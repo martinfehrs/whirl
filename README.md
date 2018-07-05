@@ -7,7 +7,7 @@ There is no unicode support, yet. Only utf-32 is fully supported.
 For utf-16 only the characters of the BMP are supported.
 Supports all single byte encodings.
 
-##Targets
+## Targets
 - supporting arbitrary lookaheads
 - full unicode support for utf-8 and utf-16
 - support for regular expressions as comparsion objects
