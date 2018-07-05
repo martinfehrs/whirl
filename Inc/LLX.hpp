@@ -66,12 +66,7 @@ namespace LL1
             return tok;
         }
 
-        const int_type& operator[](size_t i)
-        {
-            return this->storage[0];
-        }
-
-        int_type& operator[](size_t i)
+        const int_type& operator[](size_t i) const
         {
             return this->storage[0];
         }
@@ -289,9 +284,6 @@ namespace LL1
 	template <typename... Ts>
 	constexpr bool are_compatible_token_types_v = are_compatible_token_types<Ts...>::value;
 
-	template <typename T>
-	constexpr bool is_input_stream_v = is_input_stream<T>::value;
-
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// predefined tokens
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -357,19 +349,19 @@ namespace LL1
 		return is(bis.peek(), cmp);
 	}
 
-	template <
-	    template <typename...> typename TT1,
-	    template <typename...> typename TT2,
-	    typename T1,
-	    typename T2,
-	    typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-	>
-	constexpr bool is(TT1<T1>& bis, TT2<T1>& buf, T2 cmp)
-	{
-	    buf.push_back(bis.get());
-
-	    return is(buf[0], cmp);
-	}
+	//template <
+	//    template <typename...> typename TT1,
+	//    template <typename...> typename TT2,
+	//    typename T1,
+	//    typename T2,
+	//    typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+	//>
+	//constexpr bool is(TT1<T1>& bis, TT2<T1>& buf, T2 cmp)
+	//{
+	//    buf.push_back(bis.get());
+    //
+	//    return is(buf[0], cmp);
+	//}
 
 	template <
 		template <typename...> typename TT,
@@ -412,7 +404,7 @@ namespace LL1
 		template <typename...> typename TT,
 		typename T1,
 		typename T2,
-		typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>		
+		typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
 	>
 	constexpr bool is_not(TT<T1>& bis, T2 cmp)
 	{
@@ -424,7 +416,7 @@ namespace LL1
 		typename T1,
 		typename T2,
 		size_t N,
-		typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>		
+		typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
 	>
 	constexpr bool is_not(TT<T1>& bis, const token_set_t<T2, N>& cmp)
 	{
@@ -433,7 +425,7 @@ namespace LL1
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// 'is_one_of' overloads
-	////////////////////////////////////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////////////////////////////////////
 
 	template <
 		typename T1,
@@ -497,7 +489,7 @@ namespace LL1
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// 'read' overloads
-	////////////////////////////////////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	template <
 		template <typename...> typename TT,
@@ -546,7 +538,7 @@ namespace LL1
 		if(is(bis, cmp))
 			return read(bis);
 		else
-			return std::null_opt;
+			return std::nullopt;
 	}
 	
 	template <
@@ -561,7 +553,7 @@ namespace LL1
 		if(is(bis, cmp))
 			return read(bis);
 		else
-			return std::null_opt;
+			return std::nullopt;
 	}
 	
 	template <
@@ -575,7 +567,7 @@ namespace LL1
 		if(is(bis, cmp))
 			return read(bis, pos);
 		else
-			return std::null_opt;
+			return std::nullopt;
 	}
 	
 	template <
@@ -590,7 +582,7 @@ namespace LL1
 		if(is(bis, cmp))
 			return read(bis, pos);
 		else
-			return std::null_opt;
+			return std::nullopt;
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -608,7 +600,7 @@ namespace LL1
 		if(is_not(bis, cmp))
 			return read(bis);
 		else
-			return std::null_opt;
+			return std::nullopt;
 	}
 
 	template <
@@ -623,7 +615,7 @@ namespace LL1
 		if(is_not(bis, cmp))
 			return read(bis);
 		else
-			return std::null_opt;
+			return std::nullopt;
 	}
 	
 	template <
@@ -637,7 +629,7 @@ namespace LL1
 		if(is_not(bis, cmp))
 			return read(bis, pos);
 		else
-			return std::null_opt;
+			return std::nullopt;
 	}
 
 	template <
@@ -652,7 +644,7 @@ namespace LL1
 		if(is_not(bis, cmp))
 			return read(bis, pos);
 		else
-			return std::null_opt;
+			return std::nullopt;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -713,12 +705,12 @@ namespace LL1
 		typename T,
 		typename... Ts,
 		typename = std::enable_if_t<sizeof...(Ts) != 0>,
-		typename = std::enable_if_t<are_compatible_token_types_v<T1, Ts...>>
+		typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
 	>
 	constexpr optional_token_t<T> read_if_none_of(TT<T>& bis, code_position& pos, Ts... cmp)
 	{
 		if(is_none_of(bis, pos, cmp...))
-			return read(bis, code_pos);
+			return read(bis, pos);
 		else
 			return std::nullopt;
 	}
@@ -872,7 +864,7 @@ namespace LL1
 		typename T,
 		typename... Ts,
 		typename = std::enable_if_t<sizeof...(Ts) != 0>,
-		typename = std::enable_if_t<are_compatible_token_types_v<T1, Ts...>>
+		typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
 	>
 	constexpr auto read_while_one_of(TT<T>& bis, Ts... cmp)
 	{
