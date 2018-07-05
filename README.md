@@ -19,15 +19,14 @@ int main()
 {
   std::stringstream ss("\t 12345 \n 67890");
 
-  while(LL1::is_not(ss, EOF)
+  while(LL1::is_not(ss, EOF))
   {
-    while(LL1::is_one_of(ss, ' \t\n'))
-      LL1::ignore(ss);
-   
+    LL1::ignore_while(ss, LL1::space);
+    
     std::string numstr;
    
-    while(LL1::is(ss, digit))
-      numstr += read();
+    while(LL1::is(ss, LL1::digit))
+      numstr += LL1::read();
   
     std::cout << numstsr << std::endl;
   }
