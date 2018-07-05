@@ -12,3 +12,27 @@ Supports all single byte encodings.
 - full unicode support for utf-8 and utf-16
 - support for regular expressions as comparsion objects
 
+## Simple Example
+
+```C++
+int main()
+{
+  std::stringstream ss("\t 12345 \n 67890");
+
+  while(LL1::is_not(ss, EOF)
+  {
+    while(LL1::is_one_of(ss, ' \t\n'))
+      LL1::ignore(ss);
+   
+    std::string numstr;
+   
+    while(LL1::is(ss, digit))
+      numstr += read();
+  
+    std::cout << numstsr << std::endl;
+  }
+  
+  return 0;
+}
+```
+
