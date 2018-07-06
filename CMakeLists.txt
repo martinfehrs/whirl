@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(LL1 INTERFACE)
 target_include_directories(LL1 INTERFACE Inc)
+
 #target_sources(LL1 INTERFACE LLX.hpp)
 
 add_library(Catch INTERFACE)
@@ -23,3 +24,4 @@ add_test(NAME is COMMAND tests [is])
 add_test(NAME is_not COMMAND tests [is_not])
 add_test(NAME is_one_of COMMAND tests [is_one_of])
 
+install(FILES Inc/LLX.hpp DESTINATION include)
