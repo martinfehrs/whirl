@@ -17,18 +17,18 @@ Supports all single byte encodings.
 ```C++
 int main()
 {
-  std::stringstream ss("\t 12345 \n 67890");
+  std::stringstream ss("\t 22 \n 21 21 \t 22 ");
+  std::vector<int> temperatures;
 
   while(LL1::is_not(ss, EOF))
   {
     LL1::ignore_while(ss, LL1::space);
     
     std::string numstr;
-   
-    while(LL1::is(ss, LL1::digit))
-      numstr += LL1::read();
-  
-    std::cout << numstsr << std::endl;
+    
+    numstr += expect(ss, digit);
+    numstr += read_while(ss, digit);
+    temperatures.psh_back(std::stoi(numstr));
   }
   
   return 0;
