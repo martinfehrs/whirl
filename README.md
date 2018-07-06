@@ -15,9 +15,8 @@ Supports all single byte encodings.
 ## Simple Example
 
 ```C++
-int main()
+auto read_temperatures(std::istream& is)
 {
-  std::stringstream ss("\t 22 \n 21 21 \t 22 ");
   std::vector<int> temperatures;
 
   LL1::ignore_while(ss, LL1::space);
@@ -33,7 +32,7 @@ int main()
     LL1::ignore_while(ss, LL1::space);
   }
   
-  return 0;
+  return temperatures;
 }
 ```
 
