@@ -20,15 +20,17 @@ int main()
   std::stringstream ss("\t 22 \n 21 21 \t 22 ");
   std::vector<int> temperatures;
 
+  LL1::ignore_while(ss, LL1::space);
+
   while(LL1::is_not(ss, EOF))
-  {
-    LL1::ignore_while(ss, LL1::space);
-    
+  {  
     std::string numstr;
     
-    numstr += expect(ss, digit);
-    numstr += read_while(ss, digit);
+    numstr += LL1::expect(ss, digit);
+    numstr += LL1::read_while(ss, digit);
     temperatures.psh_back(std::stoi(numstr));
+   
+    LL1::ignore_while(ss, LL1::space);
   }
   
   return 0;
