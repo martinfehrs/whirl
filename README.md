@@ -28,7 +28,7 @@ int main()
     
     numstr += LL1::expect(ss, digit);
     numstr += LL1::read_while(ss, digit);
-    temperatures.psh_back(std::stoi(numstr));
+    temperatures.push_back(std::stoi(numstr));
    
     LL1::ignore_while(ss, LL1::space);
   }
