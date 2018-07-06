@@ -15,21 +15,21 @@ Supports all single byte encodings.
 ## Simple Example
 
 ```C++
-auto read_temperatures(std::istream& is)
+auto read_temperatures(std::istream& ins)
 {
   std::vector<int> temperatures;
 
-  LL1::ignore_while(ss, LL1::space);
+  LL1::ignore_while(ins, LL1::space);
 
-  while(LL1::is_not(ss, EOF))
+  while(LL1::is_not(ins, EOF))
   {  
     std::string numstr;
     
-    numstr += LL1::expect(ss, digit);
-    numstr += LL1::read_while(ss, digit);
+    numstr += LL1::expect(ins, digit);
+    numstr += LL1::read_while(ins, digit);
     temperatures.push_back(std::stoi(numstr));
    
-    LL1::ignore_while(ss, LL1::space);
+    LL1::ignore_while(ins, LL1::space);
   }
   
   return temperatures;
