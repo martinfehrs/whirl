@@ -20,17 +20,17 @@ auto read_temperatures(std::istream& ins)
 {
   std::vector<int> temperatures;
 
-  LL1::ignore_while(ins, LL1::space);
+  LLk::ignore_while(ins, LLk::space);
 
-  while(LL1::is_not(ins, EOF))
+  while(LLk::is_not(ins, EOF))
   {  
     std::string numstr;
     
-    numstr += LL1::expect(ins, digit);
-    numstr += LL1::read_while(ins, digit);
+    numstr += LLk::expect(ins, digit);
+    numstr += LLk::read_while(ins, digit);
     temperatures.push_back(std::stoi(numstr));
    
-    LL1::ignore_while(ins, LL1::space);
+    LLk::ignore_while(ins, LLk::space);
   }
   
   return temperatures;
