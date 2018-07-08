@@ -13,7 +13,7 @@ Supports all single byte encodings.
 - support for regular expressions as comparsion objects
 
 ## Simple Example
-Reading sequential data from an input stream provided by a sensor or a file.
+Reading sequential data from an input stream provided by a sensor or a file. The full example can be found in the examples directory.
 
 ```C++
 auto read_temperature(std::istream& ins, LLk::code_position& pos) // throws unexpected_token
