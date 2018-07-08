@@ -26,8 +26,8 @@ auto read_temperatures(std::istream& ins)
   {  
     std::string numstr;
     
-    numstr += LLk::expect(ins, digit);
-    numstr += LLk::read_while(ins, digit);
+    numstr += LLk::expect(ins, LLk::digit);
+    numstr += LLk::read_while(ins, LLk::digit);
     temperatures.push_back(std::stoi(numstr));
    
     LLk::ignore_while(ins, LLk::space);
