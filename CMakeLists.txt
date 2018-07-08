@@ -1,27 +1,22 @@
 cmake_minimum_required(VERSION 3.1)
-project(LLX)
+project(LLk)
+
+
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 
-add_library(LL1 INTERFACE)
-target_include_directories(LL1 INTERFACE Inc)
+add_library(LLk INTERFACE)
+target_include_directories(LLk INTERFACE include)
 
-#target_sources(LL1 INTERFACE LLX.hpp)
-
-add_library(Catch INTERFACE)
-target_include_directories(Catch INTERFACE ThirdParty/Catch2)
-
+#cmake option(BUILD_TESTING "" OFF)
+include(CTest)
 enable_testing(true)
+add_subdirectory(tests)
 
-add_executable(tests Tests/tests.cpp)
-target_link_libraries(tests LL1 Catch)
+add_subdirectory(examples)
 
-add_test(NAME static_look_ahead_buffer COMMAND tests static_look_ahead_buffer)
-add_test(NAME is COMMAND tests [is])
-add_test(NAME is_not COMMAND tests [is_not])
-add_test(NAME is_one_of COMMAND tests [is_one_of])
+install(FILES Inc/LLk.hpp DESTINATION include)
 
-install(FILES Inc/LLX.hpp DESTINATION include)
