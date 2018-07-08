@@ -16,24 +16,28 @@ Supports all single byte encodings.
 Reading sequential data from an input stream provided by a sensor or a file.
 
 ```C++
-auto read_temperatures(std::istream& ins)
+auto read_temperature(std::istream& ins, LLk::code_position& pos) // throws unexpected_token
 {
-  std::vector<int> temperatures;
+    auto sign = LLk::read_if(ins, pos, '-');
+    auto val = LLk::expect(ins, pos, LLk::digit<char>) - '0';
 
-  LLk::ignore_while(ins, LLk::space);
+    while(LLk::is(ins, LLk::digit<char>))
+        val = val * 10 + LLk::read(ins, pos) - '0';
 
-  while(LLk::is_not(ins, EOF))
-  {  
-    std::string numstr;
-    
-    numstr += LLk::expect(ins, LLk::digit);
-    numstr += LLk::read_while(ins, LLk::digit);
-    temperatures.push_back(std::stoi(numstr));
-   
-    LLk::ignore_while(ins, LLk::space);
-  }
-  
-  return temperatures;
+    return val * (sign ? -1 : 1);
+}
+
+auto read_temperatures(std::istream& ins, LLk::code_position& pos) // throws unexpected_token
+{
+    std::vector<int> temperatures;
+
+    while(LLk::is_not(ins, EOF))
+    {
+        temperatures.push_back(read_temperature(ins, pos));
+        LLk::ignore_while(ins, pos, LLk::space<char>);
+    }
+
+    return temperatures;
 }
 ```
 
