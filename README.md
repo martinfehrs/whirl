@@ -31,6 +31,8 @@ auto read_temperatures(std::istream& ins, LLk::code_position& pos) // throws une
 {
     std::vector<int> temperatures;
 
+    LLk::ignore_while(ins, pos, LLk::space<char>);
+
     while(LLk::is_not(ins, EOF))
     {
         temperatures.push_back(read_temperature(ins, pos));
