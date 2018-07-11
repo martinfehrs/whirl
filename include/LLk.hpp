@@ -289,6 +289,14 @@ namespace LLk
         >
     { };
 
+    // checks if T2 fits into T1
+    template <typename T1, typename T2>
+    struct fits_into
+        : std::bool_constant<
+            sizeof(T1) >= sizeof(T2)
+        >
+    { };
+
     template <typename T1, typename T2>
     struct is_compatible_token_type
         : std::bool_constant<
@@ -297,7 +305,11 @@ namespace LLk
                 std::disjunction<
                     std::is_same<T1, T2>,
                     std::is_same<T1, int_type_t<T2>>,
-                    std::is_same<int_type_t<T1>, T2>
+                    std::is_same<int_type_t<T1>, T2>,
+                    std::conjunction<
+                        is_char_type<T2>,
+                        fits_into<T1, T2>
+                    >
                 >
             >
         >
@@ -347,14 +359,11 @@ namespace LLk
     // predefined token sets
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename T>
-    constexpr token_set_t<T, 3> space{ ' ', '\t', '\n' };
+    constexpr token_set_t<char, 3> space{ ' ', '\t', '\n' };
 
-    template <typename T>
-    constexpr token_set_t<T, 2> blank{ ' ', '\t' };
+    constexpr token_set_t<char, 2> blank{ ' ', '\t' };
 
-    template <typename T>
-    constexpr token_set_t<T, 10> digit{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    constexpr token_set_t<char, 10> digit{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is' overloads
