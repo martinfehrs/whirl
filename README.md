@@ -1,7 +1,7 @@
-# LLK
-a header only library for implementing LL(k) parsers 
+# LL1
+a header only library for implementing LL(1) parsers 
 
-This library provides functions to easily implement LL(k) parsers.
+This library provides functions to easily implement LL(1) parsers.
 Currently, only a lookahead of 1 is supported.
 There is no unicode support, yet. Only utf-32 is fully supported.
 For utf-16 only the characters of the BMP are recognized correctly.
