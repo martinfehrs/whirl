@@ -1,16 +1,12 @@
-# LLK
-a header only library for implementing LL(k) parsers 
+# LL1
+a header only library for implementing LL(1) parsers 
 
-This library provides functions to easily implement LL(k) parsers.
-Currently, only a lookahead of 1 is supported.
-There is no unicode support, yet. Only utf-32 is fully supported.
-For utf-16 only the characters of the BMP are recognized correctly.
-Supports all single byte encodings.
+This library provides functions to easily implement LL(1) parsers with a lookahead of 1. There is no unicode support, yet. Only utf-32 is fully supported. For utf-16 only the characters of the BMP are recognized correctly. Supports all single byte encodings.
 
 ## Targets
-- supporting arbitrary lookaheads
+- arbitrary lookaheads
 - full unicode support for utf-8 and utf-16
-- support for regular expressions as comparsion objects
+- regular expressions as comparsion objects
 
 ## Simple Example
 Reading sequential data from an input stream provided by a sensor or a file. The full example can be found in the examples directory.
