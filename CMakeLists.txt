@@ -18,5 +18,5 @@ add_subdirectory(tests)
 
 add_subdirectory(examples)
 
-install(FILES Inc/LLk.hpp DESTINATION include)
+install(FILES Inc/LL1.hpp DESTINATION include)
 
