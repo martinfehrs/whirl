@@ -14,13 +14,13 @@ Reading sequential data from an input stream provided by a sensor or a file. The
 ```C++
 auto read_temperature(std::istream& ins, LLk::code_position& pos) // throws unexpected_token
 {
-    auto sign = LLk::read_if(ins, pos, '-');
+    auto has_sign = LLk::ignore_if(ins, pos, '-');
     auto val = LLk::expect(ins, pos, LLk::digit) - '0';
 
     while(LLk::is(ins, LLk::digit))
         val = val * 10 + LLk::read(ins, pos) - '0';
 
-    return val * (sign ? -1 : 1);
+    return val * (has_sign ? -1 : 1);
 }
 
 auto read_temperatures(std::istream& ins, LLk::code_position& pos) // throws unexpected_token
