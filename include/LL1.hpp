@@ -1017,10 +1017,9 @@ namespace LLk
        typename T2,
        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
     >
-    void ignore_if(TT<T1>& bis, T2 cmp)
+    bool ignore_if(TT<T1>& bis, T2 cmp)
     {
-       if(is(bis, cmp))
-           ignore(bis);
+        return is(bis, cmp) ? ignore(bis), true : false;
     }
 
     template <
@@ -1030,10 +1029,9 @@ namespace LLk
        size_t N,
        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
     >
-    void ignore_if(TT<T1>& bis, const token_set_t<T2, N>& cmp)
+    bool ignore_if(TT<T1>& bis, const token_set_t<T2, N>& cmp)
     {
-       if(is(bis, cmp))
-           ignore(bis);
+       return is(bis, cmp) ? ignore(bis), true : false;
     }
 
     template <
@@ -1042,10 +1040,9 @@ namespace LLk
         typename T2,
         typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
     >
-    void ignore_if(TT<T1>& bis, code_position& pos, T2 cmp)
+    bool ignore_if(TT<T1>& bis, code_position& pos, T2 cmp)
     {
-        if(is(bis, cmp))
-            ignore(bis, pos);
+        return is(bis, cmp) ? ignore(bis, pos), true : false;
     }
 
     template <
@@ -1055,10 +1052,9 @@ namespace LLk
         size_t N,
         typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
     >
-    void ignore_if(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
+    bool ignore_if(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
     {
-        if(is(bis, cmp))
-            ignore(bis, pos);
+        return is(bis, cmp) ? ignore(bis, pos), true : false;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
