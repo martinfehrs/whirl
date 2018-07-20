@@ -41,6 +41,7 @@ namespace LLk
     {
     };
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // token sequences
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,6 +93,7 @@ namespace LLk
         std::vector<int_type> storage;
 
     };
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // look ahead buffers
@@ -242,8 +244,9 @@ namespace LLk
 
     };
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // type traits
+    // token type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename T>
@@ -336,8 +339,12 @@ namespace LLk
     template <typename... Ts>
     constexpr bool are_token_types_v = are_token_types<Ts...>::value;
 
+    template <typename T1, typename T2>
+    constexpr bool is_compatible_token_type_v = is_compatible_token_type<T1, T2>::value;
+
     template <typename... Ts>
     constexpr bool are_compatible_token_types_v = are_compatible_token_types<Ts...>::value;
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // predefined tokens
@@ -355,6 +362,7 @@ namespace LLk
     template <typename T>
     constexpr T tab_v = 0x9;
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // predefined token sets
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -365,6 +373,120 @@ namespace LLk
 
     constexpr token_set_t<char, 10> digit{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // token set search functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T>
+    constexpr bool disjunction(T expr)
+    {
+        return expr ? true : false;
+    }
+
+    template <typename T, typename... Ts>
+    constexpr bool disjunction(T expr, Ts... exprs)
+    {
+        return disjunction(expr) || disjunction(exprs...);
+    }
+
+    template <
+        typename T1,
+        typename T2,
+        size_t... I,
+        typename = std::enable_if<are_compatible_token_types_v<T1, T2>>
+    >
+    constexpr bool contains_impl(const T1& set, T2 tok, std::index_sequence<I...>)
+    {
+        return disjunction((std::get<I>(set) == tok)...);
+    }
+
+    template <
+        typename... Ts,
+        typename T,
+        typename = std::enable_if<are_compatible_token_types_v<T, Ts...>>
+    >
+    constexpr bool contains(const std::tuple<Ts...>& set, T tok)
+    {
+        return contains_impl(set, tok, std::index_sequence_for<Ts...>{});
+    }
+
+    template <
+        typename T1,
+        size_t N,
+        typename T2,
+        typename = std::enable_if<are_compatible_token_types_v<T1, T2>>
+    >
+    constexpr bool contains(const std::array<T1, N>& set, T2 tok)
+    {
+        return contains_impl(set, tok, std::make_index_sequence<N>{});
+    }
+
+    template <
+        typename T1,
+        size_t N,
+        typename T2,
+        typename = std::enable_if<are_compatible_token_types_v<T1, T2>>
+    >
+    constexpr bool contains(const T1 (&set)[N], T2 tok)
+    {
+        return contains_impl(set, tok, std::make_index_sequence<N>{});
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // token set type traits
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T1, typename T2, typename = void>
+    struct is_compatible_token_set_type : std::false_type
+    { };
+
+    template <typename T1, typename T2>
+    struct is_compatible_token_set_type<
+        T1, T2, std::void_t<decltype(contains(std::declval<T2>(), std::declval<T1>()))>
+    > : std::true_type
+    { };
+
+    template <typename T1, typename T2>
+    constexpr bool is_compatible_token_set_type_v = is_compatible_token_set_type<T1, T2>::value;
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // comparison type traits
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T1, typename T2>
+    struct is_compatible_comparison_type
+        : std::bool_constant<
+            std::disjunction_v<
+                is_compatible_token_type<T1, T2>,
+                is_compatible_token_set_type<T1, T2>
+            >
+        >
+     { };
+
+     template <typename T1, typename T2>
+     constexpr bool is_compatible_comparison_type_v = is_compatible_comparison_type<T1, T2>::value;
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // input steam type traits
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T1, typename = void>
+    struct is_compatible_input_stream_type : std::false_type
+    { };
+
+    template <typename T1>
+    struct is_compatible_input_stream_type<T1, std::void_t<decltype(std::declval<T1>().get())>>
+        : is_int_type<decltype(std::declval<T1>().get())>::type
+    { };
+
+    template <typename T1>
+    constexpr bool is_compatible_input_stream_type_v = is_compatible_input_stream_type<T1>::value;
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,7 +494,8 @@ namespace LLk
     template <
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_token_type_v<T1>>,
+        typename = std::enable_if_t<is_compatible_token_type_v<T1, T2>>
     >
     constexpr bool is(T1 tok, T2 cmp) noexcept
     {
@@ -382,50 +505,38 @@ namespace LLk
     template <
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_token_type_v<T1>>,
+        typename = std::enable_if_t<is_compatible_token_set_type_v<T1, T2>>
     >
-    constexpr bool is(T1 tok, const token_set_t<T2, N>& cmp) noexcept
+    constexpr bool is(T1 tok, const T2& cmp) noexcept
     {
-        return std::find(std::begin(cmp), std::end(cmp), tok) != std::end(cmp);
+        return contains(cmp, tok);
     }
-    
+
     template <
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
+        typename = std::enable_if_t<is_compatible_token_type_v<T1, T2>>
     >
     constexpr bool is(TT<T1>& bis, T2 cmp)
     {
         return is(bis.peek(), cmp);
     }
 
-    //template <
-    //    template <typename...> typename TT1,
-    //    template <typename...> typename TT2,
-    //    typename T1,
-    //    typename T2,
-    //    typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    //>
-    //constexpr bool is(TT1<T1>& bis, TT2<T1>& buf, T2 cmp)
-    //{
-    //    buf.push_back(bis.get());
-    //
-    //    return is(buf[0], cmp);
-    //}
-
     template <
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
+        typename = std::enable_if_t<is_compatible_token_set_type_v<T1, T2>>
     >
-    constexpr bool is(TT<T1>& bis, const token_set_t<T2, N>& cmp)
+    constexpr bool is(TT<T1>& bis, const T2& cmp)
     {
-        return std::find(std::begin(cmp), std::end(cmp), bis.peek()) != std::end(cmp);
+        return is(bis.peek(), cmp);
     }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is_not' overloads
@@ -434,20 +545,10 @@ namespace LLk
     template <
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_token_type_v<T1>>,
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr bool is_not(T1 tok, T2 cmp) noexcept
-    {
-        return !is(tok, cmp);
-    }
-
-    template <
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr bool is_not(T1 tok, const token_set_t<T2, N>& cmp) noexcept
+    constexpr bool is_not(T1 tok, const T2& cmp) noexcept
     {
         return !is(tok, cmp);
     }
@@ -456,24 +557,14 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr bool is_not(TT<T1>& bis, T2 cmp)
+    constexpr bool is_not(TT<T1>& bis, const T2& cmp)
     {
         return !is(bis, cmp);
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr bool is_not(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-        return !is(bis, cmp);
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is_one_of' overloads
@@ -512,6 +603,7 @@ namespace LLk
         return is_one_of(bis.peek(), cmp...);
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is_none_of' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -539,6 +631,7 @@ namespace LLk
         return !is_one_of(bis, cmp...);
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -546,7 +639,7 @@ namespace LLk
     template <
         template <typename...> typename TT,
         typename T,
-        typename = std::enable_if_t<are_token_types_v<T>>
+        typename = std::enable_if_t<is_token_type_v<T>>
     >
     constexpr auto read(TT<T>& bis)
     {
@@ -556,7 +649,7 @@ namespace LLk
     template <
        template <typename...> typename TT,
        typename T,
-       typename = std::enable_if_t<are_token_types_v<T>>
+       typename = std::enable_if_t<is_token_type_v<T>>
     >
     constexpr auto read(TT<T>& bis, code_position& pos)
     {
@@ -575,6 +668,7 @@ namespace LLk
        return tok;
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read_if' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -583,9 +677,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr optional_token_t<T1> read_if(TT<T1>& bis, T2 cmp)
+    constexpr optional_token_t<T1> read_if(TT<T1>& bis, const T2& cmp)
     {
         if(is(bis, cmp))
             return read(bis);
@@ -597,24 +691,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr optional_token_t<T1> read_if(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-        if(is(bis, cmp))
-            return read(bis);
-        else
-            return std::nullopt;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr optional_token_t<T1> read_if(TT<T1>& bis, code_position& pos, T2 cmp)
+    constexpr optional_token_t<T1> read_if(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         if(is(bis, cmp))
             return read(bis, pos);
@@ -622,20 +701,6 @@ namespace LLk
             return std::nullopt;
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr optional_token_t<T1> read_if(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
-    {
-        if(is(bis, cmp))
-            return read(bis, pos);
-        else
-            return std::nullopt;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read_if_not' overloads
@@ -645,9 +710,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr optional_token_t<T1> read_if_not(TT<T1>& bis, T2 cmp)
+    constexpr optional_token_t<T1> read_if_not(TT<T1>& bis, const T2& cmp)
     {
         if(is_not(bis, cmp))
             return read(bis);
@@ -659,24 +724,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr optional_token_t<T1> read_if_not(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-        if(is_not(bis, cmp))
-            return read(bis);
-        else
-            return std::nullopt;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr optional_token_t<T1> read_if_not(TT<T1>& bis, code_position& pos, T2 cmp)
+    constexpr optional_token_t<T1> read_if_not(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         if(is_not(bis, cmp))
             return read(bis, pos);
@@ -684,20 +734,6 @@ namespace LLk
             return std::nullopt;
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr optional_token_t<T1> read_if_not(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
-    {
-        if(is_not(bis, cmp))
-            return read(bis, pos);
-        else
-            return std::nullopt;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read_if_one_of' overloads
@@ -733,6 +769,7 @@ namespace LLk
             return std::nullopt;
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read_if_none_of' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -767,6 +804,7 @@ namespace LLk
             return std::nullopt;
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read_while' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -775,9 +813,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto read_while(TT<T1>& bis, T2 cmp)
+    constexpr auto read_while(TT<T1>& bis, const T2& cmp)
     {
         dynamic_token_sequence<T1> tokseq;
         
@@ -791,26 +829,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto read_while(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-        dynamic_token_sequence<T1> tokseq;
-        
-        while(is(bis, cmp))
-            tokseq.push_back(read(bis));
-
-        return tokseq;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr auto read_while(TT<T1>& bis, code_position& pos, T2 cmp)
+    constexpr auto read_while(TT<T1>& bis, code_position& pos, const T2& cmp)
     {        
         dynamic_token_sequence<T1> tokseq;
         
@@ -820,22 +841,6 @@ namespace LLk
         return tokseq;
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr auto read_while(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
-    {
-        dynamic_token_sequence<T1> tokseq;
-        
-        while(is(bis, cmp))
-            tokseq.push_back(read(bis, pos));
-            
-        return tokseq;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read_while_not' overloads
@@ -845,9 +850,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto read_while_not(TT<T1>& bis, T2 cmp)
+    constexpr auto read_while_not(TT<T1>& bis, const T2& cmp)
     {
         dynamic_token_sequence<T1> tokseq;
         
@@ -861,26 +866,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto read_while_not(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-        dynamic_token_sequence<T1> tokseq;
-        
-        while(is_not(bis, cmp))
-            tokseq.push_back(read(bis));
-
-        return tokseq;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr auto read_while_not(TT<T1>& bis, code_position& pos, T2 cmp)
+    constexpr auto read_while_not(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         dynamic_token_sequence<T1> tokseq;
         
@@ -890,22 +878,6 @@ namespace LLk
         return tokseq;
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr auto read_while_not(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
-    {
-        dynamic_token_sequence<T1> tokseq;
-        
-        while(is_not(bis, cmp))
-            tokseq.push_back(read(bis, pos));
-
-        return tokseq;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read_while_one_of' overloads
@@ -945,6 +917,7 @@ namespace LLk
         return tokseq;
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read_while_none_of' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -983,6 +956,7 @@ namespace LLk
         return tokseq;
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1007,6 +981,7 @@ namespace LLk
         read(bis, pos);
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore_if' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1015,47 +990,24 @@ namespace LLk
        template <typename...> typename TT,
        typename T1,
        typename T2,
-       typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+       typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    bool ignore_if(TT<T1>& bis, T2 cmp)
+    bool ignore_if(TT<T1>& bis, const T2& cmp)
     {
         return is(bis, cmp) ? ignore(bis), true : false;
     }
 
     template <
-       template <typename...> typename TT,
-       typename T1,
-       typename T2,
-       size_t N,
-       typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    bool ignore_if(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-       return is(bis, cmp) ? ignore(bis), true : false;
-    }
-
-    template <
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    bool ignore_if(TT<T1>& bis, code_position& pos, T2 cmp)
+    bool ignore_if(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         return is(bis, cmp) ? ignore(bis, pos), true : false;
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    bool ignore_if(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
-    {
-        return is(bis, cmp) ? ignore(bis, pos), true : false;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore_if_not' overloads
@@ -1065,9 +1017,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    bool ignore_if_not(TT<T1>& bis, T2 cmp)
+    bool ignore_if_not(TT<T1>& bis, const T2& cmp)
     {
         return is_not(bis, cmp) ? ignore(bis), true : false;
     }
@@ -1076,36 +1028,13 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    bool ignore_if_not(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-        return is_not(bis, cmp) ? ignore(bis), true : false;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    bool ignore_if_not(TT<T1>& bis, code_position& pos, T2 cmp)
+    bool ignore_if_not(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         return is_not(bis, cmp) ? ignore(bis, pos), true : false;
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    bool ignore_if_not(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
-    {
-        return is_not(bis, cmp) ? ignore(bis, pos), true : false;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore_if_one_of' overloads
@@ -1136,7 +1065,8 @@ namespace LLk
         if(is_one_of(bis, cmp...))
             ignore(bis, pos);
     }
-    
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore_if_none_of' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1166,6 +1096,7 @@ namespace LLk
             ignore(bis, pos);
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore_while' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1174,9 +1105,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    void ignore_while(TT<T1>& bis, T2 cmp)
+    void ignore_while(TT<T1>& bis, const T2& cmp)
     {
         while(is(bis, cmp))
             ignore(bis);
@@ -1186,39 +1117,14 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    void ignore_while(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-        while(is(bis, cmp))
-            ignore(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    void ignore_while(TT<T1>& bis, code_position& pos, T2 cmp)
+    void ignore_while(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         while(is(bis, cmp))
             ignore(bis, pos);
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    void ignore_while(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
-    {
-        while(is(bis, cmp))
-            ignore(bis, pos);
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore_while_not' overloads
@@ -1228,9 +1134,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    void ignore_while_not(TT<T1>& bis, T2 cmp)
+    void ignore_while_not(TT<T1>& bis, const T2& cmp)
     {
         while(is_not(bis, cmp))
             ignore(bis);
@@ -1240,39 +1146,14 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    void ignore_while_not(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-        while(is_not(bis, cmp))
-            ignore(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    void ignore_while_not(TT<T1>& bis, code_position& pos, T2 cmp)
+    void ignore_while_not(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         while(is_not(bis, cmp))
             ignore(bis, pos);
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    void ignore_while_not(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
-    {
-        while(is_not(bis, cmp))
-            ignore(bis, pos);
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore_while_one_of' overloads
@@ -1304,6 +1185,7 @@ namespace LLk
             ignore(bis, pos);
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore_while_none_of' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1334,6 +1216,7 @@ namespace LLk
             ignore(bis, pos);
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'expect' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1342,9 +1225,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto expect(TT<T1>& bis, T2 cmp)
+    constexpr auto expect(TT<T1>& bis, const T2& cmp)
     {
         if(is_not(bis, cmp))
             throw unexpected_token{};
@@ -1356,24 +1239,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto expect(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-        if(is_not(bis, cmp))
-            throw unexpected_token{};
-
-        return read(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr auto expect(TT<T1>& bis, code_position& pos, T2 cmp)
+    constexpr auto expect(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         if(is_not(bis, cmp))
             throw unexpected_token{};
@@ -1381,20 +1249,6 @@ namespace LLk
         return read(bis, pos);
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr auto expect(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
-    {
-        if(is_not(bis, cmp))
-            throw unexpected_token{};
-
-        return read(bis, pos);
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'expect_not' overloads
@@ -1404,9 +1258,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto expect_not(TT<T1>& bis, T2 cmp)
+    constexpr auto expect_not(TT<T1>& bis, const T2& cmp)
     {
         if(is_not(bis, cmp))
             throw unexpected_token{};
@@ -1418,24 +1272,9 @@ namespace LLk
         template <typename...> typename TT,
         typename T1,
         typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto expect_not(TT<T1>& bis, const token_set_t<T2, N>& cmp)
-    {
-        if(is_not(bis, cmp))
-            throw unexpected_token{};
-
-        return read(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr auto expect_not(TT<T1>& bis, code_position& pos, T2 cmp)
+    constexpr auto expect_not(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         if(is_not(bis, cmp))
             throw unexpected_token{};
@@ -1443,20 +1282,6 @@ namespace LLk
         return read(bis, pos);
     }
 
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        size_t N,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr auto expect_not(TT<T1>& bis, code_position& pos, const token_set_t<T2, N>& cmp)
-    {
-        if(is_not(bis, cmp))
-            throw unexpected_token{};
-
-        return read(bis, pos);    
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'expect_one_of' overloads

@@ -6,51 +6,30 @@
 template <typename T>
 struct input_stream_dummy
 {
-	T c;
+    input_stream_dummy(LLk::int_type_t<T> c)
+        : c{ c }
+    { }
 
-	constexpr auto peek() noexcept
+	constexpr LLk::int_type_t<T> peek() noexcept
 	{
 		return c;
 	}
 
-	constexpr auto get() noexcept
+	constexpr LLk::int_type_t<T> get() noexcept
 	{
 		return c;
 	}
+
+	LLk::int_type_t<T> c;
+
 };
-
-template <typename T>
-constexpr input_stream_dummy<T> make_input_stream_dummy(T chr) noexcept
-{
-	return { chr };
-}
-
-//TEST_CASE("testing static_look_ahead_buffer", "static_look_ahead_buffer") {
-//
-//    LL1::static_look_ahead_buffer<char, 1> buf1;
-//
-//    buf1[0] = 'a';
-//
-//    SECTION("subscribtion operator") {
-//        REQUIRE(buf1[0] == 'a');
-//    }
-//
-//    SECTION("size tests") {
-//        REQUIRE(LLk::static_look_ahead_buffer<char, 1>{}.size() == 0);
-//        REQUIRE(LLk::static_look_ahead_buffer<char, 1>{'a'}.size() == 1);
-//        REQUIRE(LLk::static_look_ahead_buffer<char, 2>{}.size() == 0);
-//        REQUIRE(LLk::static_look_ahead_buffer<char, 2>{'a'}.size() == 1);
-//        REQUIRE(LL1::static_look_ahead_buffer<char, 2>{'a', 'b'}.size() == 2);
-//    }
-//
-//}
 
 TEST_CASE( "testing is function overloads", "[is]" ) {
 
 	SECTION("char tests") {
 		static constexpr auto eof = std::char_traits<char>::eof();
-		auto ins = make_input_stream_dummy('a');
-		auto ins_eof = make_input_stream_dummy(eof);
+		input_stream_dummy<char> ins('a');
+		input_stream_dummy<char> ins_eof(eof);
         //LL1::static_look_ahead_buffer<char, 1> buf;
 
 		REQUIRE(LLk::is('a',     'a'     ) == true );
@@ -73,8 +52,8 @@ TEST_CASE( "testing is function overloads", "[is]" ) {
 
 	SECTION("wchar_t tests") {
 		constexpr auto eof = std::char_traits<wchar_t>::eof();
-		auto ins = make_input_stream_dummy(L'a');
-		auto ins_eof = make_input_stream_dummy(eof);
+		input_stream_dummy<wchar_t> ins(L'a');
+		input_stream_dummy<wchar_t> ins_eof(eof);
 
 		REQUIRE(LLk::is(L'a',    L'a') == true );
 		REQUIRE(LLk::is(L'a',    L'b') == false);
@@ -90,9 +69,9 @@ TEST_CASE( "testing is function overloads", "[is]" ) {
 
 	SECTION("char16_t tests") {
 		constexpr auto eof = std::char_traits<char16_t>::eof();
-		auto ins = make_input_stream_dummy(u'a');
-		auto ins_eof = make_input_stream_dummy(eof);
-
+		input_stream_dummy<char16_t> ins(u'a');
+		input_stream_dummy<char16_t> ins_eof(eof);
+		
 		REQUIRE( LLk::is(u'a',    u'a') == true );
 		REQUIRE(LLk::is(u'a',    u'b') == false);
 		REQUIRE(LLk::is(eof,     eof ) == true );
@@ -107,8 +86,8 @@ TEST_CASE( "testing is function overloads", "[is]" ) {
 
 	SECTION("char32_t tests") {
 		constexpr auto eof = std::char_traits<char32_t>::eof();
-		auto ins = make_input_stream_dummy(U'a');
-		auto ins_eof = make_input_stream_dummy(eof);
+		input_stream_dummy<char32_t> ins(U'a');
+		input_stream_dummy<char32_t> ins_eof(eof);
 
 		REQUIRE(LLk::is(U'a',    U'a') == true );
 		REQUIRE(LLk::is(U'a',    U'b') == false);
@@ -127,8 +106,8 @@ TEST_CASE( "testing is_not function overloads", "[is_not]" ) {
 
 	SECTION("char tests") {
 		static constexpr auto eof = std::char_traits<char>::eof();
-		auto ins = make_input_stream_dummy('a');
-		auto ins_eof = make_input_stream_dummy(eof);
+		input_stream_dummy<char> ins('a');
+		input_stream_dummy<char> ins_eof(eof);
 
 		REQUIRE(LLk::is_not('a',     'a') == false);
 		REQUIRE(LLk::is_not('a',     'b') == true );
@@ -144,8 +123,8 @@ TEST_CASE( "testing is_not function overloads", "[is_not]" ) {
 
 	SECTION("wchar_t tests") {
 		constexpr auto eof = std::char_traits<wchar_t>::eof();
-		auto ins = make_input_stream_dummy(L'a');
-		auto ins_eof = make_input_stream_dummy(eof);
+		input_stream_dummy<wchar_t> ins(L'a');
+		input_stream_dummy<wchar_t> ins_eof(eof);
 
 		REQUIRE(LLk::is_not(L'a',    L'a') == false);
 		REQUIRE(LLk::is_not(L'a',    L'b') == true );
@@ -161,8 +140,8 @@ TEST_CASE( "testing is_not function overloads", "[is_not]" ) {
 
 	SECTION("char16_t tests") {
 		constexpr auto eof = std::char_traits<char16_t>::eof();
-		auto ins = make_input_stream_dummy(u'a');
-		auto ins_eof = make_input_stream_dummy(eof);
+		input_stream_dummy<char16_t> ins(u'a');
+		input_stream_dummy<char16_t> ins_eof(eof);
 
 		REQUIRE(LLk::is_not(u'a',    u'a') == false);
 		REQUIRE(LLk::is_not(u'a',    u'b') == true );
@@ -178,8 +157,8 @@ TEST_CASE( "testing is_not function overloads", "[is_not]" ) {
 
 	SECTION("char32_t tests") {
 		constexpr auto eof = std::char_traits<char32_t>::eof();
-		auto ins = make_input_stream_dummy(U'a');
-		auto ins_eof = make_input_stream_dummy(eof);
+		input_stream_dummy<char32_t> ins(U'a');
+		input_stream_dummy<char32_t> ins_eof(eof);
 
 		REQUIRE(LLk::is_not(U'a',    U'a') == false);
 		REQUIRE(LLk::is_not(U'a',    U'b') == true );
