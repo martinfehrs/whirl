@@ -2,25 +2,25 @@
 #include <fstream>
 #include <iostream>
 
-auto read_temperature(std::istream& ins, LLk::code_position& pos)
+auto read_temperature(std::istream& ins, LL1::code_position& pos)
 {
-    auto has_sign = LLk::ignore_if(ins, pos, '-');
-    auto val = LLk::expect(ins, pos, LLk::digit) - '0';
+    auto has_sign = LL1::ignore_if(ins, pos, '-');
+    auto val = LL1::expect(ins, pos, LL1::digit) - '0';
 
-    while(LLk::is(ins, LLk::digit))
-        val = val * 10 + LLk::read(ins, pos) - '0';
+    while(LL1::is(ins, LL1::digit))
+        val = val * 10 + LL1::read(ins, pos) - '0';
 
     return val * (has_sign ? -1 : 1);
 }
 
-auto read_temperatures(std::istream& ins, LLk::code_position& pos)
+auto read_temperatures(std::istream& ins, LL1::code_position& pos)
 {
     std::vector<int> temperatures;
 
-    while(LLk::is_not(ins, EOF))
+    while(LL1::is_not(ins, EOF))
     {
         temperatures.push_back(read_temperature(ins, pos));
-        LLk::ignore_while(ins, pos, LLk::space);
+        LL1::ignore_while(ins, pos, LL1::space);
     }
 
     return temperatures;
@@ -28,7 +28,7 @@ auto read_temperatures(std::istream& ins, LLk::code_position& pos)
 
 int main()
 {
-    LLk::code_position pos{ 1, 1 };
+    LL1::code_position pos{ 1, 1 };
 
     std::ifstream ifs("sequential_input.txt");
 
@@ -37,7 +37,7 @@ int main()
         for(auto temperature : read_temperatures(ifs, pos))
             std::cout << temperature << '\n';
     }
-    catch(LLk::unexpected_token)
+    catch(LL1::unexpected_token)
     {
         std::cout << "unexpeced token "
                   << static_cast<char>(ifs.peek())
