@@ -6,7 +6,7 @@
 template <typename T>
 struct input_stream_dummy
 {
-    input_stream_dummy(LL1::int_type_t<T> c)
+    constexpr input_stream_dummy(LL1::int_type_t<T> c)
         : c{ c }
     { }
 
