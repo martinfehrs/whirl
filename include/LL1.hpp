@@ -366,7 +366,7 @@ namespace LL1
     >
     constexpr bool contains(const negated_token_set<T1>& negated_set, T2 tok)
     {
-       return contains(negated_set.set(), tok);
+       return !contains(negated_set.set(), tok);
     }
 
     template <
@@ -697,39 +697,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'read_if_not' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    constexpr optional_token_t<T1> read_if_not(TT<T1>& bis, const T2& cmp)
-    {
-        if(is(bis, not_(cmp)))
-            return read(bis);
-        else
-            return std::nullopt;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    constexpr optional_token_t<T1> read_if_not(TT<T1>& bis, code_position& pos, const T2& cmp)
-    {
-        if(is(bis, not_(cmp)))
-            return read(bis, pos);
-        else
-            return std::nullopt;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read_if_one_of' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -832,43 +799,6 @@ namespace LL1
         while(is(bis, cmp))
             tokseq.push_back(read(bis, pos));
             
-        return tokseq;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'read_while_not' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    constexpr auto read_while_not(TT<T1>& bis, const T2& cmp)
-    {
-        dynamic_token_sequence<T1> tokseq;
-        
-        while(is(bis, not_(cmp)))
-            tokseq.push_back(read(bis));
-
-        return tokseq;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    constexpr auto read_while_not(TT<T1>& bis, code_position& pos, const T2& cmp)
-    {
-        dynamic_token_sequence<T1> tokseq;
-        
-        while(is(bis, not_(cmp)))
-            tokseq.push_back(read(bis, pos));
-
         return tokseq;
     }
 
@@ -1004,33 +934,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'ignore_if_not' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    bool ignore_if_not(TT<T1>& bis, const T2& cmp)
-    {
-        return is(bis, not_(cmp)) ? ignore(bis), true : false;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    bool ignore_if_not(TT<T1>& bis, code_position& pos, const T2& cmp)
-    {
-        return is(bis, _not(cmp)) ? ignore(bis, pos), true : false;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore_if_one_of' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1116,35 +1019,6 @@ namespace LL1
     void ignore_while(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         while(is(bis, cmp))
-            ignore(bis, pos);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'ignore_while_not' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    void ignore_while_not(TT<T1>& bis, const T2& cmp)
-    {
-        while(is(bis, _not(cmp)))
-            ignore(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    void ignore_while_not(TT<T1>& bis, code_position& pos, const T2& cmp)
-    {
-        while(is(bis, _not(cmp)))
             ignore(bis, pos);
     }
 
@@ -1236,40 +1110,7 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     constexpr auto expect(TT<T1>& bis, code_position& pos, const T2& cmp)
-    {
-        if(is(bis, not_(cmp)))
-            throw unexpected_token{};
-
-        return read(bis, pos);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'expect_not' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    constexpr auto expect_not(TT<T1>& bis, const T2& cmp)
-    {
-        if(is(bis, not_(cmp)))
-            throw unexpected_token{};
-
-        return read(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    constexpr auto expect_not(TT<T1>& bis, code_position& pos, const T2& cmp)
-    {
+    {    
         if(is(bis, not_(cmp)))
             throw unexpected_token{};
 
