@@ -96,156 +96,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // look ahead buffers
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <typename T>
-    struct dynamic_look_ahead_buffer
-    {
-
-    public:
-
-        using int_type = int_type_t<T>;
-
-
-        void push_back(int_type chr)
-        {
-            this->storage.push_back(chr);
-        }
-
-        int_type pop_front()
-        {
-            auto tok = this->storage.front();
-            this->storage.pop_back();
-            return tok;
-        }
-
-        const int_type& operator[](size_t i) const
-        {
-            return this->storage[0];
-        }
-
-        auto size() const
-        {
-            return this->storage.size();
-        }
-
-    private:
-
-        std::deque<int_type> storage;
-
-    };
-
-    template <typename T, size_t N>
-    struct static_look_ahead_buffer
-    {
-
-        using int_type = int_type_t<T>;
-
-
-        static_look_ahead_buffer() = default;
-
-        template <typename... Ts>
-        constexpr static_look_ahead_buffer(Ts... toks)
-            : storage{toks...}
-        { }
-
-        constexpr void push_back(int_type tok)
-        {
-            this->end_index++;
-            this->storage[this->end_index] = tok;
-        }
-
-        constexpr int_type pop_front()
-        {
-            auto tok = this->storage[this->begin_index];
-            this->begin_index++;
-
-            return tok;
-        }
-
-        constexpr const int_type& operator[](size_t i) const noexcept
-        {
-            return this->storage[(this->begin_index + i) % N];
-        }
-
-        constexpr int_type& operator[](size_t i) noexcept
-        {
-            return this->storage[(this->begin_index + i) % N];
-        }
-
-        constexpr size_t size() const noexcept
-        {
-            return end_index - begin_index;
-        }
-
-    private:
-
-        int_type storage[N];
-        int begin_index = -1;
-        int end_index = -1;
-
-    };
-
-    template <typename T>
-    struct static_look_ahead_buffer<T, 1>
-    {
-
-        using int_type = int_type_t<T>;
-
-
-        static_look_ahead_buffer() = default;
-
-        constexpr static_look_ahead_buffer(int_type tok)
-            : tok{tok}
-            , ptr{&this->tok}
-        { }
-
-        constexpr static_look_ahead_buffer(const static_look_ahead_buffer& other)
-            : tok{other.tok}
-            , ptr{other.ptr}
-        {
-        }
-
-        constexpr static_look_ahead_buffer& operator=(static_look_ahead_buffer& other)
-        {
-            this->tok = other.tok;
-            this->ptr = other.ptr;
-
-            return *this;
-        }
-
-        constexpr void push_back(int_type tok)
-        {
-            this->tok = tok;
-            this->ptr = &this->tok;
-        }
-
-        constexpr int_type pop_front()
-        {
-            this->ptr = nullptr;
-            return tok;
-        }
-
-        constexpr const int_type& operator[](size_t i) const noexcept
-        {
-            return *ptr;
-        }
-
-        constexpr size_t size() const noexcept
-        {
-            return ptr ? 1 : 0;
-        }
-
-    private:
-
-        int_type tok;
-        int_type* ptr = nullptr;
-
-    };
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // token type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -350,21 +200,26 @@ namespace LL1
     // predefined tokens
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    constexpr char line_feed = 0xA;
-    constexpr char carriage_return = 0xD;
-    constexpr char space = 0x20;
-    constexpr char tabulator = 0x9;
+    namespace tokens
+    {
+        constexpr char line_feed = 0xA;
+        constexpr char carriage_return = 0xD;
+        constexpr char space = 0x20;
+        constexpr char tabulator = 0x9;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // predefined token sets
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    constexpr char space[]{ ' ', '\t', '\n' };
+    namespace sets
+    {
+        constexpr char space[]{ ' ', '\t', '\n' };
 
-    constexpr char blank[]{ ' ', '\t' };
+        constexpr char blank[]{ ' ', '\t' };
 
-    constexpr char digit[]{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-
+        constexpr char digit[]{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // token set search functions
@@ -651,7 +506,7 @@ namespace LL1
     {
        auto tok = bis.get();
     
-       if(tok == line_feed)
+       if(tok == tokens::line_feed)
        {
            pos.row++;
            pos.col = 0;
