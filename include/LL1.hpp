@@ -94,6 +94,62 @@ namespace LL1
 
     };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // negated token
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T>
+    struct negated_token
+    {
+        explicit constexpr negated_token(T tok)
+            : tok{ tok }
+        { }
+
+        constexpr T token() const
+        {
+            return this->tok;
+        }
+
+    private:
+    
+        T tok;
+    };
+
+    template <typename T1, typename T2>
+    constexpr bool operator==(negated_token<T1> tok1, negated_token<T2> tok2)
+    {
+        return tok1.token() == tok2.token();
+    }
+
+    template <typename T1, typename T2>
+    constexpr bool operator!=(negated_token<T1> tok1, negated_token<T2> tok2)
+    {
+        return tok1.token() != tok2.token();
+    }
+
+    template <typename T1, typename T2>
+    constexpr bool operator==(negated_token<T1> tok1, T2 tok2)
+    {
+        return tok1.token() != tok2;
+    }
+
+    template <typename T1, typename T2>
+    constexpr bool operator==(T1 tok1, negated_token<T2> tok2)
+    {
+        return tok1 != tok2.token();
+    }
+
+    template <typename T1, typename T2>
+    constexpr bool operator!=(T1 tok1, negated_token<T2> tok2)
+    {
+        return tok1 == tok2.token();
+    }
+
+    template <typename T1, typename T2>
+    constexpr bool operator!=(negated_token<T1> tok1, T2 tok2)
+    {
+        return tok1.token() == tok2;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // token type traits
@@ -106,7 +162,12 @@ namespace LL1
                 std::is_same<T, char>,
                 std::is_same<T, wchar_t>,
                 std::is_same<T, char16_t>,
-                std::is_same<T, char32_t>
+                std::is_same<T, char32_t>,
+                std::is_same<T, negated_token<char>>,
+                std::is_same<T, negated_token<wchar_t>>,
+                std::is_same<T, negated_token<wchar_t>>,
+                std::is_same<T, negated_token<char16_t>>,
+                std::is_same<T, negated_token<char32_t>>
             >
         >
     { };
@@ -118,7 +179,12 @@ namespace LL1
                 std::is_same<T, int_type_t<char>>,
                 std::is_same<T, int_type_t<wchar_t>>,
                 std::is_same<T, int_type_t<char16_t>>,
-                std::is_same<T, int_type_t<char32_t>>
+                std::is_same<T, int_type_t<char32_t>>,
+                std::is_same<T, negated_token<int_type_t<char>>>,
+                std::is_same<T, negated_token<int_type_t<wchar_t>>>,
+                std::is_same<T, negated_token<int_type_t<wchar_t>>>,
+                std::is_same<T, negated_token<int_type_t<char16_t>>>,
+                std::is_same<T, negated_token<int_type_t<char32_t>>>
             >
         >
     { };
@@ -150,20 +216,22 @@ namespace LL1
         >
     { };
 
+    template <typename T1, typename T2, typename = void>
+    struct equality_comparable : std::false_type
+    { };
+
+    template <typename T1, typename T2>
+    struct equality_comparable<
+        T1, T2, std::void_t<decltype(std::declval<T1>() == std::declval<T2>())>
+    > : std::true_type
+    { };
+
     template <typename T1, typename T2>
     struct is_compatible_token_type
         : std::bool_constant<
             std::conjunction_v<
                 are_token_types<T1, T2>,
-                std::disjunction<
-                    std::is_same<T1, T2>,
-                    std::is_same<T1, int_type_t<T2>>,
-                    std::is_same<int_type_t<T1>, T2>,
-                    std::conjunction<
-                        is_char_type<T2>,
-                        fits_into<T1, T2>
-                    >
-                >
+                equality_comparable<T1, T2>
             >
         >
     { };
@@ -280,6 +348,22 @@ namespace LL1
         return std::find(std::begin(set), std::end(set), tok) != std::end(set);
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // logical token and token set operations
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T, typename = std::enable_if_t<is_token_type_v<T>>>
+    auto not_(T tok)
+    {
+        return negated_token{ tok };
+    }
+
+    template <typename T, typename = std::enable_if_t<is_token_type_v<T>>>
+    auto negate(T tok)
+    {
+        return negated_token{ tok };
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // token set type traits
