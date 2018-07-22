@@ -12,24 +12,24 @@ This library provides functions to easily implement LL(1) parsers with a lookahe
 Reading sequential data from an input stream provided by a sensor or a file. The full example can be found in the examples directory.
 
 ```C++
-auto read_temperature(std::istream& ins, LLk::code_position& pos) // throws unexpected_token
+auto read_temperature(std::istream& ins, LL1::code_position& pos) // throws unexpected_token
 {
-    auto has_sign = LLk::ignore_if(ins, pos, '-');
-    auto val = LLk::expect(ins, pos, LLk::digit) - '0';
+    auto has_sign = LL1::ignore_if(ins, pos, '-');
+    auto val = LL1::expect(ins, pos, LL1::digit) - '0';
 
-    while(LLk::is(ins, LLk::digit))
-        val = val * 10 + LLk::read(ins, pos) - '0';
+    while(LL1::is(ins, LL1::digit))
+        val = val * 10 + LL1::read(ins, pos) - '0';
 
     return val * (has_sign ? -1 : 1);
 }
 
-auto read_temperatures(std::istream& ins, LLk::code_position& pos) // throws unexpected_token
+auto read_temperatures(std::istream& ins, LL1::code_position& pos) // throws unexpected_token
 {
     std::vector<int> temperatures;
 
-    LLk::ignore_while(ins, pos, LLk::space);
+    LL1::ignore_while(ins, pos, LL1::space);
 
-    while(LLk::is_not(ins, EOF))
+    while(LL1::is(ins, LL1::not_(EOF)))
     {
         temperatures.push_back(read_temperature(ins, pos));
         LLk::ignore_while(ins, pos, LLk::space);
