@@ -114,16 +114,16 @@ TEST_CASE( "testing is_not function overloads", "[is_not]" )
         input_stream_dummy<char> ins('a');
         input_stream_dummy<char> ins_eof(eof);
 
-        REQUIRE(LL1::is_not('a',     'a') == false);
-        REQUIRE(LL1::is_not('a',     'b') == true );
-        REQUIRE(LL1::is_not(eof,     eof) == false);
-        REQUIRE(LL1::is_not('a',     eof) == true );
-        REQUIRE(LL1::is_not(eof,     'a') == true );
-        REQUIRE(LL1::is_not(ins,     'a') == false);
-        REQUIRE(LL1::is_not(ins,     'b') == true );
-        REQUIRE(LL1::is_not(ins,     eof) == true );
-        REQUIRE(LL1::is_not(ins_eof, eof) == false);
-        REQUIRE(LL1::is_not(ins_eof, 'a') == true );
+        REQUIRE(LL1::is('a',     LL1::not_('a')) == false);
+        REQUIRE(LL1::is('a',     LL1::not_('b')) == true );
+        REQUIRE(LL1::is(eof,     LL1::not_(eof)) == false);
+        REQUIRE(LL1::is('a',     LL1::not_(eof)) == true );
+        REQUIRE(LL1::is(eof,     LL1::not_('a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::not_('a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::not_('b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::not_(eof)) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::not_(eof)) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::not_('a')) == true );
     }
 
     SECTION("wchar_t tests")
@@ -132,16 +132,16 @@ TEST_CASE( "testing is_not function overloads", "[is_not]" )
         input_stream_dummy<wchar_t> ins(L'a');
         input_stream_dummy<wchar_t> ins_eof(eof);
 
-        REQUIRE(LL1::is_not(L'a',    L'a') == false);
-        REQUIRE(LL1::is_not(L'a',    L'b') == true );
-        REQUIRE(LL1::is_not(eof,     eof ) == false);
-        REQUIRE(LL1::is_not(L'a',    eof ) == true );
-        REQUIRE(LL1::is_not(eof,     L'a') == true );
-        REQUIRE(LL1::is_not(ins,     L'a') == false);
-        REQUIRE(LL1::is_not(ins,     L'b') == true );
-        REQUIRE(LL1::is_not(ins,     eof ) == true );
-        REQUIRE(LL1::is_not(ins_eof, eof ) == false);
-        REQUIRE(LL1::is_not(ins_eof, L'a') == true );
+        REQUIRE(LL1::is(L'a',    LL1::not_(L'a')) == false);
+        REQUIRE(LL1::is(L'a',    LL1::not_(L'b')) == true );
+        REQUIRE(LL1::is(eof,     LL1::not_(eof )) == false);
+        REQUIRE(LL1::is(L'a',    LL1::not_(eof )) == true );
+        REQUIRE(LL1::is(eof,     LL1::not_(L'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::not_(L'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::not_(L'b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::not_(eof )) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::not_(eof )) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::not_(L'a')) == true );
     }
 
     SECTION("char16_t tests")
@@ -150,16 +150,16 @@ TEST_CASE( "testing is_not function overloads", "[is_not]" )
         input_stream_dummy<char16_t> ins(u'a');
         input_stream_dummy<char16_t> ins_eof(eof);
 
-        REQUIRE(LL1::is_not(u'a',    u'a') == false);
-        REQUIRE(LL1::is_not(u'a',    u'b') == true );
-        REQUIRE(LL1::is_not(eof,     eof ) == false);
-        REQUIRE(LL1::is_not(u'a',    eof ) == true );
-        REQUIRE(LL1::is_not(eof,     u'a') == true );
-        REQUIRE(LL1::is_not(ins,     u'a') == false);
-        REQUIRE(LL1::is_not(ins,     u'b') == true );
-        REQUIRE(LL1::is_not(ins,     eof ) == true );
-        REQUIRE(LL1::is_not(ins_eof, eof ) == false);
-        REQUIRE(LL1::is_not(ins_eof, u'a') == true );
+        REQUIRE(LL1::is(u'a',    LL1::not_(u'a')) == false);
+        REQUIRE(LL1::is(u'a',    LL1::not_(u'b')) == true );
+        REQUIRE(LL1::is(eof,     LL1::not_(eof )) == false);
+        REQUIRE(LL1::is(u'a',    LL1::not_(eof )) == true );
+        REQUIRE(LL1::is(eof,     LL1::not_(u'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::not_(u'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::not_(u'b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::not_(eof )) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::not_(eof )) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::not_(u'a')) == true );
     }
 
     SECTION("char32_t tests") {
@@ -167,18 +167,19 @@ TEST_CASE( "testing is_not function overloads", "[is_not]" )
         input_stream_dummy<char32_t> ins(U'a');
         input_stream_dummy<char32_t> ins_eof(eof);
 
-        REQUIRE(LL1::is_not(U'a',    U'a') == false);
-        REQUIRE(LL1::is_not(U'a',    U'b') == true );
-        REQUIRE(LL1::is_not(eof,     eof ) == false);
-        REQUIRE(LL1::is_not(U'a',    eof ) == true );
-        REQUIRE(LL1::is_not(eof,     U'a') == true );
-        REQUIRE(LL1::is_not(ins,     U'a') == false);
-        REQUIRE(LL1::is_not(ins,     U'b') == true );
-        REQUIRE(LL1::is_not(ins,     eof ) == true );
-        REQUIRE(LL1::is_not(ins_eof, eof ) == false);
-        REQUIRE(LL1::is_not(ins_eof, U'a') == true );
+        REQUIRE(LL1::is(U'a',    LL1::not_(U'a')) == false);
+        REQUIRE(LL1::is(U'a',    LL1::not_(U'b')) == true );
+        REQUIRE(LL1::is(eof,     LL1::not_(eof )) == false);
+        REQUIRE(LL1::is(U'a',    LL1::not_(eof )) == true );
+        REQUIRE(LL1::is(eof,     LL1::not_(U'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::not_(U'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::not_(U'b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::not_(eof )) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::not_(eof )) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::not_(U'a')) == true );
     }
 }
+
 
 TEST_CASE( "testing is_one_of function overloads", "[is_one_of]" )
 {

@@ -208,14 +208,6 @@ namespace LL1
         >
     { };
 
-    // checks if T2 fits into T1
-    template <typename T1, typename T2>
-    struct fits_into
-        : std::bool_constant<
-            sizeof(T1) >= sizeof(T2)
-        >
-    { };
-
     template <typename T1, typename T2, typename = void>
     struct equality_comparable : std::false_type
     { };
@@ -265,6 +257,177 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    // negated token set
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T>
+    struct negated_token_set
+    {
+
+        explicit constexpr negated_token_set(const T& set)
+            : set_{ set }
+        { }
+
+        constexpr const auto set() const
+        {
+            return set_;
+        }
+
+    private:
+    
+        T set_;
+
+    };
+
+    template <typename T, size_t N>
+    struct negated_token_set<T[N]>
+    {
+
+        explicit constexpr negated_token_set(const T (&set)[N])
+        {
+            std::copy_n(set, N, this->set_);
+        }
+
+        constexpr const auto& set() const
+        {
+            return set_;
+        }
+
+    private:
+    
+        T set_[N];
+
+    };
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // token set search functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T>
+    constexpr bool disjunction(T expr)
+    {
+        return expr ? true : false;
+    }
+
+    template <typename T, typename... Ts>
+    constexpr bool disjunction(T expr, Ts... exprs)
+    {
+        return disjunction(expr) || disjunction(exprs...);
+    }
+
+    template <
+        typename T1,
+        typename T2,
+        size_t... I,
+        typename = std::enable_if<is_compatible_token_type_v<T1, T2>>
+    >
+    constexpr bool contains_impl(const T1& set, T2 tok, std::index_sequence<I...>)
+    {
+        return disjunction((std::get<I>(set) == tok)...);
+    }
+
+    template <
+        typename... Ts,
+        typename T,
+        typename = std::enable_if<are_compatible_token_types_v<T, Ts...>>
+    >
+    constexpr bool contains(const std::tuple<Ts...>& set, T tok)
+    {
+        return contains_impl(set, tok, std::index_sequence_for<Ts...>{});
+    }
+
+    template <
+        typename T1,
+        size_t N,
+        typename T2,
+        typename = std::enable_if<is_compatible_token_type_v<T1, T2>>
+    >
+    constexpr bool contains(const std::array<T1, N>& set, T2 tok)
+    {
+        return contains_impl(set, tok, std::make_index_sequence<N>{});
+    }
+
+    template <
+        typename T1,
+        size_t N,
+        typename T2,
+        typename = std::enable_if<is_compatible_token_type_v<T1, T2>>
+    >
+    constexpr bool contains(const T1 (&set)[N], T2 tok)
+    {
+        return std::find(std::begin(set), std::end(set), tok) != std::end(set);
+    }
+
+    template <
+        typename T1,
+        typename T2,
+        typename = std::enable_if<is_compatible_token_type_v<T1, T2>>
+    >
+    constexpr bool contains(const negated_token_set<T1>& negated_set, T2 tok)
+    {
+       return contains(negated_set.set(), tok);
+    }
+
+    template <
+        template <typename...> typename TT,
+        typename T1,
+        typename T2,
+        size_t N,
+        typename = std::enable_if<is_compatible_token_type_v<T1, T2>>
+    >
+    constexpr bool contains(const negated_token_set<T1[N]>& negated_set, T2 tok)
+    {
+       return !contains(negated_set.set(), tok);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // token set type traits
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T>
+    struct is_token_set_type : std::false_type
+    { };
+
+    template <typename... Ts>
+    struct is_token_set_type<std::tuple<Ts...>> : std::true_type
+    { };
+
+    template <typename T1, typename T2>
+    struct is_token_set_type<std::pair<T1, T2>> : std::true_type
+    { };
+
+    template <typename T, size_t N>
+    struct is_token_set_type<std::array<T, N>> : std::true_type
+    { };
+
+    template <typename T, size_t N>
+    struct is_token_set_type<T[N]> : std::true_type
+    { };
+
+    template <typename T>
+    struct is_token_set_type<negated_token_set<T>> : std::true_type
+    { };
+
+    template <typename T1, typename T2, typename = void>
+    struct is_compatible_token_set_type : std::false_type
+    { };
+
+    template <typename T1, typename T2>
+    struct is_compatible_token_set_type<
+        T1, T2, std::void_t<decltype(contains(std::declval<T2>(), std::declval<T1>()))>
+    > : std::true_type
+    { };
+
+    template <typename T>
+    constexpr bool is_token_set_type_v = is_token_set_type<T>::value;
+
+    template <typename T1, typename T2>
+    constexpr bool is_compatible_token_set_type_v = is_compatible_token_set_type<T1, T2>::value;
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // predefined tokens
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -289,65 +452,6 @@ namespace LL1
         constexpr char digit[]{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // token set search functions
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <typename T>
-    constexpr bool disjunction(T expr)
-    {
-        return expr ? true : false;
-    }
-
-    template <typename T, typename... Ts>
-    constexpr bool disjunction(T expr, Ts... exprs)
-    {
-        return disjunction(expr) || disjunction(exprs...);
-    }
-
-    template <
-        typename T1,
-        typename T2,
-        size_t... I,
-        typename = std::enable_if<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr bool contains_impl(const T1& set, T2 tok, std::index_sequence<I...>)
-    {
-        return disjunction((std::get<I>(set) == tok)...);
-    }
-
-    template <
-        typename... Ts,
-        typename T,
-        typename = std::enable_if<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr bool contains(const std::tuple<Ts...>& set, T tok)
-    {
-        return contains_impl(set, tok, std::index_sequence_for<Ts...>{});
-    }
-
-    template <
-        typename T1,
-        size_t N,
-        typename T2,
-        typename = std::enable_if<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr bool contains(const std::array<T1, N>& set, T2 tok)
-    {
-        return contains_impl(set, tok, std::make_index_sequence<N>{});
-    }
-
-    template <
-        typename T1,
-        size_t N,
-        typename T2,
-        typename = std::enable_if<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr bool contains(const T1 (&set)[N], T2 tok)
-    {
-        return std::find(std::begin(set), std::end(set), tok) != std::end(set);
-    }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // logical token and token set operations
@@ -356,31 +460,14 @@ namespace LL1
     template <typename T, typename = std::enable_if_t<is_token_type_v<T>>>
     auto not_(T tok)
     {
-        return negated_token{ tok };
+        return negated_token<T>{ tok };
     }
 
-    template <typename T, typename = std::enable_if_t<is_token_type_v<T>>>
-    auto negate(T tok)
+    template <typename T, typename = std::enable_if_t<is_token_set_type_v<T>>>
+    auto not_(const T& set)
     {
-        return negated_token{ tok };
+        return negated_token_set<T>{ set };
     }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // token set type traits
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <typename T1, typename T2, typename = void>
-    struct is_compatible_token_set_type : std::false_type
-    { };
-
-    template <typename T1, typename T2>
-    struct is_compatible_token_set_type<
-        T1, T2, std::void_t<decltype(contains(std::declval<T2>(), std::declval<T1>()))>
-    > : std::true_type
-    { };
-
-    template <typename T1, typename T2>
-    constexpr bool is_compatible_token_set_type_v = is_compatible_token_set_type<T1, T2>::value;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -470,34 +557,6 @@ namespace LL1
     constexpr bool is(TT<T1>& bis, const T2& cmp)
     {
         return is(bis.peek(), cmp);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'is_not' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_token_type_v<T1>>,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    constexpr bool is_not(T1 tok, const T2& cmp) noexcept
-    {
-        return !is(tok, cmp);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
-    >
-    constexpr bool is_not(TT<T1>& bis, const T2& cmp)
-    {
-        return !is(bis, cmp);
     }
 
 
@@ -649,7 +708,7 @@ namespace LL1
     >
     constexpr optional_token_t<T1> read_if_not(TT<T1>& bis, const T2& cmp)
     {
-        if(is_not(bis, cmp))
+        if(is(bis, not_(cmp)))
             return read(bis);
         else
             return std::nullopt;
@@ -663,7 +722,7 @@ namespace LL1
     >
     constexpr optional_token_t<T1> read_if_not(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
-        if(is_not(bis, cmp))
+        if(is(bis, not_(cmp)))
             return read(bis, pos);
         else
             return std::nullopt;
@@ -791,7 +850,7 @@ namespace LL1
     {
         dynamic_token_sequence<T1> tokseq;
         
-        while(is_not(bis, cmp))
+        while(is(bis, not_(cmp)))
             tokseq.push_back(read(bis));
 
         return tokseq;
@@ -807,7 +866,7 @@ namespace LL1
     {
         dynamic_token_sequence<T1> tokseq;
         
-        while(is_not(bis, cmp))
+        while(is(bis, not_(cmp)))
             tokseq.push_back(read(bis, pos));
 
         return tokseq;
@@ -956,7 +1015,7 @@ namespace LL1
     >
     bool ignore_if_not(TT<T1>& bis, const T2& cmp)
     {
-        return is_not(bis, cmp) ? ignore(bis), true : false;
+        return is(bis, not_(cmp)) ? ignore(bis), true : false;
     }
 
     template <
@@ -967,7 +1026,7 @@ namespace LL1
     >
     bool ignore_if_not(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
-        return is_not(bis, cmp) ? ignore(bis, pos), true : false;
+        return is(bis, _not(cmp)) ? ignore(bis, pos), true : false;
     }
 
 
@@ -1073,7 +1132,7 @@ namespace LL1
     >
     void ignore_while_not(TT<T1>& bis, const T2& cmp)
     {
-        while(is_not(bis, cmp))
+        while(is(bis, _not(cmp)))
             ignore(bis);
     }
 
@@ -1085,7 +1144,7 @@ namespace LL1
     >
     void ignore_while_not(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
-        while(is_not(bis, cmp))
+        while(is(bis, _not(cmp)))
             ignore(bis, pos);
     }
 
@@ -1164,7 +1223,7 @@ namespace LL1
     >
     constexpr auto expect(TT<T1>& bis, const T2& cmp)
     {
-        if(is_not(bis, cmp))
+        if(is(bis, not_(cmp)))
             throw unexpected_token{};
         
         return read(bis);
@@ -1178,7 +1237,7 @@ namespace LL1
     >
     constexpr auto expect(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
-        if(is_not(bis, cmp))
+        if(is(bis, not_(cmp)))
             throw unexpected_token{};
 
         return read(bis, pos);
@@ -1197,7 +1256,7 @@ namespace LL1
     >
     constexpr auto expect_not(TT<T1>& bis, const T2& cmp)
     {
-        if(is_not(bis, cmp))
+        if(is(bis, not_(cmp)))
             throw unexpected_token{};
 
         return read(bis);
@@ -1211,7 +1270,7 @@ namespace LL1
     >
     constexpr auto expect_not(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
-        if(is_not(bis, cmp))
+        if(is(bis, not_(cmp)))
             throw unexpected_token{};
 
         return read(bis, pos);
