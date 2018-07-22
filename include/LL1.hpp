@@ -476,13 +476,13 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename... Ts, typename = std::enable_if_t<are_token_types_v<Ts...>>>
-    auto one_of(Ts... toks)
+    constexpr auto one_of(Ts... toks)
     {
         return std::make_tuple(toks...);
     }
 
     template <typename... Ts, typename = std::enable_if_t<are_token_types_v<Ts...>>>
-    auto none_of(Ts... toks)
+    constexpr auto none_of(Ts... toks)
     {
         return not_(one_of(toks...));
     }
@@ -578,72 +578,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'is_one_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2>>
-    >
-    constexpr bool is_one_of(T1 tok, T2 cmp1) noexcept
-    {
-        return is(tok, cmp1);
-    }
-
-    template <
-        typename T1,
-        typename T2,
-        typename... Ts,
-        typename = std::enable_if_t<are_compatible_token_types_v<T1, T2, Ts...>>
-    >
-    constexpr bool is_one_of(T1 tok, T2 cmp1, Ts... cmp) noexcept
-    {
-        return is(tok, cmp1) || is_one_of(tok, cmp...);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr bool is_one_of(TT<T>& bis, Ts... cmp)
-    {
-        return is_one_of(bis.peek(), cmp...);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'is_none_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr bool is_none_of(T tok, Ts... cmp) noexcept
-    {
-        return !is_one_of(tok, cmp...);
-    }
-
-    template <
-    template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr bool is_none_of(TT<T>& bis, Ts... cmp)
-    {
-        return !is_one_of(bis, cmp...);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -714,76 +648,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'read_if_one_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr optional_token_t<T> read_if_one_of(TT<T>& bis, Ts... cmp)
-    {
-        if(is_one_of(bis, cmp...))
-            return read(bis);
-        else
-            return std::nullopt;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr optional_token_t<T> read_if_one_of(TT<T>& bis, code_position& pos, Ts... cmp)
-    {
-        if(is_one_of(bis, cmp...))
-            return read(bis, pos);
-        else
-            return std::nullopt;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'read_if_none_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr optional_token_t<T> read_if_none_of(TT<T>& bis, Ts... cmp)
-    {
-        if(is_none_of(bis, cmp...))
-            return read(bis);
-        else
-            return std::nullopt;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr optional_token_t<T> read_if_none_of(TT<T>& bis, code_position& pos, Ts... cmp)
-    {
-        if(is_none_of(bis, pos, cmp...))
-            return read(bis, pos);
-        else
-            return std::nullopt;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read_while' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -816,84 +680,6 @@ namespace LL1
         while(is(bis, cmp))
             tokseq.push_back(read(bis, pos));
             
-        return tokseq;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'read_while_one_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr auto read_while_one_of(TT<T>& bis, Ts... cmp)
-    {
-        dynamic_token_sequence<T> tokseq;
-        
-        while(is_one_of(bis, cmp...))
-            tokseq.push_back(read(bis));
-
-        return tokseq;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr auto read_while_one_of(TT<T>& bis, code_position& pos, Ts... cmp)
-    {
-        dynamic_token_sequence<T> tokseq;
-        
-        while(is_one_of(bis, cmp...))
-            tokseq.push_back(read(bis, pos));
-            
-        return tokseq;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'read_while_none_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-       template <typename...> typename TT,
-       typename T,
-       typename... Ts,
-       typename = std::enable_if_t<sizeof...(Ts) != 0>,
-       typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr auto read_while_none_of(TT<T>& bis, Ts... cmp)
-    {
-       dynamic_token_sequence<T> tokseq;
-
-       while(is_none_of(bis, cmp...))
-           tokseq.push_back(read(bis));
-
-       return tokseq;
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    constexpr auto read_while_none_of(TT<T>& bis, code_position& pos, Ts... cmp)
-    {
-        dynamic_token_sequence<T> tokseq;
-    
-        while(is_none_of(bis, cmp...))
-            tokseq.push_back(read(bis, pos));
-    
         return tokseq;
     }
 
@@ -951,67 +737,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'ignore_if_one_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void ignore_if_one_of(TT<T>& bis, Ts... cmp)
-    {
-        if(is_one_of(bis, cmp...))
-            ignore(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void ignore_if_one_of(TT<T>& bis, code_position& pos, Ts... cmp)
-    {
-        if(is_one_of(bis, cmp...))
-            ignore(bis, pos);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'ignore_if_none_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void ignore_if_none_of(input_stream_t<T>& bis, Ts... cmp)
-    {
-        if(is_none_of(bis, cmp...))
-            ignore(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void ignore_if_none_of(TT<T>& bis, code_position& pos, Ts... cmp)
-    {
-        if(is_none_of(bis, cmp...))
-            ignore(bis, pos);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'ignore_while' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1036,68 +761,6 @@ namespace LL1
     void ignore_while(TT<T1>& bis, code_position& pos, const T2& cmp)
     {
         while(is(bis, cmp))
-            ignore(bis, pos);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'ignore_while_one_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void ignore_while_one_of(TT<T>& bis, Ts... cmp)
-    {
-        while(is_one_of(bis, cmp...))
-            ignore(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void ignore_while_one_of(TT<T>& bis, code_position& pos, Ts... cmp)
-    {
-        while(is_one_of(bis, cmp...))
-            ignore(bis, pos);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'ignore_while_none_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void ignore_while_none_of(TT<T>& bis, Ts... cmp)
-    {
-        while(is_none_of(bis, cmp...))
-            ignore(bis);
-    }
-    
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void ignore_while_none_of(TT<T>& bis, code_position& pos, Ts... cmp)
-    {
-        while(is_none_of(bis, cmp...))
             ignore(bis, pos);
     }
 
@@ -1134,76 +797,4 @@ namespace LL1
         return read(bis, pos);
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'expect_one_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void expect_one_of(TT<T>& bis, Ts... cmp)
-    {
-        if(is_not_one_of(bis, cmp...))
-            throw unexpected_token{};
-
-        return read(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void expect_one_of(TT<T>& bis, code_position& pos, Ts... cmp)
-    {
-        if(is_not_one_of(bis, cmp...))
-            throw unexpected_token{};
-
-        return read(bis, pos);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'expect_none_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void expect_none_of(TT<T>& bis, Ts... cmp)
-    {
-        if(is_one_of(bis, cmp...))
-            throw unexpected_token{};
-
-        return read(bis);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T,
-        typename... Ts,
-        typename = std::enable_if_t<sizeof...(Ts) != 0>,
-        typename = std::enable_if_t<are_compatible_token_types_v<T, Ts...>>
-    >
-    void expect_none_of(TT<T>& bis, code_position& pos, Ts... cmp)
-    {
-        if(is_one_of(bis, cmp...))
-            throw unexpected_token{};
-
-        return read(bis, pos);
-    }
-
 }
-
-
-

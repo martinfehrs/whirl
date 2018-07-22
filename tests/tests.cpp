@@ -190,16 +190,16 @@ TEST_CASE( "testing is_one_of function overloads", "[is_one_of]" )
         //auto ins_eof = make_input_stream_dummy(eof);
         //auto tok_set = make_token_set
 
-        REQUIRE(LL1::is_one_of('a', 'a')      == true );
-        REQUIRE(LL1::is_one_of('a', 'b')      == false);
-        REQUIRE(LL1::is_one_of('a', 'a', 'b') == true );
-        REQUIRE(LL1::is_one_of('a', 'b', 'a') == true );
-        REQUIRE(LL1::is_one_of('a', 'b', 'c') == false);
-        REQUIRE(LL1::is_one_of(eof, eof)      == true );
-        REQUIRE(LL1::is_one_of(eof, 'a')      == false);
-        REQUIRE(LL1::is_one_of('a', eof)      == false);
-        REQUIRE(LL1::is_one_of(eof, 'a', eof) == true );
-        REQUIRE(LL1::is_one_of(eof, eof, 'a') == true );
+        REQUIRE(LL1::is('a', LL1::one_of('a'     )) == true );
+        REQUIRE(LL1::is('a', LL1::one_of('b'     )) == false);
+        REQUIRE(LL1::is('a', LL1::one_of('a', 'b')) == true );
+        REQUIRE(LL1::is('a', LL1::one_of('b', 'a')) == true );
+        REQUIRE(LL1::is('a', LL1::one_of('b', 'c')) == false);
+        REQUIRE(LL1::is(eof, LL1::one_of(eof     )) == true );
+        REQUIRE(LL1::is(eof, LL1::one_of('a'     )) == false);
+        REQUIRE(LL1::is('a', LL1::one_of(eof     )) == false);
+        REQUIRE(LL1::is(eof, LL1::one_of('a', eof)) == true );
+        REQUIRE(LL1::is(eof, LL1::one_of(eof, 'a')) == true );
     }
 
     SECTION("wchar_t tests")
@@ -208,11 +208,11 @@ TEST_CASE( "testing is_one_of function overloads", "[is_one_of]" )
         //auto ins = make_input_stream_dummy(L'a');
         //auto ins_eof = make_input_stream_dummy(eof);
 
-        REQUIRE(LL1::is_one_of(L'a', L'a'      ) == true );
-        REQUIRE(LL1::is_one_of(L'a', L'b'      ) == false);
-        REQUIRE(LL1::is_one_of(L'a', L'a', L'b') == true );
-        REQUIRE(LL1::is_one_of(L'a', L'b', L'a') == true );
-        REQUIRE(LL1::is_one_of(L'a', L'b', L'c') == false);
+        REQUIRE(LL1::is(L'a', LL1::one_of(L'a'      )) == true );
+        REQUIRE(LL1::is(L'a', LL1::one_of(L'b'      )) == false);
+        REQUIRE(LL1::is(L'a', LL1::one_of(L'a', L'b')) == true );
+        REQUIRE(LL1::is(L'a', LL1::one_of(L'b', L'a')) == true );
+        REQUIRE(LL1::is(L'a', LL1::one_of(L'b', L'c')) == false);
     }
 
     SECTION("char16_t tests")
@@ -221,11 +221,11 @@ TEST_CASE( "testing is_one_of function overloads", "[is_one_of]" )
         //auto ins = make_input_stream_dummy(u'a');
         //auto ins_eof = make_input_stream_dummy(eof);
 
-        REQUIRE(LL1::is_one_of(u'a', u'a'      ) == true );
-        REQUIRE(LL1::is_one_of(u'a', u'b'      ) == false);
-        REQUIRE(LL1::is_one_of(u'a', u'a', u'b') == true );
-        REQUIRE(LL1::is_one_of(u'a', u'b', u'a') == true );
-        REQUIRE(LL1::is_one_of(u'a', u'b', u'c') == false);
+        REQUIRE(LL1::is(u'a', LL1::one_of(u'a'      )) == true );
+        REQUIRE(LL1::is(u'a', LL1::one_of(u'b'      )) == false);
+        REQUIRE(LL1::is(u'a', LL1::one_of(u'a', u'b')) == true );
+        REQUIRE(LL1::is(u'a', LL1::one_of(u'b', u'a')) == true );
+        REQUIRE(LL1::is(u'a', LL1::one_of(u'b', u'c')) == false);
     }
 
     SECTION("char32_t tests")
@@ -234,11 +234,11 @@ TEST_CASE( "testing is_one_of function overloads", "[is_one_of]" )
         //auto ins = make_input_stream_dummy(U'a');
         //auto ins_eof = make_input_stream_dummy(eof);
 
-        REQUIRE(LL1::is_one_of(U'a', U'a'      ) == true );
-        REQUIRE(LL1::is_one_of(U'a', U'b'      ) == false);
-        REQUIRE(LL1::is_one_of(U'a', U'a', U'b') == true );
-        REQUIRE(LL1::is_one_of(U'a', U'b', U'a') == true );
-        REQUIRE(LL1::is_one_of(U'a', U'b', U'c') == false);
+        REQUIRE(LL1::is(U'a', LL1::one_of(U'a'      )) == true );
+        REQUIRE(LL1::is(U'a', LL1::one_of(U'b'      )) == false);
+        REQUIRE(LL1::is(U'a', LL1::one_of(U'a', U'b')) == true );
+        REQUIRE(LL1::is(U'a', LL1::one_of(U'b', U'a')) == true );
+        REQUIRE(LL1::is(U'a', LL1::one_of(U'b', U'c')) == false);
     }
 }
 
