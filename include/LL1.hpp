@@ -350,18 +350,10 @@ namespace LL1
     // predefined tokens
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename T>
-    constexpr T lf_v = 0xA;
-
-    template <typename T>
-    constexpr T cr_v = 0xD;
-
-    template <typename T>
-    constexpr T space_v = 0x20;
-
-    template <typename T>
-    constexpr T tab_v = 0x9;
-
+    constexpr char line_feed = 0xA;
+    constexpr char carriage_return = 0xD;
+    constexpr char space = 0x20;
+    constexpr char tabulator = 0x9;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // predefined token sets
@@ -659,7 +651,7 @@ namespace LL1
     {
        auto tok = bis.get();
     
-       if(tok == lf_v<T>)
+       if(tok == line_feed)
        {
            pos.row++;
            pos.col = 0;
