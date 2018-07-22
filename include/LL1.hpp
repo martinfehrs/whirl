@@ -20,8 +20,8 @@ namespace LL1
     template <typename T>
     using optional_token_t = std::optional<int_type_t<T>>;
 
-    template <typename T, size_t N>
-    using token_set_t = std::array<T, N>;
+    //template <typename T, size_t N>
+    //using token_set_t = std::array<T, N>;
 
     template <typename T>
     using input_stream_t = std::basic_istream<T>;
@@ -367,11 +367,11 @@ namespace LL1
     // predefined token sets
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    constexpr token_set_t<char, 3> space{ ' ', '\t', '\n' };
+    constexpr char space[]{ ' ', '\t', '\n' };
 
-    constexpr token_set_t<char, 2> blank{ ' ', '\t' };
+    constexpr char blank[]{ ' ', '\t' };
 
-    constexpr token_set_t<char, 10> digit{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    constexpr char digit[]{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -430,7 +430,7 @@ namespace LL1
     >
     constexpr bool contains(const T1 (&set)[N], T2 tok)
     {
-        return contains_impl(set, tok, std::make_index_sequence<N>{});
+        return std::find(std::begin(set), std::end(set), tok) != std::end(set);
     }
 
 
@@ -460,7 +460,11 @@ namespace LL1
     struct is_compatible_comparison_type
         : std::bool_constant<
             std::disjunction_v<
-                is_compatible_token_type<T1, T2>,
+                std::conditional_t<
+                    is_token_type_v<T2>,
+                    is_compatible_token_type<T1, T2>,
+                    std::false_type
+                >,
                 is_compatible_token_set_type<T1, T2>
             >
         >
