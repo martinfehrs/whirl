@@ -4,8 +4,9 @@
 #include <array>
 #include <deque>
 #include <algorithm>
-
+#include <tuple>
 #include <iostream>
+
 
 namespace LL1
 {
@@ -469,6 +470,22 @@ namespace LL1
         return negated_token_set<T>{ set };
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // token set factories
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename... Ts, typename = std::enable_if_t<are_token_types_v<Ts...>>>
+    auto one_of(Ts... toks)
+    {
+        return std::make_tuple(toks...);
+    }
+
+    template <typename... Ts, typename = std::enable_if_t<are_token_types_v<Ts...>>>
+    auto none_of(Ts... toks)
+    {
+        return not_(one_of(toks...));
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // comparison type traits
