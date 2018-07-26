@@ -557,9 +557,9 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto is(TT<T1>& bis, const T2& cmp)
+    constexpr auto is(TT<T1>& ins, const T2& cmp)
     {
-        return compare(bis.peek(), cmp);
+        return compare(ins.peek(), cmp);
     }
 
 
@@ -573,9 +573,9 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T>>>,
         typename = std::enable_if_t<is_token_type_v<T>>
     >
-    constexpr auto read(TT<T>& bis)
+    constexpr auto read(TT<T>& ins)
     {
-        return bis.get();
+        return ins.get();
     }
 
     template <
@@ -584,9 +584,9 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T>>>,
         typename = std::enable_if_t<is_token_type_v<T>>
     >
-    constexpr auto read(TT<T>& bis, code_position& pos)
+    constexpr auto read(TT<T>& ins, code_position& pos)
     {
-        auto tok = bis.get();
+        auto tok = ins.get();
 
         if (tok == tokens::line_feed)
         {
@@ -613,10 +613,10 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr optional_token_t<T1> read_if(TT<T1>& bis, const T2& cmp)
+    constexpr optional_token_t<T1> read_if(TT<T1>& ins, const T2& cmp)
     {
-        if (is(bis, cmp))
-            return read(bis);
+        if (is(ins, cmp))
+            return read(ins);
         else
             return std::nullopt;
     }
@@ -628,10 +628,10 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr optional_token_t<T1> read_if(TT<T1>& bis, code_position& pos, const T2& cmp)
+    constexpr optional_token_t<T1> read_if(TT<T1>& ins, code_position& pos, const T2& cmp)
     {
-        if (is(bis, cmp))
-            return read(bis, pos);
+        if (is(ins, cmp))
+            return read(ins, pos);
         else
             return std::nullopt;
     }
@@ -648,12 +648,12 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto read_while(TT<T1>& bis, const T2& cmp)
+    constexpr auto read_while(TT<T1>& ins, const T2& cmp)
     {
         dynamic_token_sequence<T1> tokseq;
 
-        while (is(bis, cmp))
-            tokseq.push_back(read(bis));
+        while (is(ins, cmp))
+            tokseq.push_back(read(ins));
 
         return tokseq;
     }
@@ -665,12 +665,12 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto read_while(TT<T1>& bis, code_position& pos, const T2& cmp)
+    constexpr auto read_while(TT<T1>& ins, code_position& pos, const T2& cmp)
     {
         dynamic_token_sequence<T1> tokseq;
 
-        while (is(bis, cmp))
-            tokseq.push_back(read(bis, pos));
+        while (is(ins, cmp))
+            tokseq.push_back(read(ins, pos));
 
         return tokseq;
     }
@@ -686,9 +686,9 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T>>>,
         typename = std::enable_if_t<are_token_types_v<T>>
     >
-    constexpr void ignore(TT<T>& bis)
+    constexpr void ignore(TT<T>& ins)
     {
-        read(bis);
+        read(ins);
     }
 
     template <
@@ -697,9 +697,9 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T>>>,
         typename = std::enable_if_t<are_token_types_v<T>>
     >
-    constexpr void ignore(TT<T>& bis, code_position& pos)
+    constexpr void ignore(TT<T>& ins, code_position& pos)
     {
-        read(bis, pos);
+        read(ins, pos);
     }
 
 
@@ -714,9 +714,9 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto ignore_if(TT<T1>& bis, const T2& cmp)
+    constexpr auto ignore_if(TT<T1>& ins, const T2& cmp)
     {
-        return is(bis, cmp) ? ignore(bis), true : false;
+        return is(ins, cmp) ? ignore(ins), true : false;
     }
 
     template <
@@ -726,9 +726,9 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto ignore_if(TT<T1>& bis, code_position& pos, const T2& cmp)
+    constexpr auto ignore_if(TT<T1>& ins, code_position& pos, const T2& cmp)
     {
-        return is(bis, cmp) ? ignore(bis, pos), true : false;
+        return is(ins, cmp) ? ignore(ins, pos), true : false;
     }
 
 
@@ -743,13 +743,13 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto ignore_while(TT<T1>& bis, const T2& cmp)
+    constexpr auto ignore_while(TT<T1>& ins, const T2& cmp)
     {
         unsigned count = 0;
 
-        while (is(bis, cmp))
+        while (is(ins, cmp))
         {
-            ignore(bis);
+            ignore(ins);
             count++;
         }
 
@@ -763,13 +763,13 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto ignore_while(TT<T1>& bis, code_position& pos, const T2& cmp)
+    constexpr auto ignore_while(TT<T1>& ins, code_position& pos, const T2& cmp)
     {
         unsigned count = 0;
 
-        while(is(bis, cmp))
+        while(is(ins, cmp))
         {
-            ignore(bis, pos);
+            ignore(ins, pos);
             count++;
         }
 
@@ -787,12 +787,12 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto expect(TT<T1>& bis, const T2& cmp)
+    constexpr auto expect(TT<T1>& ins, const T2& cmp)
     {
-        if(is(bis, not_(cmp)))
+        if(is(ins, not_(cmp)))
             throw unexpected_token{};
         
-        return read(bis);
+        return read(ins);
     }
 
     template <
@@ -802,12 +802,12 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr auto expect(TT<T1>& bis, code_position& pos, const T2& cmp)
+    constexpr auto expect(TT<T1>& ins, code_position& pos, const T2& cmp)
     {    
-        if(is(bis, not_(cmp)))
+        if(is(ins, not_(cmp)))
             throw unexpected_token{};
 
-        return read(bis, pos);
+        return read(ins, pos);
     }
 
 }
