@@ -554,19 +554,7 @@ namespace LL1
         typename T1,
         typename T2,
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
-        typename = std::enable_if_t<is_compatible_token_type_v<T1, T2>>
-    >
-    constexpr bool is(TT<T1>& bis, T2 cmp)
-    {
-        return is(bis.peek(), cmp);
-    }
-
-    template <
-        template <typename...> typename TT,
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
-        typename = std::enable_if_t<is_compatible_token_set_type_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     constexpr bool is(TT<T1>& bis, const T2& cmp)
     {
