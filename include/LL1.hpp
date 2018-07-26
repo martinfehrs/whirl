@@ -505,6 +505,29 @@ namespace LL1
     template <typename T1, typename T2>
     constexpr bool is_compatible_comparison_type_v = is_compatible_comparison_type<T1, T2>::value;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // comparison functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <
+        typename T1,
+        typename T2,
+        typename = std::enable_if_t<is_compatible_token_type_v<T1, T2>>
+    >
+    auto compare(T1 tok, T2 cmp)
+    {
+        return tok == cmp;
+    }
+
+    template <
+        typename T1,
+        typename T2,
+        typename = std::enable_if_t<is_compatible_token_set_type_v<T1, T2>>
+    >
+    auto compare(T1 tok, const T2& cmp)
+    {
+        return contains(cmp, tok);
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // input steam type traits
@@ -528,37 +551,15 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_token_type_v<T1>>,
-        typename = std::enable_if_t<is_compatible_token_type_v<T1, T2>>
-    >
-    constexpr bool is(T1 tok, T2 cmp) noexcept
-    {
-        return tok == cmp;
-    }
-
-    template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_token_type_v<T1>>,
-        typename = std::enable_if_t<is_compatible_token_set_type_v<T1, T2>>
-    >
-    constexpr bool is(T1 tok, const T2& cmp) noexcept
-    {
-        return contains(cmp, tok);
-    }
-
-    template <
         template <typename...> typename TT,
         typename T1,
         typename T2,
         typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr bool is(TT<T1>& bis, const T2& cmp)
+    constexpr auto is(TT<T1>& bis, const T2& cmp)
     {
-        return is(bis.peek(), cmp);
+        return compare(bis.peek(), cmp);
     }
 
 
