@@ -21,9 +21,6 @@ namespace LL1
     template <typename T>
     using optional_token_t = std::optional<int_type_t<T>>;
 
-    //template <typename T, size_t N>
-    //using token_set_t = std::array<T, N>;
-
     template <typename T>
     using input_stream_t = std::basic_istream<T>;
 
