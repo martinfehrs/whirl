@@ -581,6 +581,7 @@ namespace LL1
     template <
         template <typename...> typename TT,
         typename T,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T>>>,
         typename = std::enable_if_t<is_token_type_v<T>>
     >
     constexpr auto read(TT<T>& bis)
@@ -591,6 +592,7 @@ namespace LL1
     template <
        template <typename...> typename TT,
        typename T,
+       typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T>>>,
        typename = std::enable_if_t<is_token_type_v<T>>
     >
     constexpr auto read(TT<T>& bis, code_position& pos)
@@ -619,6 +621,7 @@ namespace LL1
         template <typename...> typename TT,
         typename T1,
         typename T2,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     constexpr optional_token_t<T1> read_if(TT<T1>& bis, const T2& cmp)
@@ -633,6 +636,7 @@ namespace LL1
         template <typename...> typename TT,
         typename T1,
         typename T2,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     constexpr optional_token_t<T1> read_if(TT<T1>& bis, code_position& pos, const T2& cmp)
@@ -652,6 +656,7 @@ namespace LL1
         template <typename...> typename TT,
         typename T1,
         typename T2,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     constexpr auto read_while(TT<T1>& bis, const T2& cmp)
@@ -668,6 +673,7 @@ namespace LL1
         template <typename...> typename TT,
         typename T1,
         typename T2,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     constexpr auto read_while(TT<T1>& bis, code_position& pos, const T2& cmp)
@@ -688,6 +694,7 @@ namespace LL1
     template <
         template <typename...> typename TT,
         typename T,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T>>>,
         typename = std::enable_if_t<are_token_types_v<T>>
     >
        constexpr void ignore(TT<T>& bis)
@@ -698,6 +705,7 @@ namespace LL1
     template <
         template <typename...> typename TT,
         typename T,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T>>>,
         typename = std::enable_if_t<are_token_types_v<T>>
     >
     constexpr void ignore(TT<T>& bis, code_position& pos)
@@ -711,10 +719,11 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
-       template <typename...> typename TT,
-       typename T1,
-       typename T2,
-       typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
+        template <typename...> typename TT,
+        typename T1,
+        typename T2,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     bool ignore_if(TT<T1>& bis, const T2& cmp)
     {
@@ -725,6 +734,7 @@ namespace LL1
         template <typename...> typename TT,
         typename T1,
         typename T2,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     bool ignore_if(TT<T1>& bis, code_position& pos, const T2& cmp)
@@ -741,6 +751,7 @@ namespace LL1
         template <typename...> typename TT,
         typename T1,
         typename T2,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     void ignore_while(TT<T1>& bis, const T2& cmp)
@@ -753,6 +764,7 @@ namespace LL1
         template <typename...> typename TT,
         typename T1,
         typename T2,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     void ignore_while(TT<T1>& bis, code_position& pos, const T2& cmp)
@@ -760,7 +772,6 @@ namespace LL1
         while(is(bis, cmp))
             ignore(bis, pos);
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'expect' overloads
@@ -770,6 +781,7 @@ namespace LL1
         template <typename...> typename TT,
         typename T1,
         typename T2,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     constexpr auto expect(TT<T1>& bis, const T2& cmp)
@@ -784,6 +796,7 @@ namespace LL1
         template <typename...> typename TT,
         typename T1,
         typename T2,
+        typename = std::enable_if_t<is_compatible_input_stream_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     constexpr auto expect(TT<T1>& bis, code_position& pos, const T2& cmp)
