@@ -24,7 +24,7 @@ struct input_stream_dummy
 
 };
 
-TEST_CASE( "testing is function overloads", "[is]" )
+TEST_CASE( "testing is function overloads", "is" )
 {
     SECTION("char tests")
     {
@@ -86,7 +86,7 @@ TEST_CASE( "testing is function overloads", "[is]" )
     }
 }
 
-TEST_CASE( "testing is_not function overloads", "[is_not]" )
+TEST_CASE( "testing is_not function overloads", "is-not" )
 {
     SECTION("char tests")
     {
@@ -141,7 +141,7 @@ TEST_CASE( "testing is_not function overloads", "[is_not]" )
 }
 
 
-TEST_CASE( "testing is_one_of function overloads", "[is_one_of]" )
+TEST_CASE( "testing is_one_of function overloads", "is-one-of" )
 {
     SECTION("char tests")
     {
