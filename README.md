@@ -36,7 +36,7 @@ auto read_temperatures(std::istream& ins, LL1::code_position& pos) // throws une
     while(LL1::is(ins, LL1::not_(EOF)))
     {
         temperatures.push_back(read_temperature(ins, pos));
-        LL1::ignore_while(ins, pos, LL1::space);
+        LL1::ignore_while(ins, pos, space);
     }
 
     return temperatures;
