@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/LL1.hpp
+istream
+-
+vector
+-
+optional
+-
+array
+-
+deque
+-
+algorithm
+-
+tuple
+-
+iostream
+-
+
+/home/martin/LL1/examples/sequential.cpp
+LL1.hpp
+/home/martin/LL1/examples/LL1.hpp
+fstream
+-
+iostream
+-
+sstream
+-
+
