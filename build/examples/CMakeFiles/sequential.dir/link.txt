@@ -1,1 +1,0 @@
-/usr/bin/c++    -rdynamic CMakeFiles/sequential.dir/sequential.cpp.o  -o sequential 

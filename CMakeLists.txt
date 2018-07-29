@@ -14,9 +14,8 @@ target_include_directories(LLk INTERFACE include)
 #cmake option(BUILD_TESTING "" OFF)
 include(CTest)
 enable_testing(true)
-add_subdirectory(tests)
-
 add_subdirectory(examples)
+add_subdirectory(tests)
 
 install(FILES Inc/LL1.hpp DESTINATION include)
 

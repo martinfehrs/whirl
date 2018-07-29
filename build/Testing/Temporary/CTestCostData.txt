@@ -1,6 +1,0 @@
-static_look_ahead_buffer 150 2.27324e-05
-is 150 1.99938e-05
-is-not 150 2.34731e-05
-is-one-of 150 2.2467e-05
-sequential 47 3.766e-05
----

@@ -24,26 +24,20 @@ struct input_stream_dummy
 
 };
 
-TEST_CASE( "testing is function overloads", "is" )
+TEST_CASE( "testing is function overloads", "[is]" )
 {
     SECTION("char tests")
     {
         static constexpr auto eof = std::char_traits<char>::eof();
         input_stream_dummy<char> ins('a');
         input_stream_dummy<char> ins_eof(eof);
-        //LL1::static_look_ahead_buffer<char, 1> buf;
 
         REQUIRE(LL1::is(ins,     'a'     ) == true );
         REQUIRE(LL1::is(ins,     'b'     ) == false);
         REQUIRE(LL1::is(ins,     eof     ) == false);
         REQUIRE(LL1::is(ins_eof, eof     ) == true );
         REQUIRE(LL1::is(ins_eof, 'a'     ) == false);
-        //REQUIRE(LL1::is(ins,     buf, 'a') == true );
-        //REQUIRE(LL1::is(ins,     buf, 'b') == false);
-        //REQUIRE(LL1::is(ins,     buf, 'a') == true );
-        //REQUIRE(LL1::is(ins,     buf, eof) == false);
-        //REQUIRE(LL1::is(ins_eof, buf, eof) == true );
-        //REQUIRE(LL1::is(ins_eof, buf, 'a') == false);
+
     }
 
     SECTION("wchar_t tests")
@@ -86,7 +80,7 @@ TEST_CASE( "testing is function overloads", "is" )
     }
 }
 
-TEST_CASE( "testing is_not function overloads", "is-not" )
+TEST_CASE( "testing is_not function overloads", "[is-not]" )
 {
     SECTION("char tests")
     {
@@ -141,36 +135,222 @@ TEST_CASE( "testing is_not function overloads", "is-not" )
 }
 
 
-TEST_CASE( "testing is_one_of function overloads", "is-one-of" )
+TEST_CASE( "testing is_one_of function overloads", "[is-one-of]" )
 {
     SECTION("char tests")
     {
         static constexpr auto eof = std::char_traits<char>::eof();
-        //auto ins = make_input_stream_dummy('a');
-        //auto ins_eof = make_input_stream_dummy(eof);
-        //auto tok_set = make_token_set
+        input_stream_dummy<char> ins('a');
+        input_stream_dummy<char> ins_eof(eof);
+
+        REQUIRE(LL1::is(ins,     LL1::one_of('a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of('b')) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof)) == false);
+
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(eof)) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of('a')) == false);
+        
+        REQUIRE(LL1::is(ins,     LL1::one_of('a', 'b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of('b', 'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of('b', 'c')) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of('a', eof)) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof, 'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of('b', eof)) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof, 'b')) == false);
+
+        REQUIRE(LL1::is(ins_eof, LL1::one_of('a', eof)) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(eof, 'a')) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of('a', 'b')) == false);
+    }
+
+    SECTION("wchar_t tests")
+    {
+        static constexpr auto eof = std::char_traits<wchar_t>::eof();
+        input_stream_dummy<wchar_t> ins(L'a');
+        input_stream_dummy<wchar_t> ins_eof(eof);
+
+        REQUIRE(LL1::is(ins,     LL1::one_of(L'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(L'b')) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof )) == false);
+
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(eof )) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(L'a')) == false);
+
+        REQUIRE(LL1::is(ins,     LL1::one_of(L'a', L'b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(L'b', L'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(L'b', L'c')) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(L'a', eof )) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof,  L'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(L'b', eof )) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof,  L'b')) == false);
+
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(L'a', eof)) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(eof,  L'a')) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(L'a', L'b')) == false);
+    }
+
+    SECTION("char16_t tests")
+    {
+        static constexpr auto eof = std::char_traits<char16_t>::eof();
+        input_stream_dummy<char16_t> ins(u'a');
+        input_stream_dummy<char16_t> ins_eof(eof);
+
+        REQUIRE(LL1::is(ins,     LL1::one_of(u'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(u'b')) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof )) == false);
+
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(eof )) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(u'a')) == false);
+
+        REQUIRE(LL1::is(ins,     LL1::one_of(u'a', u'b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(u'b', u'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(u'b', u'c')) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(u'a', eof )) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof,  u'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(u'b', eof )) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof,  u'b')) == false);
+
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(u'a', eof )) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(eof,  u'a')) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(u'a', u'b')) == false);
+    }
+
+    SECTION("char32_t tests")
+    {
+        static constexpr auto eof = std::char_traits<char32_t>::eof();
+        input_stream_dummy<char32_t> ins(U'a');
+        input_stream_dummy<char32_t> ins_eof(eof);
+
+        REQUIRE(LL1::is(ins,     LL1::one_of(U'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(U'b')) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof )) == false);
+
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(eof )) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(U'a')) == false);
+
+        REQUIRE(LL1::is(ins,     LL1::one_of(U'a', U'b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(U'b', U'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(U'b', U'c')) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(U'a', eof )) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof,  U'a')) == true );
+        REQUIRE(LL1::is(ins,     LL1::one_of(U'b', eof )) == false);
+        REQUIRE(LL1::is(ins,     LL1::one_of(eof,  U'b')) == false);
+
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(U'a', eof )) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(eof,  U'a')) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::one_of(U'a', U'b')) == false);
+    }
+}
+
+TEST_CASE( "testing is_none_of function overloads", "[is-none-of]" )
+{
+    SECTION("char tests")
+    {
+        static constexpr auto eof = std::char_traits<char>::eof();
+        input_stream_dummy<char> ins('a');
+        input_stream_dummy<char> ins_eof(eof);
+
+        REQUIRE(LL1::is(ins,     LL1::none_of('a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of('b')) == true );
+
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof)) == true );
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(eof)) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of('a')) == true );
+
+        REQUIRE(LL1::is(ins,     LL1::none_of('a', 'b')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of('b', 'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of('b', 'c')) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of('a', eof)) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof, 'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of('b', eof)) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof, 'b')) == true );
+
+
+        REQUIRE(LL1::is(ins_eof, LL1::none_of('a', eof)) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(eof, 'a')) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of('a', 'b')) == true );
 
     }
 
     SECTION("wchar_t tests")
     {
-        //constexpr auto eof = std::char_traits<wchar_t>::eof();
-        //auto ins = make_input_stream_dummy(L'a');
-        //auto ins_eof = make_input_stream_dummy(eof);
+        static constexpr auto eof = std::char_traits<wchar_t>::eof();
+        input_stream_dummy<wchar_t> ins(L'a');
+        input_stream_dummy<wchar_t> ins_eof(eof);
+
+        REQUIRE(LL1::is(ins,     LL1::none_of(L'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(L'b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof )) == true );
+
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(eof )) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(L'a')) == true );
+
+        REQUIRE(LL1::is(ins,     LL1::none_of(L'a', L'b')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(L'b', L'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(L'b', L'c')) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of(L'a', eof )) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof,  L'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(L'b', eof )) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof,  L'b')) == true );
+
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(L'a', eof )) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(eof,  L'a')) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(L'a', L'b')) == true );
+
     }
 
     SECTION("char16_t tests")
     {
-        //constexpr auto eof = std::char_traits<char16_t>::eof();
-        //auto ins = make_input_stream_dummy(u'a');
-        //auto ins_eof = make_input_stream_dummy(eof);
+        static constexpr auto eof = std::char_traits<char16_t>::eof();
+        input_stream_dummy<char16_t> ins(u'a');
+        input_stream_dummy<char16_t> ins_eof(eof);
+
+        REQUIRE(LL1::is(ins,     LL1::none_of(u'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(u'b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof )) == true );
+
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(eof )) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(u'a')) == true );
+
+        REQUIRE(LL1::is(ins,     LL1::none_of(u'a', u'b')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(u'b', u'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(u'b', u'c')) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of(u'a', eof )) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof,  u'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(u'b', eof )) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof,  u'b')) == true );
+
+
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(u'a', eof )) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(eof,  u'a')) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(u'a', u'b')) == true );
     }
 
     SECTION("char32_t tests")
     {
-        //constexpr auto eof = std::char_traits<char32_t>::eof();
-        //auto ins = make_input_stream_dummy(U'a');
-        //auto ins_eof = make_input_stream_dummy(eof);
+        static constexpr auto eof = std::char_traits<char32_t>::eof();
+        input_stream_dummy<char32_t> ins(U'a');
+        input_stream_dummy<char32_t> ins_eof(eof);
+
+        REQUIRE(LL1::is(ins,     LL1::none_of(U'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(U'b')) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof )) == true );
+
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(eof )) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(U'a')) == true );
+
+        REQUIRE(LL1::is(ins,     LL1::none_of(U'a', U'b')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(U'b', U'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(U'b', U'c')) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof,  U'a')) == false);
+        REQUIRE(LL1::is(ins,     LL1::none_of(U'b', eof )) == true );
+        REQUIRE(LL1::is(ins,     LL1::none_of(eof,  U'b')) == true );
+
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(U'a', eof )) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(eof,  U'a')) == false);
+        REQUIRE(LL1::is(ins_eof, LL1::none_of(U'a', U'b')) == true );
     }
 }
+
+
 

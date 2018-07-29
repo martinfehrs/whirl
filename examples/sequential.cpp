@@ -1,7 +1,7 @@
 #include "LL1.hpp"
 #include <fstream>
 #include <iostream>
-
+#include <sstream>
 
 auto read_temperature(std::istream& ins, LL1::code_position& pos)
 {
@@ -33,6 +33,8 @@ auto read_temperatures(std::istream& ins, LL1::code_position& pos)
 
 int main()
 {
+    std::locale::global(std::locale(""));
+
     LL1::code_position pos{ 1, 1 };
 
     std::ifstream ifs("sequential_input.txt");
@@ -40,7 +42,9 @@ int main()
     try
     {
         for(auto temperature : read_temperatures(ifs, pos))
-            std::cout << temperature << '\n';
+           std::cout << temperature << "\n";
+
+        return EXIT_SUCCESS;
     }
     catch(LL1::unexpected_token)
     {
@@ -51,7 +55,9 @@ int main()
                   << ", "
                   << pos.col
                   << ")\n";
+                  
+        return EXIT_FAILURE;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
