@@ -24,6 +24,22 @@ struct input_stream_dummy
 
 };
 
+
+namespace LL1
+{
+    template <typename T>
+    struct input_source_traits<input_stream_dummy<T>>
+    {
+	using char_type = T;
+
+	static constexpr auto read(input_stream_dummy<T>& ins) noexcept
+	{
+	    return ins.get();
+	}
+    };
+}
+
+
 TEST_CASE( "testing is function overloads", "[is]" )
 {
     SECTION("char tests")

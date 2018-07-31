@@ -476,14 +476,41 @@ namespace LL1
     // input source type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename T1, typename = void>
-    struct is_input_source_type : std::false_type
+    template <typename T, typename = void>
+    struct input_source_traits;
+
+    template <template <typename...> typename TT, typename T, typename... Ts>
+    struct input_source_traits<
+	TT<T, Ts...>,
+	std::enable_if_t<std::is_base_of_v<std::basic_istream<T, Ts...>, TT<T, Ts...>>>
+    >
+    {
+	using char_type = T;
+	
+	static auto read(std::basic_istream<T, Ts...>& ins)
+	{
+	    return ins.get();
+	}
+    };
+
+    template <typename T, typename = void>
+    struct is_input_source_trait_class_type : std::false_type
     { };
 
-    template <typename T1>
-    struct is_input_source_type<T1, std::void_t<decltype(std::declval<T1>().get())>>
-        : is_int_type<decltype(std::declval<T1>().get())>::type
+    template <template <typename...> typename TT, typename T, typename... Ts>
+    struct is_input_source_trait_class_type<TT<T, Ts...>, std::void_t<
+	decltype(std::declval<typename TT<T, Ts...>::char_type>()),
+	decltype(TT<T, Ts...>::read(std::declval<T&>()))
+    >>
+	: is_token_type<decltype(TT<T, Ts...>::read(std::declval<T&>()))>
+
     { };
+
+    template <typename T>
+    struct is_input_source_type
+	: std::bool_constant<is_input_source_trait_class_type<input_source_traits<T>>::value>
+    { };
+
 
     template <typename T1>
     constexpr bool is_input_source_type_v = is_input_source_type<T1>::value;
