@@ -88,18 +88,19 @@ namespace LL1
 
     };
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // negated token
+    // special token types
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename T>
-    struct negated_token
+    struct negated_character
     {
-        explicit constexpr negated_token(T tok)
+        explicit constexpr negated_character(T tok)
             : tok{tok}
         { }
 
-        constexpr T token() const
+        constexpr T character() const
         {
             return this->tok;
         }
@@ -110,40 +111,44 @@ namespace LL1
     };
 
     template <typename T1, typename T2>
-    constexpr bool operator==(negated_token<T1> tok1, negated_token<T2> tok2)
+    constexpr bool operator==(negated_character<T1> tok1, negated_character<T2> tok2)
     {
-        return tok1.token() == tok2.token();
+        return tok1.character() == tok2.character();
     }
 
     template <typename T1, typename T2>
-    constexpr bool operator!=(negated_token<T1> tok1, negated_token<T2> tok2)
+    constexpr bool operator!=(negated_character<T1> tok1, negated_character<T2> tok2)
     {
-        return tok1.token() != tok2.token();
+        return tok1.character() != tok2.character();
     }
 
     template <typename T1, typename T2>
-    constexpr bool operator==(negated_token<T1> tok1, T2 tok2)
+    constexpr bool operator==(negated_character<T1> tok1, T2 tok2)
     {
-        return tok1.token() != tok2;
+        return tok1.character() != tok2;
     }
 
     template <typename T1, typename T2>
-    constexpr bool operator==(T1 tok1, negated_token<T2> tok2)
+    constexpr bool operator==(T1 tok1, negated_character<T2> tok2)
     {
-        return tok1 != tok2.token();
+        return tok1 != tok2.character();
     }
 
     template <typename T1, typename T2>
-    constexpr bool operator!=(T1 tok1, negated_token<T2> tok2)
+    constexpr bool operator!=(T1 tok1, negated_character<T2> tok2)
     {
-        return tok1 == tok2.token();
+        return tok1 == tok2.character();
     }
 
     template <typename T1, typename T2>
-    constexpr bool operator!=(negated_token<T1> tok1, T2 tok2)
+    constexpr bool operator!=(negated_character<T1> tok1, T2 tok2)
     {
-        return tok1.token() == tok2;
+        return tok1.character() == tok2;
     }
+
+
+    struct end_token {};
+    struct any_token {};
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,35 +156,28 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename T>
-    struct is_char_type
+    struct is_character_type
         : std::bool_constant<
             std::disjunction_v<
                 std::is_same<T, char>,
                 std::is_same<T, wchar_t>,
                 std::is_same<T, char16_t>,
                 std::is_same<T, char32_t>,
-                std::is_same<T, negated_token<char>>,
-                std::is_same<T, negated_token<wchar_t>>,
-                std::is_same<T, negated_token<wchar_t>>,
-                std::is_same<T, negated_token<char16_t>>,
-                std::is_same<T, negated_token<char32_t>>
+                std::is_same<T, negated_character<char>>,
+                std::is_same<T, negated_character<wchar_t>>,
+                std::is_same<T, negated_character<wchar_t>>,
+                std::is_same<T, negated_character<char16_t>>,
+                std::is_same<T, negated_character<char32_t>>
             >
         >
     { };
 
     template <typename T>
-    struct is_int_type
+    struct is_special_token_type
         : std::bool_constant<
             std::disjunction_v<
-                std::is_same<T, int_type_t<char>>,
-                std::is_same<T, int_type_t<wchar_t>>,
-                std::is_same<T, int_type_t<char16_t>>,
-                std::is_same<T, int_type_t<char32_t>>,
-                std::is_same<T, negated_token<int_type_t<char>>>,
-                std::is_same<T, negated_token<int_type_t<wchar_t>>>,
-                std::is_same<T, negated_token<int_type_t<wchar_t>>>,
-                std::is_same<T, negated_token<int_type_t<char16_t>>>,
-                std::is_same<T, negated_token<int_type_t<char32_t>>>
+                std::is_same<T, end_token>,
+                std::is_same<T, any_token>
             >
         >
     { };
@@ -188,8 +186,17 @@ namespace LL1
     struct is_token_type
         : std::bool_constant<
             std::disjunction_v<
-                is_char_type<T>,
-                is_int_type<T>
+                is_character_type<T>,
+                is_special_token_type<T>
+            >
+        >
+    { };
+
+    template <typename... Ts>
+    struct are_character_types
+        : std::bool_constant<
+            std::disjunction_v<
+                is_character_type<Ts>...
             >
         >
     { };
@@ -204,7 +211,7 @@ namespace LL1
     { };
 
     template <typename T1, typename T2, typename = void>
-    struct equality_comparable: std::false_type
+    struct equality_comparable : std::false_type
     { };
 
     template <typename T1, typename T2>
@@ -225,19 +232,22 @@ namespace LL1
 
 
     template <typename T>
-    constexpr bool is_char_type_v = is_char_type<T>::value;
+    constexpr auto is_character_type_v = is_character_type<T>::value;
 
     template <typename T>
-    constexpr bool is_int_type_v = is_int_type<T>::value;
+    constexpr auto is_special_token_type_v = is_special_token_type<T>::value;
 
     template <typename T>
-    constexpr bool is_token_type_v = is_token_type<T>::value;
+    constexpr auto is_token_type_v = is_token_type<T>::value;
 
     template <typename... Ts>
-    constexpr bool are_token_types_v = are_token_types<Ts...>::value;
+    constexpr auto are_character_types_v = are_character_types<Ts...>::value;
+
+    template <typename... Ts>
+    constexpr auto are_token_types_v = are_token_types<Ts...>::value;
 
     template <typename T1, typename T2>
-    constexpr bool is_compatible_token_type_v = is_compatible_token_type<T1, T2>::value;
+    constexpr auto is_compatible_token_type_v = is_compatible_token_type<T1, T2>::value;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -361,6 +371,14 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    // special tokens
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    constexpr end_token end;
+    constexpr any_token any;
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // predefined tokens
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -372,6 +390,7 @@ namespace LL1
         constexpr char tabulator = 0x9;
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // predefined token sets
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -379,7 +398,7 @@ namespace LL1
     namespace sets
     {
         constexpr token_set space{ ' ', '\t', '\n' };
-    
+
         constexpr token_set blank{' ', '\t'};
 
         constexpr token_set digit{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -396,7 +415,17 @@ namespace LL1
     >
     constexpr auto not_(T tok)
     {
-        return negated_token<T>{ tok };
+        return negated_character<T>{ tok };
+    }
+
+    constexpr auto not_(end_token)
+    {
+        return any;
+    }
+
+    constexpr auto not_(any_token)
+    {
+        return end;
     }
 
     template <
@@ -409,21 +438,23 @@ namespace LL1
         return !set;
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // token set factories
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename... Ts, typename = std::enable_if_t<are_token_types_v<Ts...>>>
+    template <typename... Ts, typename = std::enable_if_t<are_character_types_v<Ts...>>>
     constexpr auto one_of(Ts... toks)
     {
         return token_set{ toks... };
     }
 
-    template <typename... Ts, typename = std::enable_if_t<are_token_types_v<Ts...>>>
+    template <typename... Ts, typename = std::enable_if_t<are_character_types_v<Ts...>>>
     constexpr auto none_of(Ts... toks)
     {
         return not_(one_of(toks...));
     }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // comparison type traits
@@ -448,31 +479,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // comparison functions
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_token_type_v<T1, T2>>
-    >
-    auto compare(T1 tok, T2 cmp)
-    {
-        return tok == cmp;
-    }
-
-    template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_token_set_type_v<T1, T2>>
-    >
-    auto compare(T1 tok, const T2& cmp)
-    {
-        return cmp.contains(tok);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // input source type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -481,16 +487,26 @@ namespace LL1
 
     template <template <typename...> typename TT, typename T, typename... Ts>
     struct input_source_traits<
-	TT<T, Ts...>,
-	std::enable_if_t<std::is_base_of_v<std::basic_istream<T, Ts...>, TT<T, Ts...>>>
+        TT<T, Ts...>,
+        std::enable_if_t<std::is_base_of_v<std::basic_istream<T, Ts...>, TT<T, Ts...>>>
     >
     {
-	using char_type = T;
-	
-	static auto read(std::basic_istream<T, Ts...>& ins)
-	{
-	    return ins.get();
-	}
+        using char_type = T;
+
+        static char_type look_ahead(std::basic_istream<T, Ts...>& ins)
+        {
+            return ins.peek();
+        }
+
+        static char_type read(std::basic_istream<T, Ts...>& ins)
+        {
+            return ins.get();
+        }
+
+        static bool is_end(std::basic_istream<T, Ts...>& ins)
+        {
+            return ins.peek() == std::char_traits<T>::eof();
+        }
     };
 
     template <typename T, typename = void>
@@ -499,16 +515,17 @@ namespace LL1
 
     template <template <typename...> typename TT, typename T, typename... Ts>
     struct is_input_source_trait_class_type<TT<T, Ts...>, std::void_t<
-	decltype(std::declval<typename TT<T, Ts...>::char_type>()),
-	decltype(TT<T, Ts...>::read(std::declval<T&>()))
+        std::enable_if_t<is_token_type_v<typename TT<T, Ts...>::char_type>>,
+        std::enable_if_t<std::is_same_v<decltype(TT<T, Ts...>::look_ahead(std::declval<T&>())), typename TT<T, Ts...>::char_type>>,
+        std::enable_if_t<std::is_same_v<decltype(TT<T, Ts...>::read(std::declval<T&>())), typename TT<T, Ts...>::char_type>>,
+        std::enable_if_t<std::is_same_v<decltype(TT<T, Ts...>::is_end(std::declval<T&>())), bool>>
     >>
-	: is_token_type<decltype(TT<T, Ts...>::read(std::declval<T&>()))>
-
+        : is_token_type<decltype(TT<T, Ts...>::read(std::declval<T&>()))>
     { };
 
     template <typename T>
     struct is_input_source_type
-	: std::bool_constant<is_input_source_trait_class_type<input_source_traits<T>>::value>
+        : std::bool_constant<is_input_source_trait_class_type<input_source_traits<T>>::value>
     { };
 
 
@@ -525,11 +542,41 @@ namespace LL1
         typename T1,
         typename T2,
         typename = std::enable_if_t<is_input_source_type_v<TT<T1>>>,
-        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_token_type_v<T1, T2>>
+    >
+    constexpr auto is(TT<T1>& ins, T2 cmp)
+    {
+        return input_source_traits<TT<T1>>::look_ahead(ins) == cmp;
+    }
+
+    template <
+        template <typename...> typename TT,
+        typename T1,
+        typename T2,
+        typename = std::enable_if_t<is_input_source_type_v<TT<T1>>>,
+        typename = std::enable_if_t<is_compatible_token_set_type_v<T1, T2>>
     >
     constexpr auto is(TT<T1>& ins, const T2& cmp)
     {
-        return compare(ins.peek(), cmp);
+        return cmp.contains(input_source_traits<TT<T1>>::look_ahead(ins));
+    }
+
+    template <
+        typename T,
+        typename = std::enable_if_t<is_input_source_type_v<T>>
+    >
+    constexpr auto is(T& ins, end_token)
+    {
+        return input_source_traits<T>::is_end(ins);
+    }
+
+    template <
+        typename T,
+        typename = std::enable_if_t<is_input_source_type_v<T>>
+    >
+    constexpr auto is(T& ins, any_token)
+    {
+        return !input_source_traits<T>::is_end(ins);
     }
 
 
@@ -538,23 +585,19 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
-        template <typename...> typename TT,
         typename T,
-        typename = std::enable_if_t<is_input_source_type_v<TT<T>>>,
-        typename = std::enable_if_t<is_token_type_v<T>>
+        typename = std::enable_if_t<is_input_source_type_v<T>>
     >
-    constexpr auto read(TT<T>& ins)
+    constexpr auto read(T& ins)
     {
         return ins.get();
     }
 
     template <
-        template <typename...> typename TT,
         typename T,
-        typename = std::enable_if_t<is_input_source_type_v<TT<T>>>,
-        typename = std::enable_if_t<is_token_type_v<T>>
+        typename = std::enable_if_t<is_input_source_type_v<T>>
     >
-    constexpr auto read(TT<T>& ins, code_position& pos)
+    constexpr auto read(T& ins, code_position& pos)
     {
         auto tok = ins.get();
 

@@ -22,7 +22,7 @@ auto read_temperatures(std::istream& ins, LL1::code_position& pos)
 
     std::vector<int> temperatures;
 
-    while(LL1::is(ins, LL1::not_(EOF)))
+    while(LL1::is(ins, LL1::not_(LL1::end)))
     {
         temperatures.push_back(read_temperature(ins, pos));
         LL1::ignore_while(ins, pos, space);
