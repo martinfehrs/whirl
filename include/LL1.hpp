@@ -31,9 +31,7 @@ namespace LL1
         unsigned col;
     };
 
-    struct unexpected_token
-    {
-    };
+    struct unexpected_input { };
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -590,6 +588,9 @@ namespace LL1
     >
     constexpr auto read(T& ins)
     {
+        if (input_source_traits<T>::is_end(ins))
+            throw unexpected_input{};
+
         return ins.get();
     }
 
@@ -599,7 +600,7 @@ namespace LL1
     >
     constexpr auto read(T& ins, code_position& pos)
     {
-        auto tok = ins.get();
+        auto tok = read(ins);
 
         if (tok == tokens::line_feed)
         {
@@ -803,7 +804,7 @@ namespace LL1
     constexpr auto expect(TT<T1>& ins, const T2& cmp)
     {
         if(is(ins, not_(cmp)))
-            throw unexpected_token{};
+            throw unexpected_input{};
         
         return read(ins);
     }
@@ -816,9 +817,9 @@ namespace LL1
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
     constexpr auto expect(TT<T1>& ins, code_position& pos, const T2& cmp)
-    {    
+    {
         if(is(ins, not_(cmp)))
-            throw unexpected_token{};
+            throw unexpected_input{};
 
         return read(ins, pos);
     }

@@ -3,15 +3,19 @@
 #include <iostream>
 #include <sstream>
 
+
+using namespace LL1;
+
+
 auto read_temperature(std::istream& ins, LL1::code_position& pos)
 {
     using LL1::sets::digit;
 
-    auto has_sign = LL1::ignore_if(ins, pos, '-');
-    auto val = LL1::expect(ins, pos, digit) - '0';
+    auto has_sign = ignore_if(ins, pos, '-');
+    auto val = expect(ins, pos, digit) - '0';
 
-    while(LL1::is(ins, digit))
-        val = val * 10 + LL1::read(ins, pos) - '0';
+    while(is(ins, digit))
+        val = val * 10 + read(ins, pos) - '0';
 
     return val * (has_sign ? -1 : 1);
 }
@@ -22,10 +26,10 @@ auto read_temperatures(std::istream& ins, LL1::code_position& pos)
 
     std::vector<int> temperatures;
 
-    while(LL1::is(ins, LL1::not_(LL1::end)))
+    while(LL1::is(ins, not_(end)))
     {
         temperatures.push_back(read_temperature(ins, pos));
-        LL1::ignore_while(ins, pos, space);
+        ignore_while(ins, pos, space);
     }
 
     return temperatures;
@@ -46,7 +50,7 @@ int main()
 
         return EXIT_SUCCESS;
     }
-    catch(LL1::unexpected_token)
+    catch(unexpected_input)
     {
         std::cout << "unexpeced token "
                   << static_cast<char>(ifs.peek())
