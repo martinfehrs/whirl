@@ -9,21 +9,21 @@ using namespace LL1;
 template <typename T>
 struct input_stream_dummy
 {
-    constexpr input_stream_dummy(LL1::int_type_t<T> c)
-        : c{ c }
+    constexpr input_stream_dummy(typename std::char_traits<T>::int_type tok)
+        : tok{ tok }
     { }
 
     constexpr auto peek() noexcept
     {
-        return c;
+        return tok;
     }
 
     constexpr auto get() noexcept
     {
-        return c;
+        return tok;
     }
 
-    LL1::int_type_t<T> c;
+    typename std::char_traits<T>::int_type tok;
 
 };
 
