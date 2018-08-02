@@ -46,9 +46,14 @@ namespace LL1
             : tok{tok}
         { }
 
-        constexpr T character() const
+        constexpr T negate() const
         {
             return this->tok;
+        }
+
+        constexpr T operator!() const
+        {
+            return this->negate();
         }
 
     private:
@@ -59,37 +64,37 @@ namespace LL1
     template <typename T1, typename T2>
     constexpr bool operator==(negated_character<T1> tok1, negated_character<T2> tok2)
     {
-        return tok1.character() == tok2.character();
+        return !tok1 == tok2.negate();
     }
 
     template <typename T1, typename T2>
     constexpr bool operator!=(negated_character<T1> tok1, negated_character<T2> tok2)
     {
-        return tok1.character() != tok2.character();
+        return tok1.negate() != tok2.negate();
     }
 
     template <typename T1, typename T2>
     constexpr bool operator==(negated_character<T1> tok1, T2 tok2)
     {
-        return tok1.character() != tok2;
+        return tok1.negate() != tok2;
     }
 
     template <typename T1, typename T2>
     constexpr bool operator==(T1 tok1, negated_character<T2> tok2)
     {
-        return tok1 != tok2.character();
+        return tok1 != tok2.negate();
     }
 
     template <typename T1, typename T2>
     constexpr bool operator!=(T1 tok1, negated_character<T2> tok2)
     {
-        return tok1 == tok2.character();
+        return tok1 == tok2.negate();
     }
 
     template <typename T1, typename T2>
     constexpr bool operator!=(negated_character<T1> tok1, T2 tok2)
     {
-        return tok1.character() == tok2;
+        return tok1.negate() == tok2;
     }
 
 
@@ -362,6 +367,15 @@ namespace LL1
     constexpr auto not_(T tok)
     {
         return negated_character<T>{ tok };
+    }
+
+    template <
+        typename T,
+        typename = std::enable_if_t<is_token_type_v<T>>
+    >
+        constexpr auto not_(negated_character<T> tok)
+    {
+        return tok.negate();
     }
 
     constexpr auto not_(end_token)
