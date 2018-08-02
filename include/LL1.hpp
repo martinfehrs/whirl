@@ -46,12 +46,12 @@ namespace LL1
             : tok{tok}
         { }
 
-        constexpr T negate() const
+        constexpr auto negate() const
         {
             return this->tok;
         }
 
-        constexpr T operator!() const
+        constexpr auto operator!() const
         {
             return this->negate();
         }
@@ -62,37 +62,37 @@ namespace LL1
     };
 
     template <typename T1, typename T2>
-    constexpr bool operator==(negated_character<T1> tok1, negated_character<T2> tok2)
+    constexpr auto operator==(negated_character<T1> tok1, negated_character<T2> tok2)
     {
         return !tok1 == tok2.negate();
     }
 
     template <typename T1, typename T2>
-    constexpr bool operator!=(negated_character<T1> tok1, negated_character<T2> tok2)
+    constexpr auto operator!=(negated_character<T1> tok1, negated_character<T2> tok2)
     {
         return tok1.negate() != tok2.negate();
     }
 
     template <typename T1, typename T2>
-    constexpr bool operator==(negated_character<T1> tok1, T2 tok2)
+    constexpr auto operator==(negated_character<T1> tok1, T2 tok2)
     {
         return tok1.negate() != tok2;
     }
 
     template <typename T1, typename T2>
-    constexpr bool operator==(T1 tok1, negated_character<T2> tok2)
+    constexpr auto operator==(T1 tok1, negated_character<T2> tok2)
     {
         return tok1 != tok2.negate();
     }
 
     template <typename T1, typename T2>
-    constexpr bool operator!=(T1 tok1, negated_character<T2> tok2)
+    constexpr auto operator!=(T1 tok1, negated_character<T2> tok2)
     {
         return tok1 == tok2.negate();
     }
 
     template <typename T1, typename T2>
-    constexpr bool operator!=(negated_character<T1> tok1, T2 tok2)
+    constexpr auto operator!=(negated_character<T1> tok1, T2 tok2)
     {
         return tok1.negate() == tok2;
     }
@@ -219,7 +219,7 @@ namespace LL1
         { }
 
         template <typename T>
-        constexpr bool contains(T tok) const
+        constexpr auto contains(T tok) const
         {
             return contains<>(tok, std::index_sequence_for<Ts...>{});
         }
@@ -238,7 +238,7 @@ namespace LL1
         }
 
         template <typename T, size_t... I>
-        constexpr bool contains(T tok, std::index_sequence<I...>) const
+        constexpr auto contains(T tok, std::index_sequence<I...>) const
         {
             return ((std::get<I>(this->toks) == tok) || ...);
         }
@@ -259,7 +259,7 @@ namespace LL1
         { }
 
         template <typename T>
-        constexpr bool contains(T tok) const
+        constexpr auto contains(T tok) const
         {
             return contains<>(tok, std::index_sequence_for<Ts...>{});
         }
@@ -283,7 +283,7 @@ namespace LL1
         }
 
         template <typename T, size_t... I>
-        constexpr bool contains(T tok, std::index_sequence<I...>) const
+        constexpr auto contains(T tok, std::index_sequence<I...>) const
         {
             return ((!(std::get<I>(this->toks) == tok)) && ...);
         }
@@ -320,10 +320,10 @@ namespace LL1
     { };
 
     template <typename T>
-    constexpr bool is_token_set_type_v = is_token_set_type<T>::value;
+    constexpr auto is_token_set_type_v = is_token_set_type<T>::value;
 
     template <typename T1, typename T2>
-    constexpr bool is_compatible_token_set_type_v = is_compatible_token_set_type<T1, T2>::value;
+    constexpr auto is_compatible_token_set_type_v = is_compatible_token_set_type<T1, T2>::value;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -440,7 +440,7 @@ namespace LL1
     { };
 
     template <typename T1, typename T2>
-    constexpr bool is_compatible_comparison_type_v = is_compatible_comparison_type<T1, T2>::value;
+    constexpr auto is_compatible_comparison_type_v = is_compatible_comparison_type<T1, T2>::value;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -468,7 +468,7 @@ namespace LL1
             return ins.get();
         }
 
-        static bool is_end(std::basic_istream<T, Ts...>& ins)
+        static auto is_end(std::basic_istream<T, Ts...>& ins)
         {
             return ins.peek() == std::char_traits<T>::eof();
         }
