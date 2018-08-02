@@ -7,14 +7,6 @@
 
 namespace LL1
 {
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // aliases, improving readability
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <typename T>
-    using optional_token_t = std::optional<T>;
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // parsing error handling
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -592,7 +584,7 @@ namespace LL1
         typename = std::enable_if_t<is_input_source_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr optional_token_t<T1> read_if(TT<T1>& ins, const T2& cmp)
+    constexpr std::optional<T1> read_if(TT<T1>& ins, const T2& cmp)
     {
         if (is(ins, cmp))
             return read(ins);
@@ -607,7 +599,7 @@ namespace LL1
         typename = std::enable_if_t<is_input_source_type_v<TT<T1>>>,
         typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
     >
-    constexpr optional_token_t<T1> read_if(TT<T1>& ins, code_position& pos, const T2& cmp)
+    constexpr std::optional<T1> read_if(TT<T1>& ins, code_position& pos, const T2& cmp)
     {
         if (is(ins, cmp))
             return read(ins, pos);
