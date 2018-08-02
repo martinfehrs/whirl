@@ -266,7 +266,13 @@ namespace LL1
 
         constexpr negated_token_set<Ts...> operator!() const
         {
-            return negate(std::index_sequence_for<Ts...>{});
+            return this->negate(std::index_sequence_for<Ts...>{});
+        }
+
+        template <size_t... I>
+        constexpr auto negate() const
+        {
+            return this->negate(std::index_sequence_for<Ts...>{});
         }
 
     private:
