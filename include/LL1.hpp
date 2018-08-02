@@ -400,7 +400,7 @@ namespace LL1
         typename = std::enable_if_t<are_token_types_v<Ts...>>>
     constexpr auto not_(const TT<Ts...>& set)
     {
-        return !set;
+        return set.negate();
     }
 
 
