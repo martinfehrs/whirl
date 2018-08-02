@@ -1,11 +1,8 @@
 #include <istream>
 #include <vector>
 #include <optional>
-#include <array>
-#include <deque>
 #include <algorithm>
 #include <tuple>
-#include <iostream>
 
 
 namespace LL1
@@ -16,11 +13,10 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename T>
-    using int_type_t = typename std::char_traits<T>::int_type;
+    using  = typename std::char_traits<T>::int_type;
 
     template <typename T>
     using optional_token_t = std::optional<int_type_t<T>>;
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // parsing error handling
