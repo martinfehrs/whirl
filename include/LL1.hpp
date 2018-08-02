@@ -264,7 +264,7 @@ namespace LL1
             return contains<>(tok, std::index_sequence_for<Ts...>{});
         }
 
-        constexpr negated_token_set<Ts...> operator!() const
+        constexpr auto operator!() const
         {
             return negate(std::index_sequence_for<Ts...>{});
         }
