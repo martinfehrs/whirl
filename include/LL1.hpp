@@ -21,8 +21,9 @@ namespace LL1
     template <typename T>
     using optional_token_t = std::optional<int_type_t<T>>;
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // error handling
+    // parsing error handling
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct code_position
@@ -32,59 +33,6 @@ namespace LL1
     };
 
     struct unexpected_input { };
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // token sequences
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <typename T>
-    struct dynamic_token_sequence
-    {
-
-    public:
-
-        using int_type = int_type_t<T>;
-
-
-        void push_back(int_type chr)
-        {
-            this->storage.push_back(chr);
-        }
-
-        dynamic_token_sequence& operator +=(int_type tok)
-        {
-            this->storage.push_back(tok);
-
-            return *this;
-        }
-
-        dynamic_token_sequence& operator+=(const dynamic_token_sequence& other)
-        {
-            this->storage.insert(
-                std::end(this->storage),
-                std::begin(other.storage),
-                std::end(other.storage)
-            );
-
-            return *this;
-        }
-
-        const int_type& operator[](size_t i) const
-        {
-            return this->storage[0];
-        }
-
-        auto size() const
-        {
-            return this->storage.size();
-        }
-
-    private:
-
-        std::vector<int_type> storage;
-
-    };
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -664,7 +612,7 @@ namespace LL1
     >
     constexpr auto read_while(TT<T1>& ins, const T2& cmp)
     {
-        dynamic_token_sequence<T1> tokseq;
+        std::basic_string<T1> tokseq;
 
         while (is(ins, cmp))
             tokseq.push_back(read(ins));
@@ -681,7 +629,7 @@ namespace LL1
     >
     constexpr auto read_while(TT<T1>& ins, code_position& pos, const T2& cmp)
     {
-        dynamic_token_sequence<T1> tokseq;
+        std::basic_string<T1> tokseq;
 
         while (is(ins, cmp))
             tokseq.push_back(read(ins, pos));
