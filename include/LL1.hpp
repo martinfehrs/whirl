@@ -264,15 +264,14 @@ namespace LL1
             return contains<>(tok, std::index_sequence_for<Ts...>{});
         }
 
-        constexpr auto operator!() const
+        constexpr negated_token_set<Ts...> operator!() const
         {
-            return this->negate(std::index_sequence_for<Ts...>{});
+            return negate(std::index_sequence_for<Ts...>{});
         }
 
-        template <size_t... I>
         constexpr auto negate() const
         {
-            return this->negate(std::index_sequence_for<Ts...>{});
+            return negate(std::index_sequence_for<Ts...>{});
         }
 
     private:
