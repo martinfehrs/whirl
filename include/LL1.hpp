@@ -229,6 +229,11 @@ namespace LL1
             return negate(std::index_sequence_for<Ts...>{});
         }
 
+        constexpr auto negate() const
+        {
+            return negate(std::index_sequence_for<Ts...>{});
+        }
+
     private:
 
         template <size_t... I>
