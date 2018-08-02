@@ -13,10 +13,10 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename T>
-    using  = typename std::char_traits<T>::int_type;
+    using int_type_t = typename std::char_traits<T>::int_type;
 
     template <typename T>
-    using optional_token_t = std::optional<int_type_t<T>>;
+    using optional_token_t = std::optional<T>;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // parsing error handling
