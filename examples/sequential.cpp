@@ -9,7 +9,7 @@ using namespace LL1;
 
 auto read_temperature(std::istream& ins, LL1::code_position& pos)
 {
-    using LL1::sets::digit;
+    using sets::digit;
 
     auto has_sign = ignore_if(ins, pos, '-');
     auto val = expect(ins, pos, digit) - '0';
@@ -22,11 +22,11 @@ auto read_temperature(std::istream& ins, LL1::code_position& pos)
 
 auto read_temperatures(std::istream& ins, LL1::code_position& pos)
 {
-    using LL1::sets::space;
+    using sets::space;
 
     std::vector<int> temperatures;
 
-    while(LL1::is(ins, not_(end)))
+    while(is(ins, not_(end)))
     {
         temperatures.push_back(read_temperature(ins, pos));
         ignore_while(ins, pos, space);
@@ -52,14 +52,21 @@ int main()
     }
     catch(unexpected_input)
     {
-        std::cout << "unexpeced token "
-                  << static_cast<char>(ifs.peek())
-                  << " at ("
-                  << pos.row
-                  << ", "
-                  << pos.col
-                  << ")\n";
-                  
+        if (is(ifs, any))
+        {
+            std::cerr << "unexpeced token "
+                << static_cast<char>(read(ifs))
+                << " at ("
+                << pos.row
+                << ", "
+                << pos.col
+                << ")\n";
+        }
+        else
+        {
+            std::cerr << "unexpected end\n";
+        }
+
         return EXIT_FAILURE;
     }
 
