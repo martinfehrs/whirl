@@ -11,33 +11,44 @@ This library provides functions to easily implement LL(1) parsers with a lookahe
 ## Simple Example
 Reading sequential data from an input stream provided by a sensor or a file. The full example can be found in the examples directory.
 
+The EBNF we want to represent is:
+
+end                    = ? virtual end token (not part of the character set) ? ;
+non-zero-decimal-digit = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+decimal-digit          = "0" | non-zero-decimal-digit ;
+whitespace             = " " | "\t" | "\n" ;
+decimal-whole-number   =  ["-"], ( "0" | non-zero-decimal-digit, {decimal-digit} ) ;
+data-entry             = decimal-whole-number, { whitespace };
+data                   = { whitespace }, { data-entry }, end;
+
 ```C++
-auto read_temperature(std::istream& ins, LL1::code_position& pos) // throws unexpected_token
+auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
 {
-    using LL1::sets::digit;
+    auto has_sign = ignore_if(ins, pos, '-');
+    auto val = expect(ins, pos, digit) - '0';
 
-    auto has_sign = LL1::ignore_if(ins, pos, '-');
-    auto val = LL1::expect(ins, pos, digit) - '0';
-
-    while(LL1::is(ins, digit))
-        val = val * 10 + LL1::read(ins, pos) - '0';
+    while(is(ins, digit))
+        val = val * 10 + read(ins, pos) - '0';
 
     return val * (has_sign ? -1 : 1);
 }
 
-auto read_temperatures(std::istream& ins, LL1::code_position& pos) // throws unexpected_token
+auto read_data_entry(std::istream& ins, LL1::code_position& pos)
 {
-    using LL1::sets::space;
+    auto temperature = read_decimal_whole_number(ins, pos);
+    ignore_while(ins, pos, space);
 
+    return temperature;
+}
+
+auto read_data(std::istream& ins, LL1::code_position& pos)
+{
     std::vector<int> temperatures;
 
-    LL1::ignore_while(ins, pos, space);
+    ignore_while(ins, pos, space);
 
-    while(LL1::is(ins, LL1::not_(EOF)))
-    {
-        temperatures.push_back(read_temperature(ins, pos));
-        LL1::ignore_while(ins, pos, space);
-    }
+    while(is(ins, digit) || is(ins, '-'))
+        temperatures.push_back(read_data_entry(ins, pos));
 
     return temperatures;
 }
