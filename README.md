@@ -31,7 +31,7 @@ auto read_decimal_whole_number(std::istream& ins, code_position& pos)
 
     if (is(ins, '0'))
     {
-        ignore(ins);
+        ignore(ins, pos);
     }
     else if (is(ins, digit))
     {
