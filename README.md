@@ -18,9 +18,9 @@ end                    = ? virtual end token (not part of the character set) ? ;
 non-zero-decimal-digit = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 decimal-digit          = "0" | non-zero-decimal-digit ;
 whitespace             = " " | "\t" | "\n" ;
-decimal-whole-number   =  ["-"], ( "0" | non-zero-decimal-digit, {decimal-digit} ) ;
-data-entry             = decimal-whole-number, { whitespace };
-data                   = { whitespace }, { data-entry }, end;
+decimal-whole-number   =  [ "-" ], ( "0" | non-zero-decimal-digit, { decimal-digit } ) ;
+data-entry             = decimal-whole-number, { whitespace } ;
+data                   = { whitespace }, { data-entry }, end ;
 ```
 
 ```C++
