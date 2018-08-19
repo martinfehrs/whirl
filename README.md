@@ -9,7 +9,7 @@ This library provides functions to easily implement LL(1) parsers with a lookahe
 - regular expressions as comparsion objects
 
 ## Simple Example
-Reading sequential data from an input stream provided by a sensor or a file. The full example can be found in the examples directory.
+Reading sequential measurement data from an input stream provided by an input device. The full example can be found in the examples directory.
 
 The EBNF we want to represent is:
 
@@ -27,10 +27,23 @@ data                   = { whitespace }, { data-entry }, end ;
 auto read_decimal_whole_number(std::istream& ins, code_position& pos)
 {
     auto has_sign = ignore_if(ins, pos, '-');
-    auto val = expect(ins, pos, digit) - '0';
+    auto val = 0;
 
-    while(is(ins, digit))
-        val = val * 10 + read(ins, pos) - '0';
+    if (is(ins, '0'))
+    {
+        ignore(ins);
+    }
+    else if (is(ins, digit))
+    {
+        val = read(ins, pos) - '0';
+
+        while (is(ins, digit))
+            val = val * 10 + read(ins, pos) - '0';
+    }
+    else
+    {
+        throw unexpected_input{};
+    }
 
     return val * (has_sign ? -1 : 1);
 }
