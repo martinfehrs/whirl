@@ -1,15 +1,21 @@
 # LL1
-a header only library for implementing LL(1) parsers 
+This is a header only library for implementing LL(1) parsers 
 
-This library provides functions to easily implement LL(1) parsers with a lookahead of 1. There is no unicode support, yet. Only utf-32 is fully supported. For utf-16 only the characters of the BMP are recognized correctly. Supports all single byte encodings.
+Its target is to simplify the parser implementation providing set of higher level functions on top
+of the streaming capabilities of the standard library.
+
+There is no unicode support, yet. Only utf-32 is fully supported. For utf-16 only the characters of
+the BMP are recognized correctly. Supports all single byte encodings.
 
 ## Targets
 - arbitrary lookaheads
 - full unicode support for utf-8 and utf-16
-- regular expressions as comparsion objects
+- an additional parser class template, providing a more object oriented approach
+- functional composition of primitives.
 
 ## Simple Example
-Reading sequential measurement data from an input stream provided by an input device. The full example can be found in the examples directory.
+Reading sequential measurement data from an input stream provided by an input device. The full
+example can be found in the examples directory.
 
 The EBNF we want to represent is:
 
