@@ -562,7 +562,7 @@ namespace LL1
     >
     constexpr bool is_not(TT<T1>& ins, const T2& cmp)
     {
-        return is(ins, not_(cmp));
+        return !is(ins, cmp);
     }
 
 
