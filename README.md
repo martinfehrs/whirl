@@ -1,17 +1,28 @@
 # LL1
-This is a header only library for implementing LL(1) parsers 
+This is a header only library for implementing LL(1) parsers. 
 
-Its target is to simplify the parser implementation providing set of higher level functions on top
-of the streaming capabilities of the standard library.
+Its purpose is to simplify parser implementations providing a set of higher level functions on top
+of the stl's streaming capabilities or compatible APIs.
 
+This library is in an early development stage.
 There is no unicode support, yet. Only utf-32 is fully supported. For utf-16 only the characters of
 the BMP are recognized correctly. Supports all single byte encodings.
 
-## Targets
+## Goals for Version 1
 - arbitrary lookaheads
 - full unicode support for utf-8 and utf-16
-- an additional parser class template, providing a more object oriented approach
 - functional composition of primitives.
+- implicit transformators for reading functions
+- a doxypress generated api documentation
+- further small examples
+- unit tests for all components 
+
+## Long term goals
+- an objectoriented layer on top of the procedural basic layer
+- a rich set of predefined lookahead and reading functions for recurring token sequences
+- support for lexical analysers.
+- some more complex examples.
+
 
 ## Simple Example
 Reading sequential measurement data from an input stream provided by an input device. The full
