@@ -127,11 +127,11 @@ TEST_CASE( "testing is_not function overloads", "[is-not]" )
         input_stream_dummy<wchar_t> ins(L'a');
         input_stream_dummy<wchar_t> ins_eof(std::char_traits<wchar_t>::eof());
 
-        REQUIRE(is(ins,     not_(L'a')) == false);
-        REQUIRE(is(ins,     not_(L'b')) == true );
-        REQUIRE(is(ins,     not_(end )) == true );
-        REQUIRE(is(ins_eof, not_(end )) == false);
-        REQUIRE(is(ins_eof, not_(L'a')) == true );
+        REQUIRE(is_not(ins,     L'a') == false);
+        REQUIRE(is_not(ins,     L'b') == true );
+        REQUIRE(is_not(ins,     end ) == true );
+        REQUIRE(is_not(ins_eof, end ) == false);
+        REQUIRE(is_not(ins_eof, L'a') == true );
     }
 
     SECTION("char16_t tests")
@@ -139,11 +139,11 @@ TEST_CASE( "testing is_not function overloads", "[is-not]" )
         input_stream_dummy<char16_t> ins(u'a');
         input_stream_dummy<char16_t> ins_eof(std::char_traits<char16_t>::eof());
 
-        REQUIRE(is(ins,     not_(u'a')) == false);
-        REQUIRE(is(ins,     not_(u'b')) == true );
-        REQUIRE(is(ins,     not_(end )) == true );
-        REQUIRE(is(ins_eof, not_(end )) == false);
-        REQUIRE(is(ins_eof, not_(u'a')) == true );
+        REQUIRE(is_not(ins,     u'a') == false);
+        REQUIRE(is_not(ins,     u'b') == true );
+        REQUIRE(is_not(ins,     end ) == true );
+        REQUIRE(is_not(ins_eof, end ) == false);
+        REQUIRE(is_not(ins_eof, u'a') == true );
     }
 
     SECTION("char32_t tests")
@@ -151,11 +151,11 @@ TEST_CASE( "testing is_not function overloads", "[is-not]" )
         input_stream_dummy<char32_t> ins(U'a');
         input_stream_dummy<char32_t> ins_eof(std::char_traits<char32_t>::eof());
 
-        REQUIRE(is(ins,     not_(U'a')) == false);
-        REQUIRE(is(ins,     not_(U'b')) == true );
-        REQUIRE(is(ins,     not_(end )) == true );
-        REQUIRE(is(ins_eof, not_(end )) == false);
-        REQUIRE(is(ins_eof, not_(U'a')) == true );
+        REQUIRE(is_not(ins,     U'a') == false);
+        REQUIRE(is_not(ins,     U'b') == true );
+        REQUIRE(is_not(ins,     end ) == true );
+        REQUIRE(is_not(ins_eof, end ) == false);
+        REQUIRE(is_not(ins_eof, U'a') == true );
     }
 }
 
