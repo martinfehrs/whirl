@@ -433,11 +433,12 @@ namespace LL1
         : std::bool_constant<
             std::disjunction_v<
                 std::conditional_t<
-                    is_token_type_v<T2>,
-                    is_compatible_token_type<T1, T2>,
+                    is_character_type_v<T2>,
+                    is_compatible_character_type<T1, T2>,
                     std::false_type
                 >,
-                is_compatible_character_set_type<T1, T2>
+                is_compatible_character_set_type<T1, T2>,
+                is_special_token_type<T2>
             >
         >
     { };
@@ -547,6 +548,21 @@ namespace LL1
         return !input_source_traits<T>::is_end(ins);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 'is_not' overloads
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <
+        template <typename...> typename TT,
+        typename T1,
+        typename T2,
+        typename = std::enable_if_t<is_input_source_type_v<TT<T1>>>,
+        typename = std::enable_if_t<is_compatible_comparison_type_v<T1, T2>>
+    >
+    constexpr bool is_not(TT<T1>& ins, const T2& cmp)
+    {
+        return !is(ins, cmp);
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read' overloads

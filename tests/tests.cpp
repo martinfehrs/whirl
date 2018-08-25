@@ -115,11 +115,11 @@ TEST_CASE( "testing is_not function overloads", "[is-not]" )
         input_stream_dummy<char> ins('a');
         input_stream_dummy<char> ins_eof(std::char_traits<char>::eof());
 
-        REQUIRE(is(ins,     not_('a')) == false);
-        REQUIRE(is(ins,     not_('b')) == true );
-        REQUIRE(is(ins,     not_(end)) == true );
-        REQUIRE(is(ins_eof, not_(end)) == false);
-        REQUIRE(is(ins_eof, not_('a')) == true );
+        REQUIRE(is_not(ins,     'a') == false);
+        REQUIRE(is_not(ins,     'b') == true );
+        REQUIRE(is_not(ins,     end) == true );
+        REQUIRE(is_not(ins_eof, end) == false);
+        REQUIRE(is_not(ins_eof, 'a') == true );
     }
 
     SECTION("wchar_t tests")
