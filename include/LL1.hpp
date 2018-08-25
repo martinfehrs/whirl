@@ -191,15 +191,15 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename... Ts>
-    struct negated_token_set;
+    struct negated_character_set;
 
     template <typename... Ts>
-    struct token_set
+    struct character_set
     {
     
     public:
 
-        explicit constexpr token_set(Ts... toks)
+        explicit constexpr character_set(Ts... toks)
             : toks{ toks... }
         { }
 
@@ -224,7 +224,7 @@ namespace LL1
         template <size_t... I>
         constexpr auto negate(std::index_sequence<I...>) const
         {
-            return negated_token_set<Ts...>{ std::get<I>(this->toks)... };
+            return negated_character_set<Ts...>{ std::get<I>(this->toks)... };
         }
 
         template <typename T, size_t... I>
@@ -239,12 +239,12 @@ namespace LL1
 
 
     template <typename... Ts>
-    struct negated_token_set
+    struct negated_character_set
     {
 
     public:
 
-        explicit constexpr negated_token_set(Ts... toks)
+        explicit constexpr negated_character_set(Ts... toks)
             : toks{ toks... }
         { }
 
@@ -269,7 +269,7 @@ namespace LL1
         template <size_t... I>
         constexpr auto negate(std::index_sequence<I...>) const
         {
-            return token_set<Ts...>{ std::get<I>(this->toks)... };
+            return character_set<Ts...>{ std::get<I>(this->toks)... };
         }
 
         template <typename T, size_t... I>
@@ -288,32 +288,32 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename T>
-    struct is_token_set_type : std::false_type
+    struct is_character_set_type : std::false_type
     { };
 
     template <typename... Ts>
-    struct is_token_set_type<token_set<Ts...>> : std::true_type
+    struct is_character_set_type<character_set<Ts...>> : std::true_type
     { };
 
     template <typename... Ts>
-    struct is_token_set_type<negated_token_set<Ts...>> : std::true_type
+    struct is_character_set_type<negated_character_set<Ts...>> : std::true_type
     { };
 
     template <typename T1, typename T2, typename = void>
-    struct is_compatible_token_set_type : std::false_type
+    struct is_compatible_character_set_type : std::false_type
     { };
 
     template <typename T1, typename T2>
-    struct is_compatible_token_set_type<
+    struct is_compatible_character_set_type<
         T1, T2, std::void_t<decltype(std::declval<T2>().contains(std::declval<T1>()))>
     >: std::true_type
     { };
 
     template <typename T>
-    constexpr auto is_token_set_type_v = is_token_set_type<T>::value;
+    constexpr auto is_character_set_type_v = is_character_set_type<T>::value;
 
     template <typename T1, typename T2>
-    constexpr auto is_compatible_token_set_type_v = is_compatible_token_set_type<T1, T2>::value;
+    constexpr auto is_compatible_character_set_type_v = is_compatible_character_set_type<T1, T2>::value;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -343,11 +343,11 @@ namespace LL1
 
     namespace sets
     {
-        constexpr token_set space{ ' ', '\t', '\n' };
+        constexpr character_set space{ ' ', '\t', '\n' };
 
-        constexpr token_set blank{' ', '\t'};
+        constexpr character_set blank{' ', '\t'};
 
-        constexpr token_set digit{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+        constexpr character_set digit{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     }
 
 
@@ -386,7 +386,7 @@ namespace LL1
     template <
         template<typename...> typename TT,
         typename... Ts,
-        typename = std::enable_if_t<is_token_set_type_v<TT<Ts...>>>,
+        typename = std::enable_if_t<is_character_set_type_v<TT<Ts...>>>,
         typename = std::enable_if_t<are_token_types_v<Ts...>>>
     constexpr auto not_(const TT<Ts...>& set)
     {
@@ -401,7 +401,7 @@ namespace LL1
     template <typename... Ts, typename = std::enable_if_t<are_character_types_v<Ts...>>>
     constexpr auto one_of(Ts... toks)
     {
-        return token_set{ toks... };
+        return character_set{ toks... };
     }
 
     template <typename... Ts, typename = std::enable_if_t<are_character_types_v<Ts...>>>
@@ -424,7 +424,7 @@ namespace LL1
                     is_compatible_token_type<T1, T2>,
                     std::false_type
                 >,
-                is_compatible_token_set_type<T1, T2>
+                is_compatible_character_set_type<T1, T2>
             >
         >
     { };
@@ -509,7 +509,7 @@ namespace LL1
         typename T1,
         typename T2,
         typename = std::enable_if_t<is_input_source_type_v<TT<T1>>>,
-        typename = std::enable_if_t<is_compatible_token_set_type_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_character_set_type_v<T1, T2>>
     >
     constexpr auto is(TT<T1>& ins, const T2& cmp)
     {
