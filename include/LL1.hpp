@@ -665,10 +665,8 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
-        template <typename...> typename TT,
         typename T,
-        typename = std::enable_if_t<is_input_source_type_v<TT<T>>>,
-        typename = std::enable_if_t<are_token_types_v<T>>
+        typename = std::enable_if_t<is_input_source_type_v<T>>,
     >
         constexpr void ignore(TT<T>& ins)
     {
@@ -676,12 +674,10 @@ namespace LL1
     }
 
     template <
-        template <typename...> typename TT,
         typename T,
-        typename = std::enable_if_t<is_input_source_type_v<TT<T>>>,
-        typename = std::enable_if_t<are_token_types_v<T>>
+        typename = std::enable_if_t<is_input_source_type_v<T>>,
     >
-    constexpr void ignore(TT<T>& ins, code_position& pos)
+    constexpr void ignore(T& ins, code_position& pos)
     {
         read(ins, pos);
     }
