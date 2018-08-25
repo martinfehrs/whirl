@@ -84,7 +84,7 @@ namespace LL1
 
 
     struct end_token {};
-    struct any_token {};
+    struct any_character {};
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +113,7 @@ namespace LL1
         : std::bool_constant<
             std::disjunction_v<
                 std::is_same<T, end_token>,
-                std::is_same<T, any_token>
+                std::is_same<T, any_character>
             >
         >
     { };
@@ -334,7 +334,7 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     constexpr end_token end;
-    constexpr any_token any;
+    constexpr any_character character;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -388,10 +388,10 @@ namespace LL1
 
     constexpr auto not_(end_token)
     {
-        return any;
+        return character;
     }
 
-    constexpr auto not_(any_token)
+    constexpr auto not_(any_character)
     {
         return end;
     }
@@ -542,7 +542,7 @@ namespace LL1
         typename T,
         typename = std::enable_if_t<is_input_source_type_v<T>>
     >
-    constexpr auto is(T& ins, any_token)
+    constexpr auto is(T& ins, any_character)
     {
         return !input_source_traits<T>::is_end(ins);
     }

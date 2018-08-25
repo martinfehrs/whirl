@@ -79,7 +79,7 @@ int main()
     }
     catch(unexpected_input)
     {
-        if (is(ifs, any))
+        if (is(ifs, character))
         {
             std::cerr << "unexpeced token "
                 << static_cast<char>(read(ifs))

@@ -60,13 +60,13 @@ TEST_CASE( "testing is function overloads", "[is]" )
         input_stream_dummy<char> ins('a');
         input_stream_dummy<char> ins_eof(std::char_traits<char>::eof());
 
-        REQUIRE(is(ins,     'a') == true );
-        REQUIRE(is(ins,     'b') == false);
-        REQUIRE(is(ins,     any) == true );
-        REQUIRE(is(ins,     end) == false);
-        REQUIRE(is(ins_eof, 'a') == false);
-        REQUIRE(is(ins_eof, any) == false);
-        REQUIRE(is(ins_eof, end) == true );
+        REQUIRE(is(ins,     'a'      ) == true );
+        REQUIRE(is(ins,     'b'      ) == false);
+        REQUIRE(is(ins,     character) == true );
+        REQUIRE(is(ins,     end      ) == false);
+        REQUIRE(is(ins_eof, 'a'      ) == false);
+        REQUIRE(is(ins_eof, character) == false);
+        REQUIRE(is(ins_eof, end      ) == true );
     }
 
     SECTION("wchar_t tests")
@@ -74,13 +74,13 @@ TEST_CASE( "testing is function overloads", "[is]" )
         input_stream_dummy<wchar_t> ins(L'a');
         input_stream_dummy<wchar_t> ins_eof(std::char_traits<wchar_t>::eof());
 
-        REQUIRE(is(ins,     L'a') == true );
-        REQUIRE(is(ins,     L'b') == false);
-        REQUIRE(is(ins,     any ) == true );
-        REQUIRE(is(ins,     end ) == false);
-        REQUIRE(is(ins_eof, L'a') == false);
-        REQUIRE(is(ins_eof, any ) == false);
-        REQUIRE(is(ins_eof, end ) == true );
+        REQUIRE(is(ins,     L'a'     ) == true );
+        REQUIRE(is(ins,     L'b'     ) == false);
+        REQUIRE(is(ins,     character) == true );
+        REQUIRE(is(ins,     end      ) == false);
+        REQUIRE(is(ins_eof, L'a'     ) == false);
+        REQUIRE(is(ins_eof, character) == false);
+        REQUIRE(is(ins_eof, end      ) == true );
     }
 
     SECTION("char16_t tests")
