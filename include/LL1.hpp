@@ -157,6 +157,16 @@ namespace LL1
     { };
 
     template <typename T1, typename T2>
+    struct is_compatible_character_type
+        : std::bool_constant<
+        std::conjunction_v<
+        are_character_types<T1, T2>,
+        equality_comparable<T1, T2>
+        >
+        >
+    { };
+
+    template <typename T1, typename T2>
     struct is_compatible_token_type
         : std::bool_constant<
             std::conjunction_v<
@@ -181,6 +191,9 @@ namespace LL1
 
     template <typename... Ts>
     constexpr auto are_token_types_v = are_token_types<Ts...>::value;
+
+    template <typename T1, typename T2>
+    constexpr auto is_compatible_character_type_v = is_compatible_character_type<T1, T2>::value;
 
     template <typename T1, typename T2>
     constexpr auto is_compatible_token_type_v = is_compatible_token_type<T1, T2>::value;
@@ -497,7 +510,7 @@ namespace LL1
         typename T1,
         typename T2,
         typename = std::enable_if_t<is_input_source_type_v<TT<T1>>>,
-        typename = std::enable_if_t<is_compatible_token_type_v<T1, T2>>
+        typename = std::enable_if_t<is_compatible_character_type_v<T1, T2>>
     >
     constexpr auto is(TT<T1>& ins, T2 cmp)
     {
@@ -657,7 +670,7 @@ namespace LL1
         typename = std::enable_if_t<is_input_source_type_v<TT<T>>>,
         typename = std::enable_if_t<are_token_types_v<T>>
     >
-    constexpr void ignore(TT<T>& ins)
+        constexpr void ignore(TT<T>& ins)
     {
         read(ins);
     }
