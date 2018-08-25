@@ -181,16 +181,16 @@ TEST_CASE( "testing is_one_of function overloads", "[is-one-of]" )
         input_stream_dummy<char> ins('a');
         input_stream_dummy<char> ins_eof(std::char_traits<char>::eof());
 
-        REQUIRE(is(ins,     one_of('a')) == true );
-        REQUIRE(is(ins,     one_of('b')) == false);
+        REQUIRE(is_one_of(ins,     'a'     ) == true );
+        REQUIRE(is_one_of(ins,     'b'     ) == false);
 
-        REQUIRE(is(ins_eof, one_of('a')) == false);
+        REQUIRE(is_one_of(ins_eof, 'a'     ) == false);
         
-        REQUIRE(is(ins,     one_of('a', 'b')) == true );
-        REQUIRE(is(ins,     one_of('b', 'a')) == true );
-        REQUIRE(is(ins,     one_of('b', 'c')) == false);
+        REQUIRE(is_one_of(ins,     'a', 'b') == true );
+        REQUIRE(is_one_of(ins,     'b', 'a') == true );
+        REQUIRE(is_one_of(ins,     'b', 'c') == false);
 
-        REQUIRE(is(ins_eof, one_of('a', 'b')) == false);
+        REQUIRE(is_one_of(ins_eof, 'a', 'b') == false);
     }
 
     SECTION("wchar_t tests")
@@ -198,16 +198,16 @@ TEST_CASE( "testing is_one_of function overloads", "[is-one-of]" )
         input_stream_dummy<wchar_t> ins(L'a');
         input_stream_dummy<wchar_t> ins_eof(std::char_traits<wchar_t>::eof());
 
-        REQUIRE(is(ins,     one_of(L'a')) == true );
-        REQUIRE(is(ins,     one_of(L'b')) == false);
+        REQUIRE(is_one_of(ins,     L'a'      ) == true );
+        REQUIRE(is_one_of(ins,     L'b'      ) == false);
 
-        REQUIRE(is(ins_eof, one_of(L'a')) == false);
+        REQUIRE(is_one_of(ins_eof, L'a'      ) == false);
+        
+        REQUIRE(is_one_of(ins,     L'a', L'b') == true );
+        REQUIRE(is_one_of(ins,     L'b', L'a') == true );
+        REQUIRE(is_one_of(ins,     L'b', L'c') == false);
 
-        REQUIRE(is(ins,     one_of(L'a', L'b')) == true );
-        REQUIRE(is(ins,     one_of(L'b', L'a')) == true );
-        REQUIRE(is(ins,     one_of(L'b', L'c')) == false);
-
-        REQUIRE(is(ins_eof, one_of(L'a', L'b')) == false);
+        REQUIRE(is_one_of(ins_eof, L'a', L'b') == false);
     }
 
     SECTION("char16_t tests")
@@ -215,16 +215,16 @@ TEST_CASE( "testing is_one_of function overloads", "[is-one-of]" )
         input_stream_dummy<char16_t> ins(u'a');
         input_stream_dummy<char16_t> ins_eof(std::char_traits<char16_t>::eof());
 
-        REQUIRE(is(ins,     one_of(u'a')) == true );
-        REQUIRE(is(ins,     one_of(u'b')) == false);
+        REQUIRE(is_one_of(ins,     u'a'      ) == true );
+        REQUIRE(is_one_of(ins,     u'b'      ) == false);
 
-        REQUIRE(is(ins_eof, one_of(u'a')) == false);
+        REQUIRE(is_one_of(ins_eof, u'a'      ) == false);
+        
+        REQUIRE(is_one_of(ins,     u'a', u'b') == true );
+        REQUIRE(is_one_of(ins,     u'b', u'a') == true );
+        REQUIRE(is_one_of(ins,     u'b', u'c') == false);
 
-        REQUIRE(is(ins,     one_of(u'a', u'b')) == true );
-        REQUIRE(is(ins,     one_of(u'b', u'a')) == true );
-        REQUIRE(is(ins,     one_of(u'b', u'c')) == false);
-
-        REQUIRE(is(ins_eof, one_of(u'a', u'b')) == false);
+        REQUIRE(is_one_of(ins_eof, u'a', u'b') == false);
     }
 
     SECTION("char32_t tests")
@@ -232,16 +232,16 @@ TEST_CASE( "testing is_one_of function overloads", "[is-one-of]" )
         input_stream_dummy<char32_t> ins(U'a');
         input_stream_dummy<char32_t> ins_eof(std::char_traits<char32_t>::eof());
 
-        REQUIRE(is(ins,     one_of(U'a')) == true );
-        REQUIRE(is(ins,     one_of(U'b')) == false);
+        REQUIRE(is_one_of(ins,     U'a'      ) == true );
+        REQUIRE(is_one_of(ins,     U'b'      ) == false);
 
-        REQUIRE(is(ins_eof, one_of(U'a')) == false);
+        REQUIRE(is_one_of(ins_eof, U'a'      ) == false);
+        
+        REQUIRE(is_one_of(ins,     U'a', U'b') == true );
+        REQUIRE(is_one_of(ins,     U'b', U'a') == true );
+        REQUIRE(is_one_of(ins,     U'b', U'c') == false);
 
-        REQUIRE(is(ins,     one_of(U'a', U'b')) == true );
-        REQUIRE(is(ins,     one_of(U'b', U'a')) == true );
-        REQUIRE(is(ins,     one_of(U'b', U'c')) == false);
-
-        REQUIRE(is(ins_eof, one_of(U'a', U'b')) == false);
+        REQUIRE(is_one_of(ins_eof, U'a', U'b') == false);
     }
 }
 
@@ -252,16 +252,16 @@ TEST_CASE( "testing is_none_of function overloads", "[is-none-of]" )
         input_stream_dummy<char> ins('a');
         input_stream_dummy<char> ins_eof(std::char_traits<char>::eof());
 
-        REQUIRE(is(ins,     none_of('a')) == false);
-        REQUIRE(is(ins,     none_of('b')) == true );
+        REQUIRE(is_none_of(ins,     'a'     ) == false);
+        REQUIRE(is_none_of(ins,     'b'     ) == true );
 
-        REQUIRE(is(ins_eof, none_of('a')) == true );
+        REQUIRE(is_none_of(ins_eof, 'a'     ) == true );
 
-        REQUIRE(is(ins,     none_of('a', 'b')) == false);
-        REQUIRE(is(ins,     none_of('b', 'a')) == false);
-        REQUIRE(is(ins,     none_of('b', 'c')) == true );
+        REQUIRE(is_none_of(ins,     'a', 'b') == false);
+        REQUIRE(is_none_of(ins,     'b', 'a') == false);
+        REQUIRE(is_none_of(ins,     'b', 'c') == true );
 
-        REQUIRE(is(ins_eof, none_of('a', 'b')) == true );
+        REQUIRE(is_none_of(ins_eof, 'a', 'b') == true );
     }
 
     SECTION("wchar_t tests")
@@ -269,16 +269,16 @@ TEST_CASE( "testing is_none_of function overloads", "[is-none-of]" )
         input_stream_dummy<wchar_t> ins(L'a');
         input_stream_dummy<wchar_t> ins_eof(std::char_traits<wchar_t>::eof());
 
-        REQUIRE(is(ins,     none_of(L'a')) == false);
-        REQUIRE(is(ins,     none_of(L'b')) == true );
+        REQUIRE(is_none_of(ins,     L'a'      ) == false);
+        REQUIRE(is_none_of(ins,     L'b'      ) == true );
 
-        REQUIRE(is(ins_eof, none_of(L'a')) == true );
+        REQUIRE(is_none_of(ins_eof, L'a'      ) == true );
 
-        REQUIRE(is(ins,     none_of(L'a', L'b')) == false);
-        REQUIRE(is(ins,     none_of(L'b', L'a')) == false);
-        REQUIRE(is(ins,     none_of(L'b', L'c')) == true );
+        REQUIRE(is_none_of(ins,     L'a', L'b') == false);
+        REQUIRE(is_none_of(ins,     L'b', L'a') == false);
+        REQUIRE(is_none_of(ins,     L'b', L'c') == true );
 
-        REQUIRE(is(ins_eof, none_of(L'a', L'b')) == true );
+        REQUIRE(is_none_of(ins_eof, L'a', L'b') == true );
     }
 
     SECTION("char16_t tests")
@@ -286,16 +286,16 @@ TEST_CASE( "testing is_none_of function overloads", "[is-none-of]" )
         input_stream_dummy<char16_t> ins(u'a');
         input_stream_dummy<char16_t> ins_eof(std::char_traits<char16_t>::eof());
 
-        REQUIRE(is(ins,     none_of(u'a')) == false);
-        REQUIRE(is(ins,     none_of(u'b')) == true );
+        REQUIRE(is_none_of(ins,     u'a'      ) == false);
+        REQUIRE(is_none_of(ins,     u'b'      ) == true );
 
-        REQUIRE(is(ins_eof, none_of(u'a')) == true );
+        REQUIRE(is_none_of(ins_eof, u'a'      ) == true );
 
-        REQUIRE(is(ins,     none_of(u'a', u'b')) == false);
-        REQUIRE(is(ins,     none_of(u'b', u'a')) == false);
-        REQUIRE(is(ins,     none_of(u'b', u'c')) == true );
+        REQUIRE(is_none_of(ins,     u'a', u'b') == false);
+        REQUIRE(is_none_of(ins,     u'b', u'a') == false);
+        REQUIRE(is_none_of(ins,     u'b', u'c') == true );
 
-        REQUIRE(is(ins_eof, none_of(u'a', u'b')) == true );
+        REQUIRE(is_none_of(ins_eof, u'a', u'b') == true );
     }
 
     SECTION("char32_t tests")
@@ -303,16 +303,16 @@ TEST_CASE( "testing is_none_of function overloads", "[is-none-of]" )
         input_stream_dummy<char32_t> ins(U'a');
         input_stream_dummy<char32_t> ins_eof(std::char_traits<char32_t>::eof());
 
-        REQUIRE(is(ins,     none_of(U'a')) == false);
-        REQUIRE(is(ins,     none_of(U'b')) == true );
+        REQUIRE(is_none_of(ins,     U'a'      ) == false);
+        REQUIRE(is_none_of(ins,     U'b'      ) == true );
 
-        REQUIRE(is(ins_eof, none_of(U'a')) == true );
+        REQUIRE(is_none_of(ins_eof, U'a'      ) == true );
 
-        REQUIRE(is(ins,     none_of(U'a', U'b')) == false);
-        REQUIRE(is(ins,     none_of(U'b', U'a')) == false);
-        REQUIRE(is(ins,     none_of(U'b', U'c')) == true );
+        REQUIRE(is_none_of(ins,     U'a', U'b') == false);
+        REQUIRE(is_none_of(ins,     U'b', U'a') == false);
+        REQUIRE(is_none_of(ins,     U'b', U'c') == true );
 
-        REQUIRE(is(ins_eof, none_of(U'a', U'b')) == true );
+        REQUIRE(is_none_of(ins_eof, U'a', U'b') == true );
     }
 }
 

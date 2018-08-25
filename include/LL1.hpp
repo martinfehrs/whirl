@@ -565,6 +565,39 @@ namespace LL1
         return is(ins, not_(cmp));
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 'is_one_of' overloads
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <
+        template <typename...> typename TT,
+        typename T1,
+        typename... Ts,
+        typename = std::enable_if_t<is_input_source_type_v<TT<T1>>>,
+        typename = std::enable_if_t<std::conjunction_v<is_compatible_comparison_type<T1, Ts>...>>
+    >
+    constexpr bool is_one_of(TT<T1>& ins, const Ts&... cmp)
+    {
+        return (is(ins, cmp) || ...);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 'is_none_of' overloads
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <
+        template <typename...> typename TT,
+        typename T1,
+        typename... Ts,
+        typename = std::enable_if_t<is_input_source_type_v<TT<T1>>>,
+        typename = std::enable_if_t<std::conjunction_v<is_compatible_comparison_type<T1, Ts>...>>
+    >
+    constexpr bool is_none_of(TT<T1>& ins, const Ts&... cmp)
+    {
+        return !is_one_of(ins, cmp...);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
