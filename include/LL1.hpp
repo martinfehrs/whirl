@@ -666,16 +666,16 @@ namespace LL1
 
     template <
         typename T,
-        typename = std::enable_if_t<is_input_source_type_v<T>>,
+        typename = std::enable_if_t<is_input_source_type_v<T>>
     >
-        constexpr void ignore(TT<T>& ins)
+        constexpr void ignore(T& ins)
     {
         read(ins);
     }
 
     template <
         typename T,
-        typename = std::enable_if_t<is_input_source_type_v<T>>,
+        typename = std::enable_if_t<is_input_source_type_v<T>>
     >
     constexpr void ignore(T& ins, code_position& pos)
     {
