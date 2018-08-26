@@ -706,9 +706,34 @@ namespace LL1
         read(ins, pos);
     }
 
+    template <
+        typename T1,
+        typename T2,
+        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+    >
+    constexpr auto next(T1& ins, const T2& cmp)
+    {
+        if(is(ins, not_(cmp)))
+            throw unexpected_input{};
+        
+        return read(ins);
+    }
+
+    template <
+        typename T1,
+        typename T2,
+        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+    >
+    constexpr auto next(T1& ins, code_position& pos, const T2& cmp)
+    {
+        if(is(ins, not_(cmp)))
+            throw unexpected_input{};
+
+        return read(ins, pos);
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'ignore_if' overloads
+    // 'next_if' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
@@ -733,7 +758,7 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'ignore_while' overloads
+    // 'next_while' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
@@ -771,31 +796,4 @@ namespace LL1
 
         return count;
     }
-
-    template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
-    >
-    constexpr auto next(T1& ins, const T2& cmp)
-    {
-        if(is(ins, not_(cmp)))
-            throw unexpected_input{};
-        
-        return read(ins);
-    }
-
-    template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
-    >
-    constexpr auto next(T1& ins, code_position& pos, const T2& cmp)
-    {
-        if(is(ins, not_(cmp)))
-            throw unexpected_input{};
-
-        return read(ins, pos);
-    }
-
 }
