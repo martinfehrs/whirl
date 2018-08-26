@@ -20,12 +20,12 @@ using namespace LL1::sets;
 
 auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
 {
-    auto has_sign = ignore_if(ins, pos, '-');
+    auto has_sign = next_if(ins, pos, '-');
     auto val = 0;
 
     if (is(ins, '0'))
     {
-        ignore(ins, pos);
+        next(ins, pos);
     }
     else if (is(ins, digit))
     {
@@ -45,7 +45,7 @@ auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
 auto read_data_entry(std::istream& ins, LL1::code_position& pos)
 {
     auto temperature = read_decimal_whole_number(ins, pos);
-    ignore_while(ins, pos, space);
+    next_while(ins, pos, space);
 
     return temperature;
 }
@@ -54,7 +54,7 @@ auto read_data(std::istream& ins, LL1::code_position& pos)
 {
     std::vector<int> temperatures;
 
-    ignore_while(ins, pos, space);
+    next_while(ins, pos, space);
 
     while(is(ins, digit) || is(ins, '-'))
         temperatures.push_back(read_data_entry(ins, pos));

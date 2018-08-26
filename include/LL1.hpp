@@ -685,14 +685,14 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'ignore' overloads
+    // 'next' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
         typename T,
         typename = std::enable_if_t<is_input_source_type_v<T>>
     >
-        constexpr void ignore(T& ins)
+        constexpr void next(T& ins)
     {
         read(ins);
     }
@@ -701,7 +701,7 @@ namespace LL1
         typename T,
         typename = std::enable_if_t<is_input_source_type_v<T>>
     >
-    constexpr void ignore(T& ins, code_position& pos)
+    constexpr void next(T& ins, code_position& pos)
     {
         read(ins, pos);
     }
@@ -716,9 +716,9 @@ namespace LL1
         typename T2,
         typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
     >
-    constexpr auto ignore_if(T1& ins, const T2& cmp)
+    constexpr auto next_if(T1& ins, const T2& cmp)
     {
-        return is(ins, cmp) ? ignore(ins), true : false;
+        return is(ins, cmp) ? next(ins), true : false;
     }
 
     template <
@@ -726,9 +726,9 @@ namespace LL1
         typename T2,
         typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
     >
-    constexpr auto ignore_if(T1& ins, code_position& pos, const T2& cmp)
+    constexpr auto next_if(T1& ins, code_position& pos, const T2& cmp)
     {
-        return is(ins, cmp) ? ignore(ins, pos), true : false;
+        return is(ins, cmp) ? next(ins, pos), true : false;
     }
 
 
@@ -741,7 +741,7 @@ namespace LL1
         typename T2,
         typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
     >
-    constexpr auto ignore_while(T1& ins, const T2& cmp)
+    constexpr auto next_while(T1& ins, const T2& cmp)
     {
         unsigned count = 0;
 
@@ -759,29 +759,25 @@ namespace LL1
         typename T2,
         typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
     >
-    constexpr auto ignore_while(T1& ins, code_position& pos, const T2& cmp)
+    constexpr auto next_while(T1& ins, code_position& pos, const T2& cmp)
     {
         unsigned count = 0;
 
         while(is(ins, cmp))
         {
-            ignore(ins, pos);
+            next(ins, pos);
             count++;
         }
 
         return count;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'expect' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
     template <
         typename T1,
         typename T2,
         typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
     >
-    constexpr auto expect(T1& ins, const T2& cmp)
+    constexpr auto next(T1& ins, const T2& cmp)
     {
         if(is(ins, not_(cmp)))
             throw unexpected_input{};
@@ -794,7 +790,7 @@ namespace LL1
         typename T2,
         typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
     >
-    constexpr auto expect(T1& ins, code_position& pos, const T2& cmp)
+    constexpr auto next(T1& ins, code_position& pos, const T2& cmp)
     {
         if(is(ins, not_(cmp)))
             throw unexpected_input{};
