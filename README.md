@@ -1,5 +1,6 @@
-# whirl++
-This is a header only library for implementing LL(1) parsers. 
+![whirl++](https://github.com/martinkal82/whirl-plus-plus/blob/master/assets/images/logo.svg)
+
+_a header only library for implementing LL(1) parsers_. 
 
 Its purpose is to simplify parser implementations providing a set of higher level functions on top
 of the stl's streaming capabilities or compatible APIs.
