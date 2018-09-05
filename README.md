@@ -1,5 +1,4 @@
-![whirl++](https://github.com/martinkal82/whirl-plus-plus/blob/master/assets/images/logo.svg)
-
+![whirl++](https://github.com/martinkal82/whirl-plus-plus/blob/master/assets/images/logo.svg)<br/>
 _a header only library for implementing LL(1) parsers_. 
 
 Its purpose is to simplify parser implementations providing a set of higher level functions on top
