@@ -1,4 +1,4 @@
-# LL1
+# whirl++
 This is a header only library for implementing LL(1) parsers. 
 
 Its purpose is to simplify parser implementations providing a set of higher level functions on top
