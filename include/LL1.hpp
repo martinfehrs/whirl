@@ -428,6 +428,16 @@ namespace LL1
     // comparison type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    template <typename T>
+    struct is_comparison_type
+        : std::bool_constant<
+            std::disjunction_v<
+                is_token_type<T>,
+                is_character_set_type<T>
+            >
+        >
+    { };
+
     template <typename T1, typename T2>
     struct is_compatible_comparison_type
         : std::bool_constant<
@@ -442,6 +452,9 @@ namespace LL1
             >
         >
     { };
+
+    template <typename T>
+    constexpr auto is_comparison_type_v = is_comparison_type<T>::value;
 
     template <typename T1, typename T2>
     constexpr auto is_compatible_comparison_type_v = is_compatible_comparison_type<T1, T2>::value;
@@ -497,15 +510,24 @@ namespace LL1
         : std::bool_constant<is_input_source_trait_class_type<input_source_traits<T>>::value>
     { };
 
+    template <typename T1, typename T2, typename = void>
+    struct is_compatible_input_source_type : std::false_type {};
+
     template <typename T1, typename T2>
+    struct is_compatible_input_source_type<T1, T2, std::enable_if_t<is_input_source_type<T1>::value>>
+	: is_compatible_comparison_type<typename input_source_traits<T1>::char_type, T2>
+    { };
+
+    /*
+    template <typename T1, typename T2, typename T3 = typename input_source_traits<T1>::char_type>
     struct is_compatible_input_source_type
-        : std::bool_constant<
-            std::conjunction_v<
-                is_input_source_type<T1>,
-                is_compatible_comparison_type<typename input_source_traits<T1>::char_type, T2>
-            >
+        : std::conditional_t<
+            is_input_source_type<T1>::value,
+            is_compatible_comparison_type<T3, T2>,
+            std::false_type
         >
     { };
+    */
 
     template <typename T1>
     constexpr auto is_input_source_type_v = is_input_source_type<T1>::value;
@@ -513,6 +535,147 @@ namespace LL1
     template <typename T1, typename T2>
     constexpr auto is_compatible_input_source_type_v =
         is_compatible_input_source_type<T1, T2>::value;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // bound functors
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T1>
+    struct bound_is
+    {
+
+    public:
+
+        explicit constexpr bound_is(T1 cmp)
+            : cmp{cmp}
+        { }
+
+        template <
+            typename T2,
+            typename = std::enable_if_t<is_compatible_input_source_type_v<T2, T1>>
+        >
+        constexpr auto operator()(T2& ins)
+        {
+            return is(ins, this->cmp);
+        }
+
+    private:
+
+        T1 cmp;
+
+    };
+
+    template <typename T1>
+    struct bound_is_not
+    {
+
+    public:
+
+        explicit constexpr bound_is_not(T1 cmp)
+            : cmp{cmp}
+        { }
+
+        template <
+            typename T2,
+            typename = std::enable_if_t<is_compatible_input_source_type_v<T2, T1>>
+        >
+        constexpr auto operator()(T2& ins)
+        {
+            return is_not(ins, this->cmp);
+        }
+
+    private:
+
+        T1 cmp;
+
+    };
+
+    template <typename... Ts>
+    struct bound_is_one_of
+    {
+
+    public:
+
+        explicit constexpr bound_is_one_of(const Ts&... cmp)
+            : cmp{cmp...}
+        {
+	}
+
+        template <
+            typename T,
+            typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<T, Ts>...>>
+        >
+        constexpr auto operator()(T& ins)
+        {
+            return (*this)(ins, std::index_sequence_for<Ts...>{});
+        }
+
+    private:
+
+        template <
+            typename T,
+            std::size_t... I,
+            typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<T, Ts>...>>
+        >
+        constexpr auto operator()(T& ins, std::index_sequence<I...>)
+        {
+            return is_one_of(ins, std::get<I>(this->cmp)...);
+        }
+
+        std::tuple<Ts...> cmp;
+
+    };
+
+    template <typename... Ts>
+    struct bound_is_none_of
+    {
+
+    public:
+
+        explicit constexpr bound_is_none_of(Ts... cmp)
+            : cmp{cmp...}
+        { }
+
+        template <
+            typename T,
+            typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<T, Ts>...>>
+        >
+        constexpr auto operator()(T& ins)
+        {
+            return (*this)(ins, std::index_sequence_for<Ts...>{});
+        }
+
+    private:
+
+        template <
+            typename T,
+            std::size_t... I,
+            typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<T, Ts>...>>
+        >
+        constexpr auto operator()(T& ins, std::index_sequence<I...>)
+        {
+            return is_none_of(ins, std::get<I>(this->cmp)...);
+        }
+
+        std::tuple<Ts...> cmp;
+
+    };
+
+    template <typename T>
+    struct is_bound_functor;
+
+    template <template <typename...> typename TT, typename... Ts>
+    struct is_bound_functor<TT<Ts...>>
+        : std::bool_constant<
+            std::disjunction_v<
+                std::is_same<TT<Ts...>, bound_is<Ts...>>,
+                std::is_same<TT<Ts...>, bound_is_not<Ts...>>,
+                std::is_same<TT<Ts...>, bound_is_one_of<Ts...>>,
+                std::is_same<TT<Ts...>, bound_is_none_of<Ts...>>
+            >
+        >
+    { };
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is' overloads
@@ -535,6 +698,14 @@ namespace LL1
             return !input_source_traits<T1>::is_end(ins);
     }
 
+    template <
+        typename T,
+        typename = std::enable_if_t<is_comparison_type_v<T>>
+    >
+    constexpr auto is(const T& cmp)
+    {
+        return bound_is{ cmp };
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is_not' overloads
@@ -548,6 +719,15 @@ namespace LL1
     constexpr bool is_not(T1& ins, const T2& cmp)
     {
         return !is(ins, cmp);
+    }
+
+    template <
+        typename T,
+        typename = std::enable_if_t<is_comparison_type_v<T>>
+    >
+    constexpr auto is_not(const T& cmp)
+    {
+        return bound_is_not{ cmp };
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -564,6 +744,14 @@ namespace LL1
         return (is(ins, cmp) || ...);
     }
 
+    template <
+        typename... Ts,
+        typename = std::enable_if_t<std::conjunction_v<is_comparison_type<Ts>...>>
+    >
+    constexpr auto is_one_of(const Ts&... cmp)
+    {
+        return bound_is_one_of<Ts...>{ cmp... };
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is_none_of' overloads
@@ -579,6 +767,14 @@ namespace LL1
         return !is_one_of(ins, cmp...);
     }
 
+    template <
+        typename... Ts,
+        typename = std::enable_if_t<std::conjunction_v<is_comparison_type<Ts>...>>
+    >
+    constexpr auto is_none_of(const Ts&... cmp)
+    {
+        return bound_is_none_of<Ts...>{ cmp... };
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read' overloads
