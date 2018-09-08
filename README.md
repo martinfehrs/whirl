@@ -1,8 +1,8 @@
-# LL1
-This is a header only library for implementing LL(1) parsers. 
+![whirl++](assets/images/logo.svg)<br/>
+_a header only library for implementing LL(1) parsers_. 
 
 Its purpose is to simplify parser implementations providing a set of higher level functions on top
-of the stl's streaming capabilities or compatible APIs.
+of the stl's streaming capabilities or compatible APIs. It can be used as a more verbose but better readable alternative to regular expressions.
 
 This library is in an early development stage.
 There is no unicode support, yet. Only utf-32 is fully supported. For utf-16 only the characters of

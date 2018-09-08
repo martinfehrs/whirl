@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="35.451355mm"
+   height="10.994578mm"
+   viewBox="0 0 35.451357 10.994578"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="logo.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.979899"
+     inkscape:cx="72.628288"
+     inkscape:cy="-77.824325"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     fit-margin-top="1"
+     fit-margin-right="1"
+     fit-margin-bottom="1"
+     fit-margin-left="1"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-26.299882,-29.764981)">
+    <path
+       sodipodi:type="spiral"
+       style="fill:none;fill-rule:evenodd;stroke:#bd0000;stroke-width:1.46500003;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path3699"
+       sodipodi:cx="-31.796747"
+       sodipodi:cy="34.684521"
+       sodipodi:expansion="1"
+       sodipodi:revolution="2.003814"
+       sodipodi:radius="4.6552191"
+       sodipodi:argument="-16.41659"
+       sodipodi:t0="0.19416255"
+       d="m -31.648152,33.79295 c 0.694475,-0.157598 1.264928,0.491591 1.315868,1.135648 0.07999,1.011312 -0.845554,1.781787 -1.804022,1.793279 -1.324232,0.01588 -2.30417,-1.200795 -2.27069,-2.472398 0.04309,-1.636395 1.556455,-2.829079 3.140772,-2.748099 1.948377,0.09959 3.355363,1.91231 3.22551,3.809146 -0.154736,2.260317 -2.268277,3.882476 -4.477521,3.702921 -1.092742,-0.08881 -2.127483,-0.59456 -2.884596,-1.384912"
+       transform="scale(-1,1)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:Laksaman;-inkscape-font-specification:Laksaman;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;"
+       x="36.990662"
+       y="38.086864"
+       id="text4527"><tspan
+         sodipodi:role="line"
+         id="tspan4525"
+         x="36.990662"
+         y="38.086864"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:Laksaman;-inkscape-font-specification:Laksaman;stroke-width:0.26458332;"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Laksaman;-inkscape-font-specification:Laksaman;"
+   id="tspan4529">whirl</tspan>++</tspan></text>
+  </g>
+</svg>
