@@ -8,6 +8,17 @@
 namespace LL1
 {
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    // SFINEA utilities
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename... Ts>
+    using requires_t = std::enable_if_t<std::conjunction_v<Ts...>>;
+
+    template <typename T1, typename T2>
+    using requires_type_t = requires_t<std::is_same<T1, T2>>;
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // parsing error handling
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -24,65 +35,6 @@ namespace LL1
     // special token types
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename T>
-    struct negated_character
-    {
-        explicit constexpr negated_character(T tok)
-            : tok{tok}
-        { }
-
-        constexpr auto negate() const
-        {
-            return this->tok;
-        }
-
-        constexpr auto operator!() const
-        {
-            return this->negate();
-        }
-
-    private:
-
-        T tok;
-    };
-
-    template <typename T1, typename T2>
-    constexpr auto operator==(negated_character<T1> tok1, negated_character<T2> tok2)
-    {
-        return !tok1 == tok2.negate();
-    }
-
-    template <typename T1, typename T2>
-    constexpr auto operator!=(negated_character<T1> tok1, negated_character<T2> tok2)
-    {
-        return tok1.negate() != tok2.negate();
-    }
-
-    template <typename T1, typename T2>
-    constexpr auto operator==(negated_character<T1> tok1, T2 tok2)
-    {
-        return tok1.negate() != tok2;
-    }
-
-    template <typename T1, typename T2>
-    constexpr auto operator==(T1 tok1, negated_character<T2> tok2)
-    {
-        return tok1 != tok2.negate();
-    }
-
-    template <typename T1, typename T2>
-    constexpr auto operator!=(T1 tok1, negated_character<T2> tok2)
-    {
-        return tok1 == tok2.negate();
-    }
-
-    template <typename T1, typename T2>
-    constexpr auto operator!=(negated_character<T1> tok1, T2 tok2)
-    {
-        return tok1.negate() == tok2;
-    }
-
-
     struct end_token {};
     struct any_character {};
 
@@ -98,12 +50,7 @@ namespace LL1
                 std::is_same<T, char>,
                 std::is_same<T, wchar_t>,
                 std::is_same<T, char16_t>,
-                std::is_same<T, char32_t>,
-                std::is_same<T, negated_character<char>>,
-                std::is_same<T, negated_character<wchar_t>>,
-                std::is_same<T, negated_character<wchar_t>>,
-                std::is_same<T, negated_character<char16_t>>,
-                std::is_same<T, negated_character<char32_t>>
+                std::is_same<T, char32_t>
             >
         >
     { };
@@ -200,136 +147,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // token set types
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <typename... Ts>
-    struct negated_character_set;
-
-    template <typename... Ts>
-    struct character_set
-    {
-    
-    public:
-
-        explicit constexpr character_set(Ts... toks)
-            : toks{ toks... }
-        { }
-
-        template <typename T>
-        constexpr auto contains(T tok) const
-        {
-            return contains<>(tok, std::index_sequence_for<Ts...>{});
-        }
-
-        constexpr auto operator!() const
-        {
-            return negate(std::index_sequence_for<Ts...>{});
-        }
-
-        constexpr auto negate() const
-        {
-            return negate(std::index_sequence_for<Ts...>{});
-        }
-
-    private:
-
-        template <size_t... I>
-        constexpr auto negate(std::index_sequence<I...>) const
-        {
-            return negated_character_set<Ts...>{ std::get<I>(this->toks)... };
-        }
-
-        template <typename T, size_t... I>
-        constexpr auto contains(T tok, std::index_sequence<I...>) const
-        {
-            return ((std::get<I>(this->toks) == tok) || ...);
-        }
-
-        std::tuple<Ts...> toks;
-
-    };
-
-
-    template <typename... Ts>
-    struct negated_character_set
-    {
-
-    public:
-
-        explicit constexpr negated_character_set(Ts... toks)
-            : toks{ toks... }
-        { }
-
-        template <typename T>
-        constexpr auto contains(T tok) const
-        {
-            return contains<>(tok, std::index_sequence_for<Ts...>{});
-        }
-
-        constexpr auto operator!() const
-        {
-            return negate(std::index_sequence_for<Ts...>{});
-        }
-
-        constexpr auto negate() const
-        {
-            return negate(std::index_sequence_for<Ts...>{});
-        }
-
-    private:
-
-        template <size_t... I>
-        constexpr auto negate(std::index_sequence<I...>) const
-        {
-            return character_set<Ts...>{ std::get<I>(this->toks)... };
-        }
-
-        template <typename T, size_t... I>
-        constexpr auto contains(T tok, std::index_sequence<I...>) const
-        {
-            return ((!(std::get<I>(this->toks) == tok)) && ...);
-        }
-
-        std::tuple<Ts...> toks;
-
-    };
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // token set type traits
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <typename T>
-    struct is_character_set_type : std::false_type
-    { };
-
-    template <typename... Ts>
-    struct is_character_set_type<character_set<Ts...>> : std::true_type
-    { };
-
-    template <typename... Ts>
-    struct is_character_set_type<negated_character_set<Ts...>> : std::true_type
-    { };
-
-    template <typename T1, typename T2, typename = void>
-    struct is_compatible_character_set_type : std::false_type
-    { };
-
-    template <typename T1, typename T2>
-    struct is_compatible_character_set_type<
-        T1, T2, std::void_t<decltype(std::declval<T2>().contains(std::declval<T1>()))>
-    >: std::true_type
-    { };
-
-    template <typename T>
-    constexpr auto is_character_set_type_v = is_character_set_type<T>::value;
-
-    template <typename T1, typename T2>
-    constexpr auto is_compatible_character_set_type_v = is_compatible_character_set_type<T1, T2>::value;
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // special tokens
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -338,104 +155,11 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // predefined tokens
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    namespace tokens
-    {
-        constexpr char line_feed = 0xA;
-        constexpr char carriage_return = 0xD;
-        constexpr char space = 0x20;
-        constexpr char tabulator = 0x9;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // predefined token sets
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    namespace sets
-    {
-        constexpr character_set space{ ' ', '\t', '\n' };
-
-        constexpr character_set blank{' ', '\t'};
-
-        constexpr character_set digit{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // logical token and token set operations
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        typename T,
-        typename = std::enable_if_t<is_token_type_v<T>>
-    >
-    constexpr auto not_(T tok)
-    {
-        return negated_character<T>{ tok };
-    }
-
-    template <
-        typename T,
-        typename = std::enable_if_t<is_token_type_v<T>>
-    >
-        constexpr auto not_(negated_character<T> tok)
-    {
-        return tok.negate();
-    }
-
-    constexpr auto not_(end_token)
-    {
-        return character;
-    }
-
-    constexpr auto not_(any_character)
-    {
-        return end;
-    }
-
-    template <
-        template<typename...> typename TT,
-        typename... Ts,
-        typename = std::enable_if_t<is_character_set_type_v<TT<Ts...>>>,
-        typename = std::enable_if_t<are_token_types_v<Ts...>>>
-    constexpr auto not_(const TT<Ts...>& set)
-    {
-        return set.negate();
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // token set factories
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <typename... Ts, typename = std::enable_if_t<are_character_types_v<Ts...>>>
-    constexpr auto one_of(Ts... toks)
-    {
-        return character_set{ toks... };
-    }
-
-    template <typename... Ts, typename = std::enable_if_t<are_character_types_v<Ts...>>>
-    constexpr auto none_of(Ts... toks)
-    {
-        return not_(one_of(toks...));
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // comparison type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename T>
-    struct is_comparison_type
-        : std::bool_constant<
-            std::disjunction_v<
-                is_token_type<T>,
-                is_character_set_type<T>
-            >
-        >
+    struct is_comparison_type : std::bool_constant<is_token_type_v<T>>
     { };
 
     template <typename T1, typename T2>
@@ -447,7 +171,6 @@ namespace LL1
                     is_compatible_character_type<T1, T2>,
                     std::false_type
                 >,
-                is_compatible_character_set_type<T1, T2>,
                 is_special_token_type<T2>
             >
         >
@@ -469,11 +192,11 @@ namespace LL1
 
     template <template <typename...> typename TT, typename T, typename... Ts>
     struct input_source_traits<
-        TT<T, Ts...>,
-        std::enable_if_t<std::is_base_of_v<std::basic_istream<T, Ts...>, TT<T, Ts...>>>
+        TT<T, Ts...>, requires_t<std::is_base_of<std::basic_istream<T, Ts...>, TT<T, Ts...>>>
     >
     {
         using char_type = T;
+        using stream_type = TT<T, Ts...>;
 
         static char_type look_ahead(std::basic_istream<T, Ts...>& ins)
         {
@@ -491,18 +214,25 @@ namespace LL1
         }
     };
 
-    template <typename T, typename = void>
-    struct is_input_source_trait_class_type : std::false_type
+    template <typename T, typename T2, typename = void>
+    struct is_input_source_trait_class_type_impl : std::false_type { };
+
+    template <typename T1, typename T2>
+    struct is_input_source_trait_class_type_impl<T1, T2, std::void_t<
+        requires_t<is_token_type<typename T1::char_type>>,
+        requires_type_t<decltype(T1::look_ahead(std::declval<T2&>())), typename T1::char_type>,
+        requires_type_t<decltype(T1::read(std::declval<T2&>())), typename T1::char_type>,
+        requires_type_t<decltype(T1::is_end(std::declval<T2&>())), bool>
+    >>
+        : is_token_type<decltype(T1::read(std::declval<T2&>()))>
     { };
 
+    template <typename T>
+    struct is_input_source_trait_class_type : std::false_type { };
+
     template <template <typename...> typename TT, typename T, typename... Ts>
-    struct is_input_source_trait_class_type<TT<T, Ts...>, std::void_t<
-        std::enable_if_t<is_token_type_v<typename TT<T, Ts...>::char_type>>,
-        std::enable_if_t<std::is_same_v<decltype(TT<T, Ts...>::look_ahead(std::declval<T&>())), typename TT<T, Ts...>::char_type>>,
-        std::enable_if_t<std::is_same_v<decltype(TT<T, Ts...>::read(std::declval<T&>())), typename TT<T, Ts...>::char_type>>,
-        std::enable_if_t<std::is_same_v<decltype(TT<T, Ts...>::is_end(std::declval<T&>())), bool>>
-    >>
-        : is_token_type<decltype(TT<T, Ts...>::read(std::declval<T&>()))>
+    struct is_input_source_trait_class_type<TT<T, Ts...>>
+        : is_input_source_trait_class_type_impl<TT<T, Ts...>, T>
     { };
 
     template <typename T>
@@ -515,19 +245,8 @@ namespace LL1
 
     template <typename T1, typename T2>
     struct is_compatible_input_source_type<T1, T2, std::enable_if_t<is_input_source_type<T1>::value>>
-	: is_compatible_comparison_type<typename input_source_traits<T1>::char_type, T2>
+	    : is_compatible_comparison_type<typename input_source_traits<T1>::char_type, T2>
     { };
-
-    /*
-    template <typename T1, typename T2, typename T3 = typename input_source_traits<T1>::char_type>
-    struct is_compatible_input_source_type
-        : std::conditional_t<
-            is_input_source_type<T1>::value,
-            is_compatible_comparison_type<T3, T2>,
-            std::false_type
-        >
-    { };
-    */
 
     template <typename T1>
     constexpr auto is_input_source_type_v = is_input_source_type<T1>::value;
@@ -536,271 +255,446 @@ namespace LL1
     constexpr auto is_compatible_input_source_type_v =
         is_compatible_input_source_type<T1, T2>::value;
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // bound functors
+    // bound predicates
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename T1>
-    struct bound_is
+    template <typename P1, typename P2>
+    struct bound_predicate_conjunction
     {
 
-    public:
+        explicit constexpr bound_predicate_conjunction(P1 p1, P2 p2)
+            : p1{ p1 }
+            , p2{ p2 }
+        { }
+        
+        template <typename T>
+        constexpr auto operator()(T& ins) const
+        {
+            return this->p1(ins) && this->p2(ins);
+        }
+        
+        P1 p1;
+        P2 p2;
 
-        explicit constexpr bound_is(T1 cmp)
-            : cmp{cmp}
+    };
+
+    template <typename P1, typename P2>
+    struct bound_predicate_disjunction
+    {
+
+        explicit constexpr bound_predicate_disjunction(const P1& pred1, const P2& pred2)
+            : pred1{ pred1 }
+            , pred2{ pred2 }
+        { }
+        
+        template <typename I>
+        constexpr auto operator()(I& ins) const
+        {
+            return this->p1(ins) || this->p2(ins);
+        }
+        
+        P1 pred1, pred2;
+
+    };
+
+    template <typename P>
+    struct bound_predicate_negation
+    {
+
+        explicit constexpr bound_predicate_negation(const P& pred)
+            : pred{ pred }
+        { }
+        
+        template <typename T2>
+        constexpr auto operator()(T2& ins) const
+        {
+            return !this->pred(ins);
+        }
+        
+        P pred;
+
+    };
+
+    template <typename C>
+    struct bound_is_predicate
+    {
+
+        explicit constexpr bound_is_predicate(const C& cmp)
+            : cmp{ cmp }
+        { }
+
+        template <typename I, typename = requires_t<is_compatible_input_source_type<I, C>>>
+        constexpr auto operator()(I& ins) const
+        {
+            if constexpr(std::is_same_v<C, any_character>)
+                return !input_source_traits<I>::is_end(ins);
+            else if constexpr(std::is_same_v<C, end_token>)
+                return input_source_traits<I>::is_end(ins);
+            else
+                return input_source_traits<I>::look_ahead(ins) == this->cmp;
+        }
+
+        C cmp;
+
+    };
+
+    template <typename C>
+    struct bound_is_not_predicate
+    {
+
+        explicit constexpr bound_is_not_predicate(const C& cmp)
+            : cmp{ cmp }
+        { }
+
+        template <typename I, typename = requires_t<is_compatible_input_source_type<I, C>>>
+        constexpr auto operator()(I& ins) const
+        {
+            if constexpr(std::is_same_v<C, any_character>)
+                return input_source_traits<I>::is_end(ins);
+            else if constexpr(std::is_same_v<C, end_token>)
+                return !input_source_traits<I>::is_end(ins);
+            else
+                return input_source_traits<I>::look_ahead(ins) != this->cmp;
+        }
+
+        C cmp;
+
+    };
+
+    template <typename... Cs>
+    struct bound_is_one_of_predicate
+    {
+
+        explicit constexpr bound_is_one_of_predicate(const Cs&... cmps)
+            : cmps{ cmps... }
+        { }
+
+        template <typename I, typename = requires_t<is_compatible_input_source_type<I, Cs>...>>
+        constexpr auto operator()(I& ins) const
+        {
+            return std::apply(
+                [&ins](const auto&... cmps) {
+                    return ((input_source_traits<I>::look_ahead(ins) == cmps) || ...);
+                },
+                this->cmps
+            );
+        }
+
+        std::tuple<Cs...> cmps;
+
+    };
+
+    template <typename... Cs>
+    struct bound_is_none_of_predicate
+    {
+
+        explicit constexpr bound_is_none_of_predicate(const Cs&... cmps)
+            : cmps{ cmps... }
         { }
 
         template <
-            typename T2,
-            typename = std::enable_if_t<is_compatible_input_source_type_v<T2, T1>>
+            typename I,
+            typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<I, Cs>...>>
         >
-        constexpr auto operator()(T2& ins)
+        constexpr auto operator()(I& ins) const
         {
-            return is(ins, this->cmp);
+            return std::apply(
+                [&ins](const auto&... cmps) {
+                    return ((input_source_traits<I>::look_ahead(ins) != cmps) && ...);
+                },
+                this->cmps
+            );
         }
 
-    private:
-
-        T1 cmp;
+        std::tuple<Cs...> cmps;
 
     };
 
-    template <typename T1>
-    struct bound_is_not
-    {
+    template<typename, typename, typename = void>
+    struct is_bound_predicate_impl : std::false_type {};
 
-    public:
-
-        explicit constexpr bound_is_not(T1 cmp)
-            : cmp{cmp}
-        { }
-
-        template <
-            typename T2,
-            typename = std::enable_if_t<is_compatible_input_source_type_v<T2, T1>>
+ 
+    template <typename T1, typename T2>
+    struct is_bound_predicate_impl<
+        T1,
+        T2,
+        requires_t<
+            std::is_same<decltype(std::declval<T1>()(std::declval<std::basic_istream<T2>>())), bool>
         >
-        constexpr auto operator()(T2& ins)
-        {
-            return is_not(ins, this->cmp);
-        }
-
-    private:
-
-        T1 cmp;
-
-    };
-
-    template <typename... Ts>
-    struct bound_is_one_of
-    {
-
-    public:
-
-        explicit constexpr bound_is_one_of(const Ts&... cmp)
-            : cmp{cmp...}
-        {
-	}
-
-        template <
-            typename T,
-            typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<T, Ts>...>>
-        >
-        constexpr auto operator()(T& ins)
-        {
-            return (*this)(ins, std::index_sequence_for<Ts...>{});
-        }
-
-    private:
-
-        template <
-            typename T,
-            std::size_t... I,
-            typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<T, Ts>...>>
-        >
-        constexpr auto operator()(T& ins, std::index_sequence<I...>)
-        {
-            return is_one_of(ins, std::get<I>(this->cmp)...);
-        }
-
-        std::tuple<Ts...> cmp;
-
-    };
-
-    template <typename... Ts>
-    struct bound_is_none_of
-    {
-
-    public:
-
-        explicit constexpr bound_is_none_of(Ts... cmp)
-            : cmp{cmp...}
-        { }
-
-        template <
-            typename T,
-            typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<T, Ts>...>>
-        >
-        constexpr auto operator()(T& ins)
-        {
-            return (*this)(ins, std::index_sequence_for<Ts...>{});
-        }
-
-    private:
-
-        template <
-            typename T,
-            std::size_t... I,
-            typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<T, Ts>...>>
-        >
-        constexpr auto operator()(T& ins, std::index_sequence<I...>)
-        {
-            return is_none_of(ins, std::get<I>(this->cmp)...);
-        }
-
-        std::tuple<Ts...> cmp;
-
-    };
+    >
+        : std::true_type
+    {};
 
     template <typename T>
-    struct is_bound_functor;
-
-    template <template <typename...> typename TT, typename... Ts>
-    struct is_bound_functor<TT<Ts...>>
-        : std::bool_constant<
-            std::disjunction_v<
-                std::is_same<TT<Ts...>, bound_is<Ts...>>,
-                std::is_same<TT<Ts...>, bound_is_not<Ts...>>,
-                std::is_same<TT<Ts...>, bound_is_one_of<Ts...>>,
-                std::is_same<TT<Ts...>, bound_is_none_of<Ts...>>
-            >
+    struct is_bound_predicate
+        : std::conjunction<
+            is_bound_predicate_impl<T, char>,
+            is_bound_predicate_impl<T, wchar_t>,
+            is_bound_predicate_impl<T, char16_t>,
+            is_bound_predicate_impl<T, char32_t>
         >
-    { };
+    {};
+
+    template <typename T>
+    constexpr auto is_bound_predicate_v = is_bound_predicate<T>::value;
+
+
+    // universal logical predicate operations
+
+    template <typename P, typename = requires_t<is_bound_predicate<P>>>
+    constexpr auto operator!(const P& p)
+    {
+        return bound_predicate_negation(p);
+    }
+
+    template <
+        typename P1,
+        typename P2,
+        typename = requires_t<is_bound_predicate<P1>>,
+        typename = requires_t<is_bound_predicate<P2>>
+    >
+    constexpr auto operator&&(const P1& p1, const P2& p2)
+    {
+        return bound_predicate_conjunction{ p1, p2 };
+    }
+
+    template <
+        typename P1,
+        typename P2,
+        typename = requires_t<is_bound_predicate<P1>>,
+        typename = requires_t<is_bound_predicate<P2>>
+    >
+    constexpr auto operator||(const P1& p1, const P2& p2)
+    {
+        return bound_predicate_disjunction{ p1, p2 };
+    }
+
+
+    // specialzed optimized logical predicate operations
+
+    template <typename T, typename = requires_t<is_comparison_type<T>>>
+    constexpr auto operator!(const bound_is_predicate<T>& p)
+    {
+        return bound_is_not_predicate<T>{ p.cmp };
+    }
+
+    template <typename T, typename = requires_t<is_comparison_type<T>>>
+    constexpr auto operator!(const bound_is_not_predicate<T>& p)
+    {
+        return bound_is_predicate<T>{ p.cmp };
+    }
+
+    template <typename... Ts, typename = requires_t<is_comparison_type<Ts>...>>
+    constexpr auto operator!(const bound_is_one_of_predicate<Ts...>& p)
+    {
+        return std::apply(
+            [](const auto&... cmps) {
+                return bound_is_none_of_predicate<Ts...>{ cmps... };
+            },
+            p.cmps
+        );
+    }
+
+    template <typename... Ts, typename = requires_t<is_comparison_type<Ts>...>>
+    constexpr auto operator!(const bound_is_none_of_predicate<Ts...>& p)
+    {
+        return std::apply(
+            [](const auto&... cmps) {
+                return bound_is_one_of_predicate<Ts...>{ cmps... };
+            },
+            p.cmps
+        );
+    }
+
+    template <
+        typename T1,
+        typename T2,
+        typename = requires_t<is_comparison_type<T1>>,
+        typename = requires_t<is_comparison_type<T2>>
+    >
+    constexpr auto operator||(const bound_is_predicate<T1>& lhs, const bound_is_predicate<T2>& rhs)
+    {
+        return bound_is_one_of_predicate{ lhs.cmp, rhs.cmp };
+    }
+
+    template <
+        typename... Ts,
+        typename T,
+        typename = requires_t<is_comparison_type<T>>,
+        typename = requires_t<is_comparison_type<Ts>...>
+    >
+    constexpr auto operator||(
+        const bound_is_one_of_predicate<Ts...>& lhs, const bound_is_predicate<T>& rhs
+    )
+    {
+        return std::apply(
+            [&rhs](const auto&... cmps) {
+                return bound_is_one_of_predicate<Ts..., T>{ cmps..., rhs.cmp };
+            },
+            lhs.cmps
+        );
+    }
+
+    template <
+        typename T,
+        typename... Ts,
+        typename = requires_t<is_comparison_type<T>>,
+        typename = requires_t<is_comparison_type<Ts>...>
+    >
+    constexpr auto operator||(
+        const bound_is_predicate<T>& lhs, const bound_is_one_of_predicate<Ts...>& rhs
+    )
+    {
+        return rhs || lhs;
+    }
+
+    template <
+        typename... Ts1,
+        typename... Ts2,
+        typename = requires_t<is_comparison_type<Ts1>...>,
+        typename = requires_t<is_comparison_type<Ts2>...>
+    >
+    constexpr auto operator||(
+        const bound_is_one_of_predicate<Ts1...>& lhs, const bound_is_one_of_predicate<Ts2...>& rhs
+    )
+    {
+        return std::apply(
+            [&rhs](const auto&... cmps) {
+                return (rhs || ... || cmps);
+            },
+            lhs.cmps
+        );
+    }
+
+    template <
+        typename T1,
+        typename T2,
+        typename = requires_t<is_comparison_type<T1>>,
+        typename = requires_t<is_comparison_type<T2>>
+    >
+    constexpr auto operator&&(
+        const bound_is_not_predicate<T1>& lhs, const bound_is_not_predicate<T2>& rhs
+    )
+    {
+        return bound_is_none_of_predicate{ lhs.cmp, rhs.cmp };
+    }
+
+    template <
+        typename... Ts,
+        typename T,
+        typename = requires_t<is_comparison_type<T>>,
+        typename = requires_t<is_comparison_type<Ts>...>
+    >
+    constexpr auto operator&&(
+        const bound_is_none_of_predicate<Ts...>& lhs, const bound_is_not_predicate<T>& rhs
+    )
+    {
+        return std::apply(
+            [&rhs](const auto&... cmps) {
+                return bound_is_one_of_predicate<Ts..., T>{ cmps..., rhs.cmp };
+            },
+            lhs.cmps
+        );
+    }
+
+    template <
+        typename T,
+        typename... Ts,
+        typename = requires_t<is_comparison_type<T>>,
+        typename = requires_t<is_comparison_type<Ts>...>
+    >
+    constexpr auto operator&&(
+        const bound_is_not_predicate<T>& lhs, const bound_is_none_of_predicate<Ts...>& rhs
+    )
+    {
+        return rhs || lhs;
+    }
+
+    template <
+        typename... Ts1,
+        typename... Ts2,
+        typename = requires_t<is_comparison_type<Ts1>...>,
+        typename = requires_t<is_comparison_type<Ts2>...>
+    >
+    constexpr auto operator&&(
+        const bound_is_none_of_predicate<Ts1...>& lhs,
+        const bound_is_none_of_predicate<Ts2...>& rhs
+    )
+    {
+        return std::apply(
+            [&rhs](const auto&... cmps) {
+                return (rhs || ... || cmps);
+            },
+            lhs.cmps
+        );
+    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
-    >
-    constexpr auto is(T1& ins, T2 cmp)
-    {
-        if constexpr (is_character_type_v<T2>)
-            return input_source_traits<T1>::look_ahead(ins) == cmp;
-        else if constexpr (is_character_set_type_v<T2>)
-            return cmp.contains(input_source_traits<T1>::look_ahead(ins));
-        else if constexpr (std::is_same_v<T2, end_token>)
-            return input_source_traits<T1>::is_end(ins);
-        else if constexpr (std::is_same_v<T2, any_character>)
-            return !input_source_traits<T1>::is_end(ins);
-    }
-
-    template <
-        typename T,
-        typename = std::enable_if_t<is_comparison_type_v<T>>
-    >
+    template <typename T, typename = requires_t<is_comparison_type<T>>>
     constexpr auto is(const T& cmp)
     {
-        return bound_is{ cmp };
+        return bound_is_predicate{ cmp };
     }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is_not' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
-    >
-    constexpr bool is_not(T1& ins, const T2& cmp)
+    template <typename C, typename = requires_t<is_comparison_type<C>>>
+    constexpr auto is_not(const C& cmp)
     {
-        return !is(ins, cmp);
+        return bound_is_not_predicate{ cmp };
     }
 
-    template <
-        typename T,
-        typename = std::enable_if_t<is_comparison_type_v<T>>
-    >
-    constexpr auto is_not(const T& cmp)
-    {
-        return bound_is_not{ cmp };
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is_one_of' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <
-        typename T1,
-        typename... Ts,
-        typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<T1, Ts>...>>
-    >
-    constexpr bool is_one_of(T1& ins, const Ts&... cmp)
+    template <typename... Cs, typename = requires_t<is_comparison_type<Cs>...>>
+    constexpr auto is_one_of(const Cs&... cmp)
     {
-        return (is(ins, cmp) || ...);
+        return bound_is_one_of_predicate{ cmp... };
     }
 
-    template <
-        typename... Ts,
-        typename = std::enable_if_t<std::conjunction_v<is_comparison_type<Ts>...>>
-    >
-    constexpr auto is_one_of(const Ts&... cmp)
-    {
-        return bound_is_one_of<Ts...>{ cmp... };
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'is_none_of' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <
-        typename T1,
-        typename... Ts,
-        typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<T1, Ts>...>>
-    >
-    constexpr bool is_none_of(T1& ins, const Ts&... cmp)
+    template <typename... Cs, typename = requires_t<is_comparison_type<Cs>...>>
+    constexpr auto is_none_of(const Cs&... cmp)
     {
-        return !is_one_of(ins, cmp...);
+        return bound_is_none_of_predicate{ cmp... };
     }
 
-    template <
-        typename... Ts,
-        typename = std::enable_if_t<std::conjunction_v<is_comparison_type<Ts>...>>
-    >
-    constexpr auto is_none_of(const Ts&... cmp)
-    {
-        return bound_is_none_of<Ts...>{ cmp... };
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'read' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <
-        typename T,
-        typename = std::enable_if_t<is_input_source_type_v<T>>
-    >
-    constexpr auto read(T& ins)
+    template <typename I, typename = requires_t<is_input_source_type<I>>>
+    constexpr auto read(I& ins)
     {
-        if (input_source_traits<T>::is_end(ins))
+        if (input_source_traits<I>::is_end(ins))
             throw unexpected_input{};
 
         return ins.get();
     }
 
-    template <
-        typename T,
-        typename = std::enable_if_t<is_input_source_type_v<T>>
-    >
-    constexpr auto read(T& ins, code_position& pos)
+    template <typename I, typename = requires_t<is_input_source_type<I>>>
+    constexpr auto read(I& ins, code_position& pos)
     {
         auto tok = read(ins);
 
-        if (tok == tokens::line_feed)
+        if (tok == '\n')
         {
             pos.row++;
             pos.col = 0;
@@ -819,26 +713,30 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+        typename I,
+        typename P,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr std::optional<T1> read_if(T1& ins, const T2& cmp)
+    constexpr std::optional<typename I::char_type> read_if(I& ins, const P& pred)
     {
-        if (is(ins, cmp))
+        if (pred(ins))
             return read(ins);
         else
             return std::nullopt;
     }
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+        typename I,
+        typename P,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr std::optional<T1> read_if(T1& ins, code_position& pos, const T2& cmp)
+    constexpr std::optional<typename I::char_type> read_if(
+        I& ins, code_position& pos, const P& pred
+    )
     {
-        if (is(ins, cmp))
+        if (pred(ins))
             return read(ins, pos);
         else
             return std::nullopt;
@@ -850,13 +748,14 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+        typename P,
+        typename I,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto read_while(T1& ins, const T2& cmp)
+    constexpr auto read_while(const P& pred, I& ins)
     {
-        std::basic_string<T1> tokseq;
+        std::basic_string<typename I::char_type> tokseq;
 
         while (is(ins, cmp))
             tokseq.push_back(read(ins));
@@ -865,13 +764,14 @@ namespace LL1
     }
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+        typename P,
+        typename I,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto read_while(T1& ins, code_position& pos, const T2& cmp)
+    constexpr auto read_while(const P& pred, I& ins, code_position& pos)
     {
-        std::basic_string<T1> tokseq;
+        std::basic_string<typename I::char_type> tokseq;
 
         while (is(ins, cmp))
             tokseq.push_back(read(ins, pos));
@@ -884,72 +784,71 @@ namespace LL1
     // 'next' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <
-        typename T,
-        typename = std::enable_if_t<is_input_source_type_v<T>>
-    >
-        constexpr void next(T& ins)
+    template <typename I, typename = requires_t<is_input_source_type<I>>>
+    constexpr void next(I& ins)
     {
         read(ins);
     }
 
-    template <
-        typename T,
-        typename = std::enable_if_t<is_input_source_type_v<T>>
-    >
-    constexpr void next(T& ins, code_position& pos)
+    template <typename I, typename = requires_t<is_input_source_type<I>>>
+    constexpr void next(I& ins, code_position& pos)
     {
         read(ins, pos);
     }
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+        typename P,
+        typename I,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next(T1& ins, const T2& cmp)
+    constexpr auto next(const P& pred, I& ins)
     {
-        if(is(ins, not_(cmp)))
+        if(!pred(ins))
             throw unexpected_input{};
         
         return read(ins);
     }
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+        typename P,
+        typename I,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next(T1& ins, code_position& pos, const T2& cmp)
+    constexpr auto next(const P& pred, I& ins, code_position& pos)
     {
-        if(is(ins, not_(cmp)))
+        if(!pred(ins))
             throw unexpected_input{};
 
         return read(ins, pos);
     }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'next_if' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+        typename P,
+        typename I,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next_if(T1& ins, const T2& cmp)
+    constexpr auto next_if(const P& pred, I& ins)
     {
-        return is(ins, cmp) ? next(ins), true : false;
+        return pred(ins) ? next(ins), true : false;
     }
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+        typename P,
+        typename I,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next_if(T1& ins, code_position& pos, const T2& cmp)
+    constexpr auto next_if(const P& pred, I& ins, code_position& pos)
     {
-        return is(ins, cmp) ? next(ins, pos), true : false;
+        return pred(ins) ? next(ins, pos), true : false;
     }
 
 
@@ -958,15 +857,16 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+        typename P,
+        typename I,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next_while(T1& ins, const T2& cmp)
+    constexpr auto next_while(const P& pred, I& ins)
     {
         unsigned count = 0;
 
-        while (is(ins, cmp))
+        while (pred(ins))
         {
             ignore(ins);
             count++;
@@ -976,15 +876,16 @@ namespace LL1
     }
 
     template <
-        typename T1,
-        typename T2,
-        typename = std::enable_if_t<is_compatible_input_source_type_v<T1, T2>>
+        typename P,
+        typename I,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next_while(T1& ins, code_position& pos, const T2& cmp)
+    constexpr auto next_while(const P& pred, I& ins, code_position& pos)
     {
         unsigned count = 0;
 
-        while(is(ins, cmp))
+        while(pred(ins))
         {
             next(ins, pos);
             count++;
@@ -992,4 +893,17 @@ namespace LL1
 
         return count;
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // predefined bound predicates
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    constexpr auto is_character      = is(character);
+    constexpr auto is_blank          = is_one_of(' ', '\t');
+    constexpr auto is_space          = is_one_of(' ', '\t', '\n');
+    constexpr auto is_zero           = is('0');
+    constexpr auto is_non_zero_digit = is_one_of('1', '2', '3', '4', '5', '6', '7', '8', '9');
+    constexpr auto is_digit          = is_zero || is_non_zero_digit;
+
 }

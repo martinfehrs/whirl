@@ -16,22 +16,26 @@
 
 
 using namespace LL1;
-using namespace LL1::sets;
+
+
+constexpr auto is_sign   = is('-');
+constexpr auto is_number = is_non_zero_digit || is_sign;
+
 
 auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
 {
-    auto has_sign = next_if(ins, pos, '-');
+    auto has_sign = next_if(is_sign, ins, pos);
     auto val = 0;
 
-    if (is(ins, '0'))
+    if (is_zero(ins))
     {
         next(ins, pos);
     }
-    else if (is(ins, digit))
+    else if (is_non_zero_digit(ins))
     {
         val = read(ins, pos) - '0';
 
-        while (is(ins, digit))
+        while (is_digit(ins))
             val = val * 10 + read(ins, pos) - '0';
     }
     else
@@ -45,7 +49,7 @@ auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
 auto read_data_entry(std::istream& ins, LL1::code_position& pos)
 {
     auto temperature = read_decimal_whole_number(ins, pos);
-    next_while(ins, pos, space);
+    next_while(is_space, ins, pos);
 
     return temperature;
 }
@@ -54,9 +58,9 @@ auto read_data(std::istream& ins, LL1::code_position& pos)
 {
     std::vector<int> temperatures;
 
-    next_while(ins, pos, space);
+    next_while(is_space, ins, pos);
 
-    while(is(ins, digit) || is(ins, '-'))
+    while(is_number(ins))
         temperatures.push_back(read_data_entry(ins, pos));
 
     return temperatures;
@@ -79,7 +83,7 @@ int main()
     }
     catch(unexpected_input)
     {
-        if (is(ifs, character))
+        if (is_character(ifs))
         {
             std::cerr << "unexpeced token "
                 << static_cast<char>(read(ifs))
