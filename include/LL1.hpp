@@ -412,6 +412,11 @@ namespace LL1
 
     };
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // bound predicate type traits
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     template<typename, typename, typename = void>
     struct is_bound_predicate_impl : std::false_type {};
 
@@ -420,9 +425,7 @@ namespace LL1
     struct is_bound_predicate_impl<
         T1,
         T2,
-        requires_t<
-            std::is_same<decltype(std::declval<T1>()(std::declval<std::basic_istream<T2>>())), bool>
-        >
+        requires_type_t<decltype(std::declval<T1>()(std::declval<std::basic_istream<T2>>())), bool>
     >
         : std::true_type
     {};
@@ -441,7 +444,9 @@ namespace LL1
     constexpr auto is_bound_predicate_v = is_bound_predicate<T>::value;
 
 
-    // universal logical predicate operations
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // universal logical bound predicate predicate operations
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename P, typename = requires_t<is_bound_predicate<P>>>
     constexpr auto operator!(const P& p)
@@ -472,22 +477,24 @@ namespace LL1
     }
 
 
-    // specialzed optimized logical predicate operations
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // specialzed optimized logical bound predicate operations
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename T, typename = requires_t<is_comparison_type<T>>>
-    constexpr auto operator!(const bound_is_predicate<T>& p)
+    template <typename C, typename = requires_t<is_comparison_type<C>>>
+    constexpr auto operator!(const bound_is_predicate<C>& p)
     {
         return bound_is_not_predicate<T>{ p.cmp };
     }
 
-    template <typename T, typename = requires_t<is_comparison_type<T>>>
-    constexpr auto operator!(const bound_is_not_predicate<T>& p)
+    template <typename C, typename = requires_t<is_comparison_type<C>>>
+    constexpr auto operator!(const bound_is_not_predicate<C>& p)
     {
         return bound_is_predicate<T>{ p.cmp };
     }
 
-    template <typename... Ts, typename = requires_t<is_comparison_type<Ts>...>>
-    constexpr auto operator!(const bound_is_one_of_predicate<Ts...>& p)
+    template <typename... Cs, typename = requires_t<is_comparison_type<Cs>...>>
+    constexpr auto operator!(const bound_is_one_of_predicate<Cs...>& p)
     {
         return std::apply(
             [](const auto&... cmps) {
@@ -497,8 +504,8 @@ namespace LL1
         );
     }
 
-    template <typename... Ts, typename = requires_t<is_comparison_type<Ts>...>>
-    constexpr auto operator!(const bound_is_none_of_predicate<Ts...>& p)
+    template <typename... Cs, typename = requires_t<is_comparison_type<Cs>...>>
+    constexpr auto operator!(const bound_is_none_of_predicate<Cs...>& p)
     {
         return std::apply(
             [](const auto&... cmps) {
@@ -509,55 +516,55 @@ namespace LL1
     }
 
     template <
-        typename T1,
-        typename T2,
-        typename = requires_t<is_comparison_type<T1>>,
-        typename = requires_t<is_comparison_type<T2>>
+        typename C1,
+        typename C2,
+        typename = requires_t<is_comparison_type<C1>>,
+        typename = requires_t<is_comparison_type<C2>>
     >
-    constexpr auto operator||(const bound_is_predicate<T1>& lhs, const bound_is_predicate<T2>& rhs)
+    constexpr auto operator||(const bound_is_predicate<C1>& lhs, const bound_is_predicate<C2>& rhs)
     {
         return bound_is_one_of_predicate{ lhs.cmp, rhs.cmp };
     }
 
     template <
-        typename... Ts,
-        typename T,
-        typename = requires_t<is_comparison_type<T>>,
-        typename = requires_t<is_comparison_type<Ts>...>
+        typename... Cs,
+        typename C,
+        typename = requires_t<is_comparison_type<C>>,
+        typename = requires_t<is_comparison_type<Cs>...>
     >
     constexpr auto operator||(
-        const bound_is_one_of_predicate<Ts...>& lhs, const bound_is_predicate<T>& rhs
+        const bound_is_one_of_predicate<Cs...>& lhs, const bound_is_predicate<C>& rhs
     )
     {
         return std::apply(
             [&rhs](const auto&... cmps) {
-                return bound_is_one_of_predicate<Ts..., T>{ cmps..., rhs.cmp };
+                return bound_is_one_of_predicate{ cmps..., rhs.cmp };
             },
             lhs.cmps
         );
     }
 
     template <
-        typename T,
-        typename... Ts,
-        typename = requires_t<is_comparison_type<T>>,
-        typename = requires_t<is_comparison_type<Ts>...>
+        typename C,
+        typename... Cs,
+        typename = requires_t<is_comparison_type<C>>,
+        typename = requires_t<is_comparison_type<Cs>...>
     >
     constexpr auto operator||(
-        const bound_is_predicate<T>& lhs, const bound_is_one_of_predicate<Ts...>& rhs
+        const bound_is_predicate<C>& lhs, const bound_is_one_of_predicate<Cs...>& rhs
     )
     {
         return rhs || lhs;
     }
 
     template <
-        typename... Ts1,
-        typename... Ts2,
-        typename = requires_t<is_comparison_type<Ts1>...>,
-        typename = requires_t<is_comparison_type<Ts2>...>
+        typename... Cs1,
+        typename... Cs2,
+        typename = requires_t<is_comparison_type<Cs1>...>,
+        typename = requires_t<is_comparison_type<Cs2>...>
     >
     constexpr auto operator||(
-        const bound_is_one_of_predicate<Ts1...>& lhs, const bound_is_one_of_predicate<Ts2...>& rhs
+        const bound_is_one_of_predicate<Cs1...>& lhs, const bound_is_one_of_predicate<Cs2...>& rhs
     )
     {
         return std::apply(
@@ -569,26 +576,26 @@ namespace LL1
     }
 
     template <
-        typename T1,
-        typename T2,
-        typename = requires_t<is_comparison_type<T1>>,
-        typename = requires_t<is_comparison_type<T2>>
+        typename C1,
+        typename C2,
+        typename = requires_t<is_comparison_type<C1>>,
+        typename = requires_t<is_comparison_type<C2>>
     >
     constexpr auto operator&&(
-        const bound_is_not_predicate<T1>& lhs, const bound_is_not_predicate<T2>& rhs
+        const bound_is_not_predicate<C1>& lhs, const bound_is_not_predicate<C2>& rhs
     )
     {
         return bound_is_none_of_predicate{ lhs.cmp, rhs.cmp };
     }
 
     template <
-        typename... Ts,
-        typename T,
-        typename = requires_t<is_comparison_type<T>>,
-        typename = requires_t<is_comparison_type<Ts>...>
+        typename... Cs,
+        typename C,
+        typename = requires_t<is_comparison_type<Cs>...>,
+        typename = requires_t<is_comparison_type<C>>
     >
     constexpr auto operator&&(
-        const bound_is_none_of_predicate<Ts...>& lhs, const bound_is_not_predicate<T>& rhs
+        const bound_is_none_of_predicate<Cs...>& lhs, const bound_is_not_predicate<C>& rhs
     )
     {
         return std::apply(
@@ -600,27 +607,27 @@ namespace LL1
     }
 
     template <
-        typename T,
-        typename... Ts,
-        typename = requires_t<is_comparison_type<T>>,
-        typename = requires_t<is_comparison_type<Ts>...>
+        typename C,
+        typename... Cs,
+        typename = requires_t<is_comparison_type<C>>,
+        typename = requires_t<is_comparison_type<Cs>...>
     >
     constexpr auto operator&&(
-        const bound_is_not_predicate<T>& lhs, const bound_is_none_of_predicate<Ts...>& rhs
+        const bound_is_not_predicate<C>& lhs, const bound_is_none_of_predicate<Cs...>& rhs
     )
     {
         return rhs || lhs;
     }
 
     template <
-        typename... Ts1,
-        typename... Ts2,
-        typename = requires_t<is_comparison_type<Ts1>...>,
-        typename = requires_t<is_comparison_type<Ts2>...>
+        typename... Cs1,
+        typename... Cs2,
+        typename = requires_t<is_comparison_type<Cs1>...>,
+        typename = requires_t<is_comparison_type<Cs2>...>
     >
     constexpr auto operator&&(
-        const bound_is_none_of_predicate<Ts1...>& lhs,
-        const bound_is_none_of_predicate<Ts2...>& rhs
+        const bound_is_none_of_predicate<Cs1...>& lhs,
+        const bound_is_none_of_predicate<Cs2...>& rhs
     )
     {
         return std::apply(
@@ -633,19 +640,14 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'is' overloads
+    // bound predicate factories
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename T, typename = requires_t<is_comparison_type<T>>>
-    constexpr auto is(const T& cmp)
+    template <typename C, typename = requires_t<is_comparison_type<C>>>
+    constexpr auto is(const C& cmp)
     {
         return bound_is_predicate{ cmp };
     }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'is_not' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename C, typename = requires_t<is_comparison_type<C>>>
     constexpr auto is_not(const C& cmp)
@@ -653,21 +655,11 @@ namespace LL1
         return bound_is_not_predicate{ cmp };
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'is_one_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
     template <typename... Cs, typename = requires_t<is_comparison_type<Cs>...>>
     constexpr auto is_one_of(const Cs&... cmp)
     {
         return bound_is_one_of_predicate{ cmp... };
     }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'is_none_of' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename... Cs, typename = requires_t<is_comparison_type<Cs>...>>
     constexpr auto is_none_of(const Cs&... cmp)
@@ -713,12 +705,12 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
-        typename I,
         typename P,
-        typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<is_bound_predicate<P>>
+        typename I,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
     >
-    constexpr std::optional<typename I::char_type> read_if(I& ins, const P& pred)
+    constexpr std::optional<typename I::char_type> read_if(const P& pred, I& ins)
     {
         if (pred(ins))
             return read(ins);
@@ -727,13 +719,13 @@ namespace LL1
     }
 
     template <
-        typename I,
         typename P,
-        typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<is_bound_predicate<P>>
+        typename I,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
     >
     constexpr std::optional<typename I::char_type> read_if(
-        I& ins, code_position& pos, const P& pred
+        const P& pred, I& ins, code_position& pos
     )
     {
         if (pred(ins))
