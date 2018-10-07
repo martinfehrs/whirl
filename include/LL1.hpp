@@ -1,3 +1,7 @@
+#ifndef __LL1_HPP__
+#define __LL1_HPP__
+
+
 #include <istream>
 #include <vector>
 #include <optional>
@@ -32,14 +36,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // special token types
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    struct end_token {};
-    struct any_character {};
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // token type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -56,21 +52,10 @@ namespace LL1
     { };
 
     template <typename T>
-    struct is_special_token_type
-        : std::bool_constant<
-            std::disjunction_v<
-                std::is_same<T, end_token>,
-                std::is_same<T, any_character>
-            >
-        >
-    { };
-
-    template <typename T>
     struct is_token_type
         : std::bool_constant<
             std::disjunction_v<
-                is_character_type<T>,
-                is_special_token_type<T>
+                is_character_type<T>
             >
         >
     { };
@@ -107,8 +92,8 @@ namespace LL1
     struct is_compatible_character_type
         : std::bool_constant<
         std::conjunction_v<
-        are_character_types<T1, T2>,
-        equality_comparable<T1, T2>
+            are_character_types<T1, T2>,
+            equality_comparable<T1, T2>
         >
         >
     { };
@@ -147,14 +132,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // special tokens
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    constexpr end_token end;
-    constexpr any_character character;
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // comparison type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -164,15 +141,10 @@ namespace LL1
 
     template <typename T1, typename T2>
     struct is_compatible_comparison_type
-        : std::bool_constant<
-            std::disjunction_v<
-                std::conditional_t<
-                    is_character_type_v<T2>,
-                    is_compatible_character_type<T1, T2>,
-                    std::false_type
-                >,
-                is_special_token_type<T2>
-            >
+        : std::conditional_t<
+            is_character_type_v<T2>,
+            is_compatible_character_type<T1, T2>,
+            std::false_type
         >
     { };
 
@@ -292,10 +264,11 @@ namespace LL1
         template <typename I>
         constexpr auto operator()(I& ins) const
         {
-            return this->p1(ins) || this->p2(ins);
+            return this->pred1(ins) || this->pred2(ins);
         }
         
-        P1 pred1, pred2;
+        P1 pred1;
+        P2 pred2;
 
     };
 
@@ -328,12 +301,7 @@ namespace LL1
         template <typename I, typename = requires_t<is_compatible_input_source_type<I, C>>>
         constexpr auto operator()(I& ins) const
         {
-            if constexpr(std::is_same_v<C, any_character>)
-                return !input_source_traits<I>::is_end(ins);
-            else if constexpr(std::is_same_v<C, end_token>)
-                return input_source_traits<I>::is_end(ins);
-            else
-                return input_source_traits<I>::look_ahead(ins) == this->cmp;
+            return input_source_traits<I>::look_ahead(ins) == this->cmp;
         }
 
         C cmp;
@@ -351,12 +319,7 @@ namespace LL1
         template <typename I, typename = requires_t<is_compatible_input_source_type<I, C>>>
         constexpr auto operator()(I& ins) const
         {
-            if constexpr(std::is_same_v<C, any_character>)
-                return input_source_traits<I>::is_end(ins);
-            else if constexpr(std::is_same_v<C, end_token>)
-                return !input_source_traits<I>::is_end(ins);
-            else
-                return input_source_traits<I>::look_ahead(ins) != this->cmp;
+            return input_source_traits<I>::look_ahead(ins) != this->cmp;
         }
 
         C cmp;
@@ -394,10 +357,7 @@ namespace LL1
             : cmps{ cmps... }
         { }
 
-        template <
-            typename I,
-            typename = std::enable_if_t<std::conjunction_v<is_compatible_input_source_type<I, Cs>...>>
-        >
+        template <typename I, typename = requires_t<is_compatible_input_source_type<I, Cs>...>>
         constexpr auto operator()(I& ins) const
         {
             return std::apply(
@@ -409,6 +369,28 @@ namespace LL1
         }
 
         std::tuple<Cs...> cmps;
+
+    };
+
+    struct bound_is_end_predicate
+    {
+
+        template <typename I, typename = requires_t<is_input_source_type<I>>>
+        constexpr auto operator()(I& ins) const
+        {
+            return input_source_traits<I>::is_end(ins);
+        }
+
+    };
+
+    struct bound_is_character_predicate
+    {
+
+        template <typename I, typename = requires_t<is_input_source_type<I>>>
+        constexpr auto operator()(I& ins) const
+        {
+            return !input_source_traits<I>::is_end(ins);
+        }
 
     };
 
@@ -794,12 +776,13 @@ namespace LL1
         typename = requires_t<is_bound_predicate<P>>,
         typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next(const P& pred, I& ins)
+    constexpr void next(const P& pred, I& ins)
     {
         if(!pred(ins))
             throw unexpected_input{};
         
-        return read(ins);
+        if constexpr(!std::is_same_v<P, bound_is_end_predicate>)
+            read(ins);
     }
 
     template <
@@ -808,12 +791,13 @@ namespace LL1
         typename = requires_t<is_bound_predicate<P>>,
         typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next(const P& pred, I& ins, code_position& pos)
+    constexpr void next(const P& pred, I& ins, code_position& pos)
     {
         if(!pred(ins))
             throw unexpected_input{};
 
-        return read(ins, pos);
+        if constexpr(!std::is_same_v<P, bound_is_end_predicate>)
+            read(ins, pos);
     }
 
 
@@ -888,10 +872,126 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    // bound consumers
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename T>
+    struct bound_transforming_read
+    {
+
+        explicit constexpr bound_transforming_read(const T& trans)
+            : trans{ trans }
+        { }
+
+        template <typename I>
+        constexpr auto operator()(I& ins) const
+        {
+            return this->trans(read(ins));
+        }
+
+        template <typename I>
+        constexpr auto operator()(I& ins, code_position& pos) const
+        {
+            return this->trans(read(ins, pos));
+        }
+
+        T trans;
+
+    };
+
+    template <typename P>
+    struct bound_conditional_read
+    {
+
+        explicit constexpr bound_conditional_read(const P& pred)
+            : pred{ pred }
+        { }
+
+        template <typename I>
+        constexpr std::optional<typename I::char_type> operator()(I& ins) const
+        {
+            if (this->pred(ins))
+                return read(ins);
+            else
+                return std::nullopt;
+        }
+
+        template <typename I>
+        constexpr std::optional<typename I::char_type> operator()(I& ins, code_position& pos) const
+        {
+            if (this->pred(ins))
+                return read(ins, pos);
+            else
+                return std::nullopt;
+        }
+
+        P pred;
+
+    };
+
+    template <typename P, typename T>
+    struct bound_transforming_conditional_read
+    {
+
+        explicit constexpr bound_transforming_conditional_read(const P& pred, const T& trans)
+            : pred{ pred }
+            , trans{ trans }
+        { }
+
+        template <typename I>
+        constexpr std::optional<typename I::char_type> operator()(I& ins) const
+        {
+            if (this->pred(ins))
+                return this->trans(read(ins));
+            else
+                return std::nullopt;
+        }
+
+        template <typename I>
+        constexpr std::optional<typename I::char_type> operator()(I& ins, code_position& pos) const
+        {
+            if (this->pred(ins))
+                return this->trans(read(ins, pos));
+            else
+                return std::nullopt;
+        }
+
+        P pred;
+        T trans;
+
+    };
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // bound consumer factories
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    template <typename T>
+    constexpr auto read(const T& trans)
+    {
+        return bound_transforming_read{ trans };
+    }
+
+    template <typename P, typename = requires_t<is_bound_predicate<P>>>
+    constexpr auto read_if(const P& pred)
+    {
+        return bound_conditional_read{ pred };
+    }
+
+    template <typename P, typename T, typename = requires_t<is_bound_predicate<P>>>
+    constexpr auto read_if(const P& pred, const T& trans)
+    {
+        return bound_transforming_conditional_read{ pred, trans };
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // predefined bound predicates
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    constexpr auto is_character      = is(character);
+    constexpr auto is_end            = bound_is_end_predicate{};
+    constexpr auto is_character      = bound_is_character_predicate{};
     constexpr auto is_blank          = is_one_of(' ', '\t');
     constexpr auto is_space          = is_one_of(' ', '\t', '\n');
     constexpr auto is_zero           = is('0');
@@ -899,3 +999,6 @@ namespace LL1
     constexpr auto is_digit          = is_zero || is_non_zero_digit;
 
 }
+
+
+#endif /*__LL1_HPP__*/

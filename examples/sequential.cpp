@@ -1,92 +1,56 @@
-// EBNF:
-// =================================================================================================
-// end                    = ? virtual end token (not part of the character set) ? ;
-// non-zero-decimal-digit = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
-// decimal-digit          = "0" | non-zero-decimal-digit ;
-// whitespace             = " " | "\t" | "\n" ;
-// decimal-whole-number   =  ["-"], ( "0" | non-zero-decimal-digit, {decimal-digit} ) ;
-// data-entry             = decimal-whole-number, { whitespace };
-// data                   = { whitespace }, { data-entry }, end;
-// =================================================================================================
-
-#include "LL1.hpp"
-#include <fstream>
-#include <iostream>
-#include <sstream>
+#include "sequential.hpp"
 
 
-using namespace LL1;
-
-
-constexpr auto is_sign   = is('-');
-constexpr auto is_number = is_non_zero_digit || is_sign;
-
-
-auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
+int main(int argc, char** argv)
 {
-    auto has_sign = next_if(is_sign, ins, pos);
-    auto val = 0;
+    if (argc != 3)
+    {
+        if(argc < 2)
+            std::cerr << "missing input file\n"; 
 
-    if (is_zero(ins))
-    {
-        next(ins, pos);
-    }
-    else if (is_non_zero_digit(ins))
-    {
-        val = read(ins, pos) - '0';
+        if(argc < 3)
+            std::cerr << "missing output file\n";
 
-        while (is_digit(ins))
-            val = val * 10 + read(ins, pos) - '0';
-    }
-    else
-    {
-        throw unexpected_input{};
+        if(argc > 3)
+            std::cerr << "to many arguments\n";
+
+        return EXIT_FAILURE;
     }
 
-    return val * (has_sign ? -1 : 1);
-}
+    std::ifstream ifs(argv[1]);
+    std::ofstream ofs(argv[2]);
 
-auto read_data_entry(std::istream& ins, LL1::code_position& pos)
-{
-    auto temperature = read_decimal_whole_number(ins, pos);
-    next_while(is_space, ins, pos);
+    std::cout << "output file is: " << argv[2] << '\n';
 
-    return temperature;
-}
+    if (!ifs.is_open())
+    {
+        std::cerr << "file \"" << argv[1] << "\" not found\n";
+        return EXIT_FAILURE;
+    }
 
-auto read_data(std::istream& ins, LL1::code_position& pos)
-{
-    std::vector<int> temperatures;
-
-    next_while(is_space, ins, pos);
-
-    while(is_number(ins))
-        temperatures.push_back(read_data_entry(ins, pos));
-
-    return temperatures;
-}
-
-int main()
-{
-    std::locale::global(std::locale(""));
+    if (!ofs.is_open())
+    {
+        std::cerr << "file \"" << argv[2] << "\" not found\n";
+        return EXIT_FAILURE;
+    }
 
     LL1::code_position pos{ 1, 1 };
 
-    std::ifstream ifs("sequential_input.txt");
-
     try
     {
-        for(auto temperature : read_data(ifs, pos))
-           std::cout << temperature << "\n";
+        for(auto temperature : sequential::read_data(ifs, pos))
+            ofs << temperature << " ";
+
+        ofs.close();
 
         return EXIT_SUCCESS;
     }
-    catch(unexpected_input)
+    catch(LL1::unexpected_input)
     {
-        if (is_character(ifs))
+        if (LL1::is_character(ifs))
         {
             std::cerr << "unexpeced token "
-                << static_cast<char>(read(ifs))
+                << static_cast<char>(LL1::read(ifs))
                 << " at ("
                 << pos.row
                 << ", "

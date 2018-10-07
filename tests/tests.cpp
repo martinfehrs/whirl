@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 #include "LL1.hpp"
+#include "sequential.hpp"
 
 
 using namespace LL1;
@@ -62,11 +63,7 @@ TEST_CASE( "testing is function overloads", "[is]" )
 
         REQUIRE((is('a'      )(ins    )) == true );
         REQUIRE((is('b'      )(ins    )) == false);
-        REQUIRE((is(character)(ins    )) == true );
-        REQUIRE((is(end      )(ins    )) == false);
         REQUIRE((is('a'      )(ins_eof)) == false);
-        REQUIRE((is(character)(ins_eof)) == false);
-        REQUIRE((is(end      )(ins_eof)) == true );
     }
 
     SECTION("wchar_t tests")
@@ -76,11 +73,7 @@ TEST_CASE( "testing is function overloads", "[is]" )
 
         REQUIRE((is(L'a'     )(ins    )) == true );
         REQUIRE((is(L'b'     )(ins    )) == false);
-        REQUIRE((is(character)(ins    )) == true );
-        REQUIRE((is(end      )(ins    )) == false);
         REQUIRE((is(L'a'     )(ins_eof)) == false);
-        REQUIRE((is(character)(ins_eof)) == false);
-        REQUIRE((is(end      )(ins_eof)) == true );
     }
 
     SECTION("char16_t tests")
@@ -90,11 +83,7 @@ TEST_CASE( "testing is function overloads", "[is]" )
 
         REQUIRE((is(u'a'     )(ins    )) == true );
         REQUIRE((is(u'b'     )(ins    )) == false);
-        REQUIRE((is(character)(ins    )) == true );
-        REQUIRE((is(end      )(ins    )) == false);
         REQUIRE((is(u'a'     )(ins_eof)) == false);
-        REQUIRE((is(character)(ins_eof)) == false);
-        REQUIRE((is(end      )(ins_eof)) == true );
     }
 
     SECTION("char32_t tests")
@@ -104,11 +93,7 @@ TEST_CASE( "testing is function overloads", "[is]" )
 
         REQUIRE((is(U'a'     )(ins    )) == true );
         REQUIRE((is(U'b'     )(ins    )) == false);
-        REQUIRE((is(character)(ins    )) == true );
-        REQUIRE((is(end      )(ins    )) == false);
         REQUIRE((is(U'a'     )(ins_eof)) == false);
-        REQUIRE((is(character)(ins_eof)) == false);
-        REQUIRE((is(end      )(ins_eof)) == true );
     }
 }
 
@@ -121,11 +106,7 @@ TEST_CASE( "testing is_not function overloads", "[is-not]" )
 
         REQUIRE((is_not('a'      )(ins    )) == false);
         REQUIRE((is_not('b'      )(ins    )) == true );
-        REQUIRE((is_not(character)(ins    )) == false);
-        REQUIRE((is_not(end      )(ins    )) == true );
         REQUIRE((is_not('a'      )(ins_eof)) == true );
-        REQUIRE((is_not(character)(ins_eof)) == true );
-        REQUIRE((is_not(end      )(ins_eof)) == false);
     }
 
     SECTION("wchar_t tests")
@@ -135,11 +116,7 @@ TEST_CASE( "testing is_not function overloads", "[is-not]" )
 
         REQUIRE((is_not(L'a'      )(ins    )) == false);
         REQUIRE((is_not(L'b'      )(ins    )) == true );
-        REQUIRE((is_not(character)(ins     )) == false);
-        REQUIRE((is_not(end       )(ins    )) == true );
         REQUIRE((is_not(L'a'      )(ins_eof)) == true );
-        REQUIRE((is_not(character )(ins_eof)) == true );
-        REQUIRE((is_not(end       )(ins_eof)) == false);
     }
 
     SECTION("char16_t tests")
@@ -149,11 +126,7 @@ TEST_CASE( "testing is_not function overloads", "[is-not]" )
 
         REQUIRE((is_not(u'a'      )(ins    )) == false);
         REQUIRE((is_not(u'b'      )(ins    )) == true );
-        REQUIRE((is_not(character )(ins    )) == false);
-        REQUIRE((is_not(end       )(ins    )) == true );
         REQUIRE((is_not(u'a'      )(ins_eof)) == true );
-        REQUIRE((is_not(character )(ins_eof)) == true );
-        REQUIRE((is_not(end       )(ins_eof)) == false);
     }
 
     SECTION("char32_t tests")
@@ -163,11 +136,7 @@ TEST_CASE( "testing is_not function overloads", "[is-not]" )
 
         REQUIRE((is_not(U'a'      )(ins    )) == false);
         REQUIRE((is_not(U'b'      )(ins    )) == true );
-        REQUIRE((is_not(character )(ins    )) == false);
-        REQUIRE((is_not(end       )(ins    )) == true );
         REQUIRE((is_not(U'a'      )(ins_eof)) == true );
-        REQUIRE((is_not(character )(ins_eof)) == true );
-        REQUIRE((is_not(end       )(ins_eof)) == false);
     }
 }
 
@@ -292,5 +261,44 @@ TEST_CASE( "testing is_none_of function overloads", "[is-none-of]" )
     }
 }
 
+TEST_CASE("testing sequential example", "[sequential]")
+{
+    SECTION("valid input")
+    {
+        static constexpr int expected_result[] = {
+            -3, -3, -2, -1, 0, -1, 0, 1, 1, 2, 2, 2, 4, 5, 8
+        };
+
+        LL1::code_position pos{ 1, 1 };
+
+        std::ifstream ifs("sequential.inp");
+
+        REQUIRE(ifs.is_open());
+
+        const auto result = sequential::read_data(ifs, pos);
+
+        REQUIRE(std::equal(std::begin(result), std::end(result), std::begin(expected_result)));
+    }
+
+    SECTION("invalid input")
+    {
+        LL1::code_position pos{ 1, 1 };
+
+        std::ifstream ifs("sequential_invalid.inp");
+
+        REQUIRE_THROWS(sequential::read_data(ifs, pos));
+    }
+
+    SECTION("empty input")
+    {
+        LL1::code_position pos{ 1, 1 };
+
+        std::istringstream iss;
+
+        const auto result = sequential::read_data(iss, pos);
+
+        REQUIRE(result.empty());
+    }
+}
 
 
