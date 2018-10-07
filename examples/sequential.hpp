@@ -9,9 +9,9 @@
 // decimal-digit          = "0" | non-zero-decimal-digit ;
 // whitespace             = " " | "\t" | "\n" ;
 // decimal-whole-number   =  ["-"], ( "0" | non-zero-decimal-digit, {decimal-digit} ) ;
-// separator              = end | whitespace, { whitespace } ;
-// data-entry             = decimal-whole-number, separator ;
-// data                   = { whitespace }, { data-entry } ;
+// separator              = whitespace, { whitespace } ;
+// data-entry             = decimal-whole-number, ( separator | end ) ;
+// data                   = { whitespace }, { data-entry }, end ;
 // =================================================================================================
 
 
@@ -24,11 +24,11 @@
 namespace sequential
 {
 
-    constexpr auto is_separator = LL1::is_end || LL1::is_space;
+    constexpr auto is_separator = LL1::is_space;
     constexpr auto is_sign      = LL1::is('-');
     constexpr auto is_number    = LL1::is_digit || is_sign;
 
-    constexpr auto read_sign  = LL1::read_if(is_sign, [](const auto& c){ return - 1; });
+    constexpr auto read_sign  = LL1::read_if(is_sign, [](const auto&){ return -1; });
     constexpr auto read_digit = LL1::read([](const auto& c){ return c - '0'; });
 
 
@@ -59,8 +59,21 @@ namespace sequential
     auto read_data_entry(std::istream& ins, LL1::code_position& pos)
     {
         auto temperature = read_decimal_whole_number(ins, pos);
-        LL1::next(is_separator, ins, pos);
-        LL1::next_while(LL1::is_space, ins, pos);
+
+        if(is_separator(ins))
+        {
+            LL1::next(ins, pos);
+            LL1::next_while(LL1::is_space, ins, pos);
+        }
+        else if (LL1::is_end(ins))
+        {
+            // No seperator needed at the end of the input sequence.
+            // Nothing to do here.
+        }
+        else
+        {
+            throw LL1::unexpected_input{};
+        }
 
         return temperature;
     }
@@ -74,7 +87,6 @@ namespace sequential
         while(is_number(ins))
             temperatures.push_back(read_data_entry(ins, pos));
 
-        LL1::next_while(LL1::is_space, ins, pos);
         LL1::next(LL1::is_end, ins, pos);
 
         return temperatures;
