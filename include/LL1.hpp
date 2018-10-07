@@ -36,7 +36,7 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // token type traits
+    // character type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename T>
@@ -51,31 +51,8 @@ namespace LL1
         >
     { };
 
-    template <typename T>
-    struct is_token_type
-        : std::bool_constant<
-            std::disjunction_v<
-                is_character_type<T>
-            >
-        >
-    { };
-
     template <typename... Ts>
-    struct are_character_types
-        : std::bool_constant<
-            std::disjunction_v<
-                is_character_type<Ts>...
-            >
-        >
-    { };
-
-    template <typename... Ts>
-    struct are_token_types
-        : std::bool_constant<
-            std::disjunction_v<
-                is_token_type<Ts>...
-            >
-        >
+    struct are_character_types : std::bool_constant<std::conjunction_v<is_character_type<Ts>...>>
     { };
 
     template <typename T1, typename T2, typename = void>
@@ -91,18 +68,9 @@ namespace LL1
     template <typename T1, typename T2>
     struct is_compatible_character_type
         : std::bool_constant<
-        std::conjunction_v<
-            are_character_types<T1, T2>,
-            equality_comparable<T1, T2>
-        >
-        >
-    { };
-
-    template <typename T1, typename T2>
-    struct is_compatible_token_type
-        : std::bool_constant<
             std::conjunction_v<
-                are_token_types<T1, T2>,
+                is_character_type<T1>,
+                is_character_type<T2>,
                 equality_comparable<T1, T2>
             >
         >
@@ -112,47 +80,11 @@ namespace LL1
     template <typename T>
     constexpr auto is_character_type_v = is_character_type<T>::value;
 
-    template <typename T>
-    constexpr auto is_special_token_type_v = is_special_token_type<T>::value;
-
-    template <typename T>
-    constexpr auto is_token_type_v = is_token_type<T>::value;
-
     template <typename... Ts>
     constexpr auto are_character_types_v = are_character_types<Ts...>::value;
 
-    template <typename... Ts>
-    constexpr auto are_token_types_v = are_token_types<Ts...>::value;
-
     template <typename T1, typename T2>
     constexpr auto is_compatible_character_type_v = is_compatible_character_type<T1, T2>::value;
-
-    template <typename T1, typename T2>
-    constexpr auto is_compatible_token_type_v = is_compatible_token_type<T1, T2>::value;
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // comparison type traits
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <typename T>
-    struct is_comparison_type : std::bool_constant<is_token_type_v<T>>
-    { };
-
-    template <typename T1, typename T2>
-    struct is_compatible_comparison_type
-        : std::conditional_t<
-            is_character_type_v<T2>,
-            is_compatible_character_type<T1, T2>,
-            std::false_type
-        >
-    { };
-
-    template <typename T>
-    constexpr auto is_comparison_type_v = is_comparison_type<T>::value;
-
-    template <typename T1, typename T2>
-    constexpr auto is_compatible_comparison_type_v = is_compatible_comparison_type<T1, T2>::value;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -180,6 +112,11 @@ namespace LL1
             return ins.get();
         }
 
+        static void ignore(std::basic_istream<T, Ts...>& ins)
+        {
+            return ins.ignore();
+        }
+
         static auto is_end(std::basic_istream<T, Ts...>& ins)
         {
             return ins.peek() == std::char_traits<T>::eof();
@@ -191,12 +128,13 @@ namespace LL1
 
     template <typename T1, typename T2>
     struct is_input_source_trait_class_type_impl<T1, T2, std::void_t<
-        requires_t<is_token_type<typename T1::char_type>>,
+        requires_t<is_character_type<typename T1::char_type>>,
         requires_type_t<decltype(T1::look_ahead(std::declval<T2&>())), typename T1::char_type>,
         requires_type_t<decltype(T1::read(std::declval<T2&>())), typename T1::char_type>,
+        requires_type_t<decltype(T1::ignore(std::declval<T2&>())), void>,
         requires_type_t<decltype(T1::is_end(std::declval<T2&>())), bool>
     >>
-        : is_token_type<decltype(T1::read(std::declval<T2&>()))>
+        : is_character_type<decltype(T1::read(std::declval<T2&>()))>
     { };
 
     template <typename T>
@@ -217,7 +155,7 @@ namespace LL1
 
     template <typename T1, typename T2>
     struct is_compatible_input_source_type<T1, T2, std::enable_if_t<is_input_source_type<T1>::value>>
-	    : is_compatible_comparison_type<typename input_source_traits<T1>::char_type, T2>
+	    : is_compatible_character_type<typename input_source_traits<T1>::char_type, T2>
     { };
 
     template <typename T1>
@@ -294,6 +232,9 @@ namespace LL1
     struct bound_is_predicate
     {
 
+        static_assert(is_character_type_v<C>);
+
+
         explicit constexpr bound_is_predicate(const C& cmp)
             : cmp{ cmp }
         { }
@@ -312,6 +253,9 @@ namespace LL1
     struct bound_is_not_predicate
     {
 
+        static_assert(is_character_type_v<C>);
+
+
         explicit constexpr bound_is_not_predicate(const C& cmp)
             : cmp{ cmp }
         { }
@@ -326,9 +270,14 @@ namespace LL1
 
     };
 
+
+
     template <typename... Cs>
     struct bound_is_one_of_predicate
     {
+
+        static_assert(are_character_types_v<Cs...>);
+
 
         explicit constexpr bound_is_one_of_predicate(const Cs&... cmps)
             : cmps{ cmps... }
@@ -352,6 +301,9 @@ namespace LL1
     template <typename... Cs>
     struct bound_is_none_of_predicate
     {
+
+        static_assert(are_character_types_v<Cs...>);
+
 
         explicit constexpr bound_is_none_of_predicate(const Cs&... cmps)
             : cmps{ cmps... }
@@ -463,19 +415,19 @@ namespace LL1
     // specialzed optimized logical bound predicate operations
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename C, typename = requires_t<is_comparison_type<C>>>
+    template <typename C, typename = requires_t<is_character_type<C>>>
     constexpr auto operator!(const bound_is_predicate<C>& p)
     {
         return bound_is_not_predicate<T>{ p.cmp };
     }
 
-    template <typename C, typename = requires_t<is_comparison_type<C>>>
+    template <typename C, typename = requires_t<is_character_type<C>>>
     constexpr auto operator!(const bound_is_not_predicate<C>& p)
     {
         return bound_is_predicate<T>{ p.cmp };
     }
 
-    template <typename... Cs, typename = requires_t<is_comparison_type<Cs>...>>
+    template <typename... Cs, typename = requires_t<are_character_types<Cs...>>>
     constexpr auto operator!(const bound_is_one_of_predicate<Cs...>& p)
     {
         return std::apply(
@@ -486,7 +438,7 @@ namespace LL1
         );
     }
 
-    template <typename... Cs, typename = requires_t<is_comparison_type<Cs>...>>
+    template <typename... Cs, typename = requires_t<are_character_types<Cs...>>>
     constexpr auto operator!(const bound_is_none_of_predicate<Cs...>& p)
     {
         return std::apply(
@@ -497,23 +449,13 @@ namespace LL1
         );
     }
 
-    template <
-        typename C1,
-        typename C2,
-        typename = requires_t<is_comparison_type<C1>>,
-        typename = requires_t<is_comparison_type<C2>>
-    >
+    template <typename C1, typename C2, typename = requires_t<are_character_types<C1, C2>>>
     constexpr auto operator||(const bound_is_predicate<C1>& lhs, const bound_is_predicate<C2>& rhs)
     {
         return bound_is_one_of_predicate{ lhs.cmp, rhs.cmp };
     }
 
-    template <
-        typename... Cs,
-        typename C,
-        typename = requires_t<is_comparison_type<C>>,
-        typename = requires_t<is_comparison_type<Cs>...>
-    >
+    template <typename... Cs, typename C, typename = requires_t<are_character_types<C, Cs...>>>
     constexpr auto operator||(
         const bound_is_one_of_predicate<Cs...>& lhs, const bound_is_predicate<C>& rhs
     )
@@ -526,12 +468,7 @@ namespace LL1
         );
     }
 
-    template <
-        typename C,
-        typename... Cs,
-        typename = requires_t<is_comparison_type<C>>,
-        typename = requires_t<is_comparison_type<Cs>...>
-    >
+    template <typename C, typename... Cs, typename = requires_t<are_character_types<C, Cs...>>>
     constexpr auto operator||(
         const bound_is_predicate<C>& lhs, const bound_is_one_of_predicate<Cs...>& rhs
     )
@@ -540,10 +477,7 @@ namespace LL1
     }
 
     template <
-        typename... Cs1,
-        typename... Cs2,
-        typename = requires_t<is_comparison_type<Cs1>...>,
-        typename = requires_t<is_comparison_type<Cs2>...>
+        typename... Cs1, typename... Cs2, typename = requires_t<are_character_types<Cs1..., Cs2...>>
     >
     constexpr auto operator||(
         const bound_is_one_of_predicate<Cs1...>& lhs, const bound_is_one_of_predicate<Cs2...>& rhs
@@ -557,12 +491,7 @@ namespace LL1
         );
     }
 
-    template <
-        typename C1,
-        typename C2,
-        typename = requires_t<is_comparison_type<C1>>,
-        typename = requires_t<is_comparison_type<C2>>
-    >
+    template <typename C1, typename C2, typename = requires_t<are_character_types<C1, C2>>>
     constexpr auto operator&&(
         const bound_is_not_predicate<C1>& lhs, const bound_is_not_predicate<C2>& rhs
     )
@@ -573,8 +502,8 @@ namespace LL1
     template <
         typename... Cs,
         typename C,
-        typename = requires_t<is_comparison_type<Cs>...>,
-        typename = requires_t<is_comparison_type<C>>
+        typename = requires_t<is_character_type<Cs>...>,
+        typename = requires_t<is_character_type<C>>
     >
     constexpr auto operator&&(
         const bound_is_none_of_predicate<Cs...>& lhs, const bound_is_not_predicate<C>& rhs
@@ -588,12 +517,7 @@ namespace LL1
         );
     }
 
-    template <
-        typename C,
-        typename... Cs,
-        typename = requires_t<is_comparison_type<C>>,
-        typename = requires_t<is_comparison_type<Cs>...>
-    >
+    template <typename C, typename... Cs, typename = requires_t<are_character_types<C, Cs...>>>
     constexpr auto operator&&(
         const bound_is_not_predicate<C>& lhs, const bound_is_none_of_predicate<Cs...>& rhs
     )
@@ -602,10 +526,7 @@ namespace LL1
     }
 
     template <
-        typename... Cs1,
-        typename... Cs2,
-        typename = requires_t<is_comparison_type<Cs1>...>,
-        typename = requires_t<is_comparison_type<Cs2>...>
+        typename... Cs1, typename... Cs2, typename = requires_t<are_character_types<Cs1..., Cs2...>>
     >
     constexpr auto operator&&(
         const bound_is_none_of_predicate<Cs1...>& lhs,
@@ -625,25 +546,25 @@ namespace LL1
     // bound predicate factories
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename C, typename = requires_t<is_comparison_type<C>>>
+    template <typename C, typename = requires_t<is_character_type<C>>>
     constexpr auto is(const C& cmp)
     {
         return bound_is_predicate{ cmp };
     }
 
-    template <typename C, typename = requires_t<is_comparison_type<C>>>
+    template <typename C, typename = requires_t<is_character_type<C>>>
     constexpr auto is_not(const C& cmp)
     {
         return bound_is_not_predicate{ cmp };
     }
 
-    template <typename... Cs, typename = requires_t<is_comparison_type<Cs>...>>
+    template <typename... Cs, typename = requires_t<are_character_types<Cs...>>>
     constexpr auto is_one_of(const Cs&... cmp)
     {
         return bound_is_one_of_predicate{ cmp... };
     }
 
-    template <typename... Cs, typename = requires_t<is_comparison_type<Cs>...>>
+    template <typename... Cs, typename = requires_t<are_character_types<Cs...>>>
     constexpr auto is_none_of(const Cs&... cmp)
     {
         return bound_is_none_of_predicate{ cmp... };
@@ -651,22 +572,91 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'read' overloads
+    // predefined bound predicates
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    constexpr auto is_end            = bound_is_end_predicate{};
+    constexpr auto is_character      = bound_is_character_predicate{};
+    constexpr auto is_blank          = is_one_of(' ', '\t');
+    constexpr auto is_space          = is_one_of(' ', '\t', '\n');
+    constexpr auto is_zero           = is('0');
+    constexpr auto is_non_zero_digit = is_one_of('1', '2', '3', '4', '5', '6', '7', '8', '9');
+    constexpr auto is_digit          = is_zero || is_non_zero_digit;
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // transformators
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    struct as_is_transform
+    {
+        template <typename C, typename = requires_t<is_character_type<C>>>
+        constexpr auto operator()(const C& c) const
+        {
+            return c;
+        }
+    };
+
+    struct as_digit_transform
+    {
+        template <typename C, typename = requires_t<is_character_type<C>>>
+        constexpr auto operator()(const C& c) const
+        {
+            return c - '0';
+        }
+    };
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // transformator factories
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    constexpr auto as_is = as_is_transform{};
+    constexpr auto as_digit = as_digit_transform{};
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // 'next' overloads
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename I, typename = requires_t<is_input_source_type<I>>>
-    constexpr auto read(I& ins)
+    constexpr void next(I& ins)
     {
         if (input_source_traits<I>::is_end(ins))
             throw unexpected_input{};
 
-        return ins.get();
+        input_source_traits<I>::ignore(ins);
+    }
+
+    template <typename I, typename T, typename = requires_t<is_input_source_type<I>>>
+    constexpr auto next(I& ins, const T& trans)
+    {
+        if (input_source_traits<I>::is_end(ins))
+            throw unexpected_input{};
+
+        return trans(input_source_traits<I>::read(ins));
     }
 
     template <typename I, typename = requires_t<is_input_source_type<I>>>
-    constexpr auto read(I& ins, code_position& pos)
+    constexpr void next(I& ins, code_position& pos)
     {
-        auto tok = read(ins);
+        const auto tok = next(ins, as_is);
+
+        if (tok == '\n')
+        {
+            pos.row++;
+            pos.col = 0;
+        }
+        else
+        {
+            pos.col++;
+        }
+    }
+
+    template <typename I, typename T, typename = requires_t<is_input_source_type<I>>>
+    constexpr auto next(I& ins, code_position& pos, const T& trans)
+    {
+        const auto tok = next(ins, trans);
 
         if (tok == '\n')
         {
@@ -681,95 +671,6 @@ namespace LL1
         return tok;
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'read_if' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        typename P,
-        typename I,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
-    >
-    constexpr std::optional<typename I::char_type> read_if(const P& pred, I& ins)
-    {
-        if (pred(ins))
-            return read(ins);
-        else
-            return std::nullopt;
-    }
-
-    template <
-        typename P,
-        typename I,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
-    >
-    constexpr std::optional<typename I::char_type> read_if(
-        const P& pred, I& ins, code_position& pos
-    )
-    {
-        if (pred(ins))
-            return read(ins, pos);
-        else
-            return std::nullopt;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'read_while' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <
-        typename P,
-        typename I,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
-    >
-    constexpr auto read_while(const P& pred, I& ins)
-    {
-        std::basic_string<typename I::char_type> tokseq;
-
-        while (is(ins, cmp))
-            tokseq.push_back(read(ins));
-
-        return tokseq;
-    }
-
-    template <
-        typename P,
-        typename I,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
-    >
-    constexpr auto read_while(const P& pred, I& ins, code_position& pos)
-    {
-        std::basic_string<typename I::char_type> tokseq;
-
-        while (is(ins, cmp))
-            tokseq.push_back(read(ins, pos));
-
-        return tokseq;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // 'next' overloads
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template <typename I, typename = requires_t<is_input_source_type<I>>>
-    constexpr void next(I& ins)
-    {
-        read(ins);
-    }
-
-    template <typename I, typename = requires_t<is_input_source_type<I>>>
-    constexpr void next(I& ins, code_position& pos)
-    {
-        read(ins, pos);
-    }
-
     template <
         typename P,
         typename I,
@@ -780,9 +681,23 @@ namespace LL1
     {
         if(!pred(ins))
             throw unexpected_input{};
-        
-        if constexpr(!std::is_same_v<P, bound_is_end_predicate>)
-            read(ins);
+
+        next(ins);
+    }
+
+    template <
+        typename P,
+        typename I,
+        typename T,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
+    >
+    constexpr auto next(const P& pred, I& ins, const T& trans)
+    {
+        if(!pred(ins))
+            throw unexpected_input{};
+
+        return next(ins, trans);
     }
 
     template <
@@ -796,8 +711,28 @@ namespace LL1
         if(!pred(ins))
             throw unexpected_input{};
 
-        if constexpr(!std::is_same_v<P, bound_is_end_predicate>)
-            read(ins, pos);
+        if constexpr(std::is_same_v<P, bound_is_end_predicate>)
+            return;
+
+        next(ins, pos);
+    }
+
+    template <
+        typename P,
+        typename I,
+        typename T,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
+    >
+    constexpr auto next(const P& pred, I& ins, code_position& pos, const T& trans)
+    {
+        if(!pred(ins))
+            throw unexpected_input{};
+
+        if constexpr(std::is_same_v<P, bound_is_end_predicate>)
+            return;
+
+        return next(ins, pos, trans);
     }
 
 
@@ -811,9 +746,25 @@ namespace LL1
         typename = requires_t<is_bound_predicate<P>>,
         typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next_if(const P& pred, I& ins)
+    constexpr void next_if(const P& pred, I& ins)
     {
-        return pred(ins) ? next(ins), true : false;
+        if (pred(ins))
+            next(ins);
+    }
+
+    template <
+        typename P,
+        typename I,
+        typename T,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
+    >
+    constexpr std::optional<typename I::char_type> next_if(const P& pred, I& ins, const T& trans)
+    {
+        if (pred(ins))
+            return next(ins, trans);
+        else
+            return std::nullopt;
     }
 
     template <
@@ -822,9 +773,27 @@ namespace LL1
         typename = requires_t<is_bound_predicate<P>>,
         typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next_if(const P& pred, I& ins, code_position& pos)
+    constexpr void next_if(const P& pred, I& ins, code_position& pos)
     {
-        return pred(ins) ? next(ins, pos), true : false;
+        if (pred(ins))
+           next(ins, pos);
+    }
+
+    template <
+        typename P,
+        typename I,
+        typename T,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
+    >
+    constexpr std::optional<typename I::char_type> next_if(
+        const P& pred, I& ins, code_position& pos, const T& trans
+    )
+    {
+        if (pred(ins))
+            return next(ins, pos, trans);
+        else
+            return std::nullopt;
     }
 
 
@@ -838,17 +807,27 @@ namespace LL1
         typename = requires_t<is_bound_predicate<P>>,
         typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next_while(const P& pred, I& ins)
+    constexpr void next_while(const P& pred, I& ins)
     {
-        unsigned count = 0;
+        while (pred(ins))
+            read(ins);
+    }
+
+    template <
+        typename P,
+        typename I,
+        typename T,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
+    >
+    constexpr auto next_while(const P& pred, I& ins, const T& trans)
+    {
+        std::basic_string<typename I::char_type> tokseq;
 
         while (pred(ins))
-        {
-            ignore(ins);
-            count++;
-        }
+            tokseq.push_back(read(ins, trans));
 
-        return count;
+        return tokseq;
     }
 
     template <
@@ -859,15 +838,25 @@ namespace LL1
     >
     constexpr auto next_while(const P& pred, I& ins, code_position& pos)
     {
-        unsigned count = 0;
-
-        while(pred(ins))
-        {
+        while (pred(ins))
             next(ins, pos);
-            count++;
-        }
+    }
 
-        return count;
+    template <
+        typename P,
+        typename I,
+        typename T,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>
+    >
+    constexpr auto next_while(const P& pred, I& ins, code_position& pos, const T& trans)
+    {
+        std::basic_string<typename I::char_type> tokseq;
+
+        while (pred(ins))
+            tokseq.push_back(next(ins, pos, trans));
+
+        return tokseq;
     }
 
 
@@ -886,13 +875,13 @@ namespace LL1
         template <typename I>
         constexpr auto operator()(I& ins) const
         {
-            return this->trans(read(ins));
+            return next(ins, this->trans);
         }
 
         template <typename I>
         constexpr auto operator()(I& ins, code_position& pos) const
         {
-            return this->trans(read(ins, pos));
+            return next(ins, pos, this->trans);
         }
 
         T trans;
@@ -903,6 +892,9 @@ namespace LL1
     struct bound_conditional_read
     {
 
+        static_assert(is_bound_predicate_v<P>);
+
+
         explicit constexpr bound_conditional_read(const P& pred)
             : pred{ pred }
         { }
@@ -911,7 +903,7 @@ namespace LL1
         constexpr std::optional<typename I::char_type> operator()(I& ins) const
         {
             if (this->pred(ins))
-                return read(ins);
+                return next(ins);
             else
                 return std::nullopt;
         }
@@ -920,7 +912,7 @@ namespace LL1
         constexpr std::optional<typename I::char_type> operator()(I& ins, code_position& pos) const
         {
             if (this->pred(ins))
-                return read(ins, pos);
+                return next(ins, pos);
             else
                 return std::nullopt;
         }
@@ -933,6 +925,9 @@ namespace LL1
     struct bound_transforming_conditional_read
     {
 
+        static_assert(is_bound_predicate_v<P>);
+
+
         explicit constexpr bound_transforming_conditional_read(const P& pred, const T& trans)
             : pred{ pred }
             , trans{ trans }
@@ -942,7 +937,7 @@ namespace LL1
         constexpr std::optional<typename I::char_type> operator()(I& ins) const
         {
             if (this->pred(ins))
-                return this->trans(read(ins));
+                return next(ins, this->trans);
             else
                 return std::nullopt;
         }
@@ -951,7 +946,7 @@ namespace LL1
         constexpr std::optional<typename I::char_type> operator()(I& ins, code_position& pos) const
         {
             if (this->pred(ins))
-                return this->trans(read(ins, pos));
+                return next(ins, pos, this->trans);
             else
                 return std::nullopt;
         }
@@ -966,37 +961,23 @@ namespace LL1
     // bound consumer factories
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-
     template <typename T>
-    constexpr auto read(const T& trans)
+    constexpr auto next(const T& trans)
     {
         return bound_transforming_read{ trans };
     }
 
     template <typename P, typename = requires_t<is_bound_predicate<P>>>
-    constexpr auto read_if(const P& pred)
+    constexpr auto next_if(const P& pred)
     {
         return bound_conditional_read{ pred };
     }
 
     template <typename P, typename T, typename = requires_t<is_bound_predicate<P>>>
-    constexpr auto read_if(const P& pred, const T& trans)
+    constexpr auto next_if(const P& pred, const T& trans)
     {
         return bound_transforming_conditional_read{ pred, trans };
     }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // predefined bound predicates
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    constexpr auto is_end            = bound_is_end_predicate{};
-    constexpr auto is_character      = bound_is_character_predicate{};
-    constexpr auto is_blank          = is_one_of(' ', '\t');
-    constexpr auto is_space          = is_one_of(' ', '\t', '\n');
-    constexpr auto is_zero           = is('0');
-    constexpr auto is_non_zero_digit = is_one_of('1', '2', '3', '4', '5', '6', '7', '8', '9');
-    constexpr auto is_digit          = is_zero || is_non_zero_digit;
 
 }
 

@@ -23,13 +23,12 @@
 
 namespace sequential
 {
-
     constexpr auto is_separator = LL1::is_space;
     constexpr auto is_sign      = LL1::is('-');
     constexpr auto is_number    = LL1::is_digit || is_sign;
 
-    constexpr auto read_sign  = LL1::read_if(is_sign, [](const auto&){ return -1; });
-    constexpr auto read_digit = LL1::read([](const auto& c){ return c - '0'; });
+    constexpr auto read_sign  = LL1::next_if(is_sign, [](const auto&){ return -1; });
+    constexpr auto read_digit = LL1::next(LL1::as_digit);
 
 
     auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
@@ -39,7 +38,7 @@ namespace sequential
 
         if (LL1::is_zero(ins))
         {
-            next(ins, pos);
+            LL1::next(ins, pos);
         }
         else if (LL1::is_non_zero_digit(ins))
         {

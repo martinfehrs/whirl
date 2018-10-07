@@ -24,6 +24,10 @@ struct input_stream_dummy
         return tok;
     }
 
+    constexpr void ignore() noexcept
+    {
+    }
+
     typename std::char_traits<T>::int_type tok;
 
 };
@@ -44,6 +48,11 @@ namespace LL1
         static constexpr char_type read(input_stream_dummy<T>& ins) noexcept
         {
             return ins.get();
+        }
+
+        static constexpr void ignore(input_stream_dummy<T>& ins) noexcept
+        {
+            ins.ignore()
         }
 
         static constexpr bool is_end(input_stream_dummy<T>& ins) noexcept
