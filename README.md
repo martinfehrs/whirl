@@ -36,18 +36,19 @@ non-zero-decimal-digit = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 decimal-digit          = "0" | non-zero-decimal-digit ;
 whitespace             = " " | "\t" | "\n" ;
 decimal-whole-number   =  ["-"], ( "0" | non-zero-decimal-digit, {decimal-digit} ) ;
-separator              = whitespace, { whitespace } ;
-data-entry             = decimal-whole-number, ( separator | end ) ;
-data                   = { whitespace }, { data-entry }, end ;
+separator              = { whitespace }- ;
+data-entry             = ( decimal-whole-number, ( ( separator, data-entry ) | end ) ) ) | end;
+data                   = { whitespace }, data-entry ;
 ```
 
 ```C++
-    constexpr auto is_separator = LL1::is_space;
-    constexpr auto is_sign      = LL1::is('-');
-    constexpr auto is_number    = LL1::is_digit || is_sign;
+    constexpr auto is_separator      = LL1::is_space;
+    constexpr auto is_sign           = LL1::is('-');
+    constexpr auto is_number         = LL1::is_digit || is_sign;
 
-    constexpr auto read_sign  = LL1::read_if(is_sign, [](const auto&){ return -1; });
-    constexpr auto read_digit = LL1::read([](const auto& c){ return c - '0'; });
+    constexpr auto read_sign         = LL1::next_if(is_sign, [](const auto&){ return -1; });
+    constexpr auto read_digit        = LL1::next(LL1::as_digit);
+    constexpr auto ignore_whitespace = LL1::next_while(LL1::is_space);
 
 
     auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
@@ -57,7 +58,7 @@ data                   = { whitespace }, { data-entry }, end ;
 
         if (LL1::is_zero(ins))
         {
-            next(ins, pos);
+            LL1::next(ins, pos);
         }
         else if (LL1::is_non_zero_digit(ins))
         {
@@ -74,40 +75,51 @@ data                   = { whitespace }, { data-entry }, end ;
         return val * sign.value_or(1);
     }
 
-    auto read_data_entry(std::istream& ins, LL1::code_position& pos)
+    std::vector<int> read_data_entry(std::istream& ins, LL1::code_position& pos)
     {
-        auto temperature = read_decimal_whole_number(ins, pos);
+        std::vector<int> temperatures;
 
-        if(is_separator(ins))
+        if (is_number(ins))
         {
-            LL1::next(ins, pos);
-            LL1::next_while(LL1::is_space, ins, pos);
+            temperatures.push_back(read_decimal_whole_number(ins, pos));
+        
+            if (is_separator(ins))
+            {
+                LL1::next(ins, pos);
+                ignore_whitespace(ins, pos);
+                const auto further_temperatures = read_data_entry(ins, pos);
+                
+                temperatures.insert(
+                    std::end(temperatures),
+                    std::begin(further_temperatures), std::end(further_temperatures)
+                );
+                
+                return temperatures;
+            }
+            else if(LL1::is_end(ins))
+            {
+                return temperatures;
+            }
+            else
+            {
+                throw LL1::unexpected_input{};
+            }
         }
         else if (LL1::is_end(ins))
         {
-            // No seperator needed at the end of the input sequence.
-            // Nothing to do here.
+            return temperatures;
         }
         else
         {
             throw LL1::unexpected_input{};
         }
-
-        return temperature;
     }
 
     auto read_data(std::istream& ins, LL1::code_position& pos)
     {
-        std::vector<int> temperatures;
+        ignore_whitespace(ins, pos);
 
-        LL1::next_while(LL1::is_space, ins, pos);
-
-        while(is_number(ins))
-            temperatures.push_back(read_data_entry(ins, pos));
-
-        LL1::next(LL1::is_end, ins, pos);
-
-        return temperatures;
+        return read_data_entry(ins, pos);
     }
 ```
 

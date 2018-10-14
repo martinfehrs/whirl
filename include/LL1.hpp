@@ -810,7 +810,7 @@ namespace LL1
     constexpr void next_while(const P& pred, I& ins)
     {
         while (pred(ins))
-            read(ins);
+            next(ins);
     }
 
     template <
@@ -825,7 +825,7 @@ namespace LL1
         std::basic_string<typename I::char_type> tokseq;
 
         while (pred(ins))
-            tokseq.push_back(read(ins, trans));
+            tokseq.push_back(next(ins, trans));
 
         return tokseq;
     }
@@ -956,6 +956,33 @@ namespace LL1
 
     };
 
+    template <typename P>
+    struct bound_conditional_multi_read
+    {
+
+        static_assert(is_bound_predicate_v<P>);
+
+
+        explicit constexpr bound_conditional_multi_read(const P& pred)
+            : pred{ pred }
+        { }
+
+        template <typename I>
+        constexpr void operator()(I& ins) const
+        {
+            next_while(this->pred, ins);
+        }
+
+        template <typename I>
+        constexpr void operator()(I& ins, code_position& pos) const
+        {
+            next_while(this->pred, ins, pos);
+        }
+
+        P pred;
+
+    };
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // bound consumer factories
@@ -977,6 +1004,12 @@ namespace LL1
     constexpr auto next_if(const P& pred, const T& trans)
     {
         return bound_transforming_conditional_read{ pred, trans };
+    }
+
+    template <typename P, typename = requires_t<is_bound_predicate<P>>>
+    constexpr auto next_while(const P& pred)
+    {
+        return bound_conditional_multi_read{ pred };
     }
 
 }
