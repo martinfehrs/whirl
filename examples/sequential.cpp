@@ -50,7 +50,7 @@ int main(int argc, char** argv)
         if (LL1::is_character(ifs))
         {
             std::cerr << "unexpeced token "
-                << static_cast<char>(LL1::next(ifs, [](const auto& c){ return c; }))
+                << static_cast<char>(LL1::next(ifs, [](const char& c){ return c; }))
                 << " at ("
                 << pos.row
                 << ", "

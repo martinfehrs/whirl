@@ -600,9 +600,18 @@ namespace LL1
     struct as_digit_transform
     {
         template <typename C, typename = requires_t<is_character_type<C>>>
-        constexpr auto operator()(const C& c) const
+        constexpr auto operator()(const C& chr) const
         {
-            return c - '0';
+            return chr - '0';
+        }
+    };
+
+    struct as_digits_transform
+    {
+        template <typename N, typename C, typename = requires_t<is_character_type<C>>>
+        constexpr auto operator()(const N& num, const C& chr) const
+        {
+            return num * 10 + chr - '0';
         }
     };
 
@@ -614,6 +623,7 @@ namespace LL1
     constexpr auto as_is = as_is_transform{};
     constexpr auto as_digit = as_digit_transform{};
 
+    constexpr auto as_digits = as_digits_transform{};
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'next' overloads
@@ -672,12 +682,12 @@ namespace LL1
     }
 
     template <
-        typename P,
         typename I,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename P,
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr void next(const P& pred, I& ins)
+    constexpr void next(I& ins, const P& pred)
     {
         if(!pred(ins))
             throw unexpected_input{};
@@ -686,13 +696,13 @@ namespace LL1
     }
 
     template <
+	typename I,
         typename P,
-        typename I,
         typename T,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr auto next(const P& pred, I& ins, const T& trans)
+    constexpr auto next(I& ins, const T& trans, const P& pred)
     {
         if(!pred(ins))
             throw unexpected_input{};
@@ -701,12 +711,12 @@ namespace LL1
     }
 
     template <
+	typename I,
         typename P,
-        typename I,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr void next(const P& pred, I& ins, code_position& pos)
+    constexpr void next(I& ins, code_position& pos, const P& pred)
     {
         if(!pred(ins))
             throw unexpected_input{};
@@ -724,7 +734,7 @@ namespace LL1
         typename = requires_t<is_bound_predicate<P>>,
         typename = requires_t<is_input_source_type<I>>
     >
-    constexpr auto next(const P& pred, I& ins, code_position& pos, const T& trans)
+    constexpr auto next(I& ins, code_position& pos, const P& pred, const T& trans)
     {
         if(!pred(ins))
             throw unexpected_input{};
@@ -741,25 +751,25 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
+	typename I,
         typename P,
-        typename I,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr void next_if(const P& pred, I& ins)
+    constexpr void next_if(I& ins, const P& pred)
     {
         if (pred(ins))
             next(ins);
     }
 
     template <
+	typename I,
         typename P,
-        typename I,
         typename T,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr std::optional<typename I::char_type> next_if(const P& pred, I& ins, const T& trans)
+    constexpr std::optional<typename I::char_type> next_if(I& ins, const P& pred, const T& trans)
     {
         if (pred(ins))
             return next(ins, trans);
@@ -768,27 +778,26 @@ namespace LL1
     }
 
     template <
+	typename I,
         typename P,
-        typename I,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr void next_if(const P& pred, I& ins, code_position& pos)
+    constexpr void next_if(I& ins, code_position& pos, const P& pred)
     {
         if (pred(ins))
            next(ins, pos);
     }
 
     template <
+	typename I,
         typename P,
-        typename I,
         typename T,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
     constexpr std::optional<typename I::char_type> next_if(
-        const P& pred, I& ins, code_position& pos, const T& trans
-    )
+	I& ins, code_position& pos, const P& pred, const T& trans)
     {
         if (pred(ins))
             return next(ins, pos, trans);
@@ -802,25 +811,25 @@ namespace LL1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <
+	typename I,
         typename P,
-        typename I,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr void next_while(const P& pred, I& ins)
+    constexpr void next_while(I& ins, const P& pred)
     {
         while (pred(ins))
             next(ins);
     }
 
     template <
+	typename I,
         typename P,
-        typename I,
         typename T,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr auto next_while(const P& pred, I& ins, const T& trans)
+    constexpr auto next_while(I& ins, const P& pred, const T& trans)
     {
         std::basic_string<typename I::char_type> tokseq;
 
@@ -831,32 +840,34 @@ namespace LL1
     }
 
     template <
+	typename I,
         typename P,
-        typename I,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr auto next_while(const P& pred, I& ins, code_position& pos)
+    constexpr auto next_while(I& ins, code_position& pos, const P& pred)
     {
         while (pred(ins))
             next(ins, pos);
     }
 
     template <
+	typename I,
         typename P,
-        typename I,
+        typename V,
         typename T,
-        typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+	typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr auto next_while(const P& pred, I& ins, code_position& pos, const T& trans)
+    constexpr auto next_while(
+	I& ins, code_position& pos, const P& pred, const V& init, const T& trans)
     {
-        std::basic_string<typename I::char_type> tokseq;
+        V result = init;
 
         while (pred(ins))
-            tokseq.push_back(next(ins, pos, trans));
+            result = trans(result, next(ins, pos, as_is));
 
-        return tokseq;
+        return result;
     }
 
 
@@ -970,16 +981,45 @@ namespace LL1
         template <typename I>
         constexpr void operator()(I& ins) const
         {
-            next_while(this->pred, ins);
+            next_while(ins, this->pred);
         }
 
         template <typename I>
         constexpr void operator()(I& ins, code_position& pos) const
         {
-            next_while(this->pred, ins, pos);
+            next_while(ins, pos, this->pred);
         }
 
         P pred;
+
+    };
+
+    template <typename P, typename T>
+    struct bound_transforming_conditional_multi_read
+    {
+
+        static_assert(is_bound_predicate_v<P>);
+
+
+        explicit constexpr bound_transforming_conditional_multi_read(const P& pred, const T& trans)
+            : pred{ pred }
+            , trans{ trans }
+        { }
+
+        template <typename V, typename I>
+        auto operator()(I& ins, const V& init) const
+        {
+            return next_while(ins, this->pred, init, trans);
+        }
+
+        template <typename V, typename I>
+        auto operator()(I& ins, code_position& pos, const V& init) const
+        {
+            return next_while(ins, pos, this->pred, init, trans);
+        }
+
+        P pred;
+        T trans;
 
     };
 
@@ -1010,6 +1050,12 @@ namespace LL1
     constexpr auto next_while(const P& pred)
     {
         return bound_conditional_multi_read{ pred };
+    }
+
+    template <typename P, typename T, typename = requires_t<is_bound_predicate<P>>>
+    constexpr auto next_while(const P& pred, const T& trans)
+    {
+        return bound_transforming_conditional_multi_read{ pred, trans };
     }
 
 }
