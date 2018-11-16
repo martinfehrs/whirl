@@ -418,7 +418,7 @@ namespace LL1
     template <typename C, typename = requires_t<is_character_type<C>>>
     constexpr auto operator!(const bound_is_predicate<C>& p)
     {
-        return bound_is_not_predicate<T>{ p.cmp };
+        return bound_is_not_predicate<C>{ p.cmp };
     }
 
     template <typename C, typename = requires_t<is_character_type<C>>>
@@ -588,12 +588,34 @@ namespace LL1
     // transformators
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    template <typename T>
+    struct as_transform
+    {
+	constexpr explicit as_transform(const T& obj)
+	    noexcept(std::is_nothrow_copy_constructible_v<T>)
+	    : obj{ obj }
+	{ }
+
+	constexpr explicit as_transform(T&& obj)
+	    noexcept(std::is_nothrow_move_constructible_v<T>)
+	    : obj{ std::move(obj) }
+	{ }
+
+	template <typename C, typename = requires_t<is_character_type<C>>>
+	constexpr auto operator()(const C&) const
+	{
+	    return obj;
+	}
+
+	T obj;
+    };
+
     struct as_is_transform
     {
         template <typename C, typename = requires_t<is_character_type<C>>>
-        constexpr auto operator()(const C& c) const
+        constexpr auto operator()(const C& chr) const
         {
-            return c;
+            return chr;
         }
     };
 
@@ -615,15 +637,20 @@ namespace LL1
         }
     };
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // transformator factories
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    constexpr auto as_is = as_is_transform{};
-    constexpr auto as_digit = as_digit_transform{};
-
+    constexpr auto as_is     = as_is_transform{};
+    constexpr auto as_digit  = as_digit_transform{};
     constexpr auto as_digits = as_digits_transform{};
+
+    template <typename T>
+    constexpr auto as(T&& obj)
+    {
+	return as_transform{ std::forward<T>(obj) };
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // 'next' overloads
