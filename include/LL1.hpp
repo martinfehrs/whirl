@@ -1035,8 +1035,6 @@ namespace LL1
         P pred;
         T trans;
 
-	
-
     };
 
     template <typename P>
