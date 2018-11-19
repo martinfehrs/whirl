@@ -29,7 +29,7 @@ namespace sequential
     constexpr auto is_number           = LL1::is_digit || is_sign;
     constexpr auto is_non_zero_number  = is_number && !LL1::is_zero; 
                                        
-    constexpr auto read_sign           = LL1::next_if(is_sign, LL1::as(-1));
+    constexpr auto read_sign           = LL1::next_if(is_sign, LL1::as(-1)) || 1;
     constexpr auto read_digit          = LL1::next(LL1::as_digit);
     constexpr auto read_digit_sequence = LL1::next_while(LL1::is_digit, LL1::as_digits);
 
@@ -37,12 +37,12 @@ namespace sequential
 
     auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
     {
-        const auto sign = read_sign(ins, pos);
-
+	auto sign = read_sign(ins, pos);
+    
         if (LL1::is_zero(ins))
             return LL1::next(ins, pos, LL1::as_digit);
         else if (is_non_zero_number(ins))
-            return sign.value_or(1) * read_digit_sequence(ins, pos, read_digit(ins, pos));
+            return sign * read_digit_sequence(ins, pos, read_digit(ins, pos));
         else
             throw LL1::unexpected_input{};
     }

@@ -270,8 +270,6 @@ namespace LL1
 
     };
 
-
-
     template <typename... Cs>
     struct bound_is_one_of_predicate
     {
@@ -796,12 +794,13 @@ namespace LL1
 	typename = requires_t<is_input_source_type<I>>,
         typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr std::optional<typename I::char_type> next_if(I& ins, const P& pred, const T& trans)
+    constexpr auto next_if(I& ins, const P& pred, const T& trans)
+	-> std::optional<decltype(next(ins, trans))>
     {
         if (pred(ins))
             return next(ins, trans);
         else
-            return std::nullopt;
+            return std::nullopt_t;
     }
 
     template <
@@ -959,6 +958,43 @@ namespace LL1
 
     };
 
+    template <typename P, typename T, typename A>
+    struct bound_ord_conditional_transforming_read
+    {
+
+	static_assert(is_bound_predicate_v<P>);
+
+
+	constexpr bound_ord_conditional_transforming_read(const P& pred, const T& trans, const A& alt)
+	    : pred{ pred }
+	    , trans{ trans }
+	    , alt{ alt }
+	{ }
+
+	template <typename I>
+	constexpr auto operator()(I& ins) const
+	{
+	    if (this->pred(ins))
+		return next(ins, this->trans);
+	    else
+		return alt;
+	}
+
+	template <typename I>
+	constexpr auto operator()(I& ins, code_position& pos) const
+	{
+	    if (this->pred(ins))
+		return next(ins, pos, this->trans);
+	    else
+		return alt;
+	}
+
+	P pred;
+	T trans;
+	A alt;
+
+    };  
+
     template <typename P, typename T>
     struct bound_transforming_conditional_read
     {
@@ -981,7 +1017,8 @@ namespace LL1
         }
 
         template <typename I>
-        constexpr std::optional<typename I::char_type> operator()(I& ins, code_position& pos) const
+        constexpr auto operator()(I& ins, code_position& pos) const
+	    -> std::optional<decltype(next(ins, pos, this->trans))>
         {
             if (this->pred(ins))
                 return next(ins, pos, this->trans);
@@ -989,8 +1026,16 @@ namespace LL1
                 return std::nullopt;
         }
 
+	template <typename A>
+	constexpr auto operator||(const A& alt)
+	{
+	    return bound_ord_conditional_transforming_read{ this->pred, this->trans, alt };
+	}
+
         P pred;
         T trans;
+
+	
 
     };
 
