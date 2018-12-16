@@ -85,7 +85,6 @@ namespace sequential
 
         return read_data_entry(ins, pos);
     }
-
 }
 
 #endif /*__SEQUENTIAL_HPP__*/
