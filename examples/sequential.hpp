@@ -36,13 +36,11 @@ namespace sequential
     constexpr auto ignore_whitespace   = LL1::next_while(LL1::is_space);
 
     auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
-    {
-	auto sign = read_sign(ins, pos);
-    
+    {    
         if (LL1::is_zero(ins))
-            return LL1::next(ins, pos, LL1::as_digit);
+            return read_digit(ins, pos);
         else if (is_non_zero_number(ins))
-            return sign * read_digit_sequence(ins, pos, read_digit(ins, pos));
+            return read_digit_sequence(ins, pos, read_sign(ins, pos) * read_digit(ins, pos));
         else
             throw LL1::unexpected_input{};
     }
