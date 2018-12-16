@@ -86,6 +86,10 @@ std::vector<int> read_data_entry(std::istream& ins, LL1::code_position& pos)
         {
             return temperatures;
         }
+        else
+        {
+            throw LL1::unexpected_input{};
+        }
     }
     else if (LL1::is_end(ins))
     {

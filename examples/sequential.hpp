@@ -68,6 +68,10 @@ namespace sequential
             {
                 return temperatures;
             }
+            else
+            {
+                throw LL1::unexpected_input{};
+            }
         }
         else if (LL1::is_end(ins))
         {
