@@ -41,8 +41,6 @@ namespace sequential
             return read_digit(ins, pos);
         else if (is_non_zero_number(ins))
             return read_digit_sequence(ins, pos, read_sign(ins, pos) * read_digit(ins, pos));
-        else
-            throw LL1::unexpected_input{};
     }
 
     std::vector<int> read_data_entry(std::istream& ins, LL1::code_position& pos)
@@ -69,10 +67,6 @@ namespace sequential
             else if(LL1::is_end(ins))
             {
                 return temperatures;
-            }
-            else
-            {
-                throw LL1::unexpected_input{};
             }
         }
         else if (LL1::is_end(ins))
