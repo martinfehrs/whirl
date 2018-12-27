@@ -150,16 +150,16 @@ namespace LL1
         : std::bool_constant<is_input_source_trait_class_type<input_source_traits<T>>::value>
     { };
 
+    template <typename T1>
+    constexpr auto is_input_source_type_v = is_input_source_type<T1>::value;
+
     template <typename T1, typename T2, typename = void>
     struct is_compatible_input_source_type : std::false_type {};
 
     template <typename T1, typename T2>
-    struct is_compatible_input_source_type<T1, T2, std::enable_if_t<is_input_source_type<T1>::value>>
-	    : is_compatible_character_type<typename input_source_traits<T1>::char_type, T2>
+    struct is_compatible_input_source_type<T1, T2, std::enable_if_t<is_input_source_type_v<T1>>>
+        : is_compatible_character_type<typename input_source_traits<T1>::char_type, T2>
     { };
-
-    template <typename T1>
-    constexpr auto is_input_source_type_v = is_input_source_type<T1>::value;
 
     template <typename T1, typename T2>
     constexpr auto is_compatible_input_source_type_v =
@@ -352,7 +352,7 @@ namespace LL1
     template<typename, typename, typename = void>
     struct is_bound_predicate_impl : std::false_type {};
 
- 
+
     template <typename T1, typename T2>
     struct is_bound_predicate_impl<
         T1,
@@ -635,6 +635,7 @@ namespace LL1
         }
     };
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // transformator factories
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -823,7 +824,7 @@ namespace LL1
         typename = requires_t<is_bound_predicate<P>>
     >
     constexpr std::optional<typename I::char_type> next_if(
-	I& ins, code_position& pos, const P& pred, const T& trans)
+        I& ins, code_position& pos, const P& pred, const T& trans)
     {
         if (pred(ins))
             return next(ins, pos, trans);
@@ -965,7 +966,8 @@ namespace LL1
         static_assert(is_bound_predicate_v<P>);
 
 
-        constexpr bound_ord_conditional_transforming_read(const P& pred, const T& trans, const A& alt)
+        constexpr bound_ord_conditional_transforming_read(
+            const P& pred, const T& trans, const A& alt)
             : pred{ pred }
             , trans{ trans }
             , alt{ alt }
@@ -993,7 +995,7 @@ namespace LL1
         T trans;
         A alt;
 
-    };  
+    };
 
     template <typename P, typename T>
     struct bound_transforming_conditional_read
