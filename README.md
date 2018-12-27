@@ -13,15 +13,16 @@ the BMP are recognized correctly. Supports all single byte encodings.
 - full unicode support for utf-8 and utf-16
 - functional composition of primitives.
 - implicit transformators for reading functions
-- a doxypress generated api documentation
 - further small examples
 - unit tests for all components 
 
 ## Long term goals
-- an objectoriented layer on top of the procedural basic layer
 - a rich set of predefined lookahead and reading functions for recurring token sequences
-- support for lexical analysers.
-- some more complex examples.
+- some more complex examples
+- a doxypress generated api documentation
+- an intoducing tutorial
+- a constexpr implementation of regular expressions on top of this library
+- allow regular expressions as arguments
 
 
 ## Simple Example
