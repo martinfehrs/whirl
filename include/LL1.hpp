@@ -55,6 +55,7 @@ namespace LL1
     struct are_character_types : std::bool_constant<std::conjunction_v<is_character_type<Ts>...>>
     { };
 
+
     template <typename T1, typename T2, typename = void>
     struct equality_comparable : std::false_type
     { };
@@ -64,6 +65,7 @@ namespace LL1
         T1, T2, std::void_t<decltype(std::declval<T1>() == std::declval<T2>())>
     > : std::true_type
     { };
+
 
     template <typename T1, typename T2>
     struct is_compatible_character_type
@@ -76,7 +78,6 @@ namespace LL1
         >
     { };
 
-
     template <typename T>
     constexpr auto is_character_type_v = is_character_type<T>::value;
 
@@ -85,6 +86,38 @@ namespace LL1
 
     template <typename T1, typename T2>
     constexpr auto is_compatible_character_type_v = is_compatible_character_type<T1, T2>::value;
+
+
+    namespace test
+    {
+
+        static_assert(is_character_type<char>::value);
+        static_assert(is_character_type<wchar_t>::value);
+        static_assert(is_character_type<char16_t>::value);
+        static_assert(is_character_type<char32_t>::value);
+
+        static_assert(are_character_types<char, wchar_t, char16_t, char32_t>::value);
+
+        static_assert(equality_comparable<int, int>::value);
+
+        static_assert(is_compatible_character_type<char, char>::value);
+        static_assert(is_compatible_character_type<wchar_t, wchar_t>::value);
+        static_assert(is_compatible_character_type<char16_t, char16_t>::value);
+        static_assert(is_compatible_character_type<char32_t, char32_t>::value);
+
+        static_assert(is_character_type_v<char>);
+        static_assert(is_character_type_v<wchar_t>);
+        static_assert(is_character_type_v<char16_t>);
+        static_assert(is_character_type_v<char32_t>);
+
+        static_assert(are_character_types_v<char, wchar_t, char16_t, char32_t>);
+
+        static_assert(is_compatible_character_type_v<char, char>);
+        static_assert(is_compatible_character_type_v<wchar_t, wchar_t>);
+        static_assert(is_compatible_character_type_v<char16_t, char16_t>);
+        static_assert(is_compatible_character_type_v<char32_t, char32_t>);
+
+    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -167,66 +200,60 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // bound predicates
+    // bound predicate type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename P1, typename P2>
-    struct bound_predicate_conjunction
+    namespace detail
     {
 
-        explicit constexpr bound_predicate_conjunction(P1 p1, P2 p2)
-            : p1{ p1 }
-            , p2{ p2 }
-        { }
-        
-        template <typename T>
-        constexpr auto operator()(T& ins) const
-        {
-            return this->p1(ins) && this->p2(ins);
-        }
-        
-        P1 p1;
-        P2 p2;
+        template <typename T1, typename T2>
+        using return_type_t = decltype(std::declval<T1>()(std::declval<std::basic_istream<T2>&>()));
 
-    };
+        template<typename, typename, typename = void>
+        struct is_bound_predicate_impl : std::false_type {};
 
-    template <typename P1, typename P2>
-    struct bound_predicate_disjunction
+
+        template <typename T1, typename T2>
+        struct is_bound_predicate_impl<
+            T1,
+            T2,
+            requires_type_t<return_type_t<T1, T2>, bool>
+        >
+            : std::true_type
+        {};
+
+    }
+
+    template <typename T>
+    struct is_bound_predicate
+        : std::disjunction<
+            detail::is_bound_predicate_impl<T, char>,
+            detail::is_bound_predicate_impl<T, wchar_t>,
+            detail::is_bound_predicate_impl<T, char16_t>,
+            detail::is_bound_predicate_impl<T, char32_t>
+        >
+    {};
+
+    template <typename T>
+    constexpr auto is_bound_predicate_v = is_bound_predicate<T>::value;
+
+
+    namespace test
     {
-
-        explicit constexpr bound_predicate_disjunction(const P1& pred1, const P2& pred2)
-            : pred1{ pred1 }
-            , pred2{ pred2 }
-        { }
-        
-        template <typename I>
-        constexpr auto operator()(I& ins) const
+        struct bound_predicate_dummy
         {
-            return this->pred1(ins) || this->pred2(ins);
-        }
-        
-        P1 pred1;
-        P2 pred2;
+            bool operator()(const std::istream&);
+        };
 
-    };
+        static_assert(detail::is_bound_predicate_impl<bound_predicate_dummy, char>::value);
+        static_assert(is_bound_predicate<bound_predicate_dummy>::value);
+        static_assert(is_bound_predicate_v<bound_predicate_dummy>);
+    }
 
-    template <typename P>
-    struct bound_predicate_negation
-    {
 
-        explicit constexpr bound_predicate_negation(const P& pred)
-            : pred{ pred }
-        { }
-        
-        template <typename T2>
-        constexpr auto operator()(T2& ins) const
-        {
-            return !this->pred(ins);
-        }
-        
-        P pred;
-
-    };
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // bound predicates
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename C>
     struct bound_is_predicate
@@ -240,12 +267,99 @@ namespace LL1
         { }
 
         template <typename I, typename = requires_t<is_compatible_input_source_type<I, C>>>
-        constexpr auto operator()(I& ins) const
+        constexpr bool operator()(I& ins) const
         {
             return input_source_traits<I>::look_ahead(ins) == this->cmp;
         }
 
         C cmp;
+
+    };
+
+    template <typename P1, typename P2>
+    struct bound_predicate_conjunction
+    {
+
+        static_assert(is_bound_predicate_v<P1>);
+        static_assert(is_bound_predicate_v<P2>);
+
+
+        explicit constexpr bound_predicate_conjunction(P1 p1, P2 p2)
+            : p1{ p1 }
+            , p2{ p2 }
+        { }
+
+        template <typename T>
+        constexpr bool operator()(T& ins) const
+        {
+            return this->p1(ins) && this->p2(ins);
+        }
+
+        P1 p1;
+        P2 p2;
+
+    };
+
+    template <typename P1, typename P2>
+    struct bound_predicate_disjunction
+    {
+
+        static_assert(is_bound_predicate_v<P1>);
+        static_assert(is_bound_predicate_v<P2>);
+
+
+        explicit constexpr bound_predicate_disjunction(const P1& pred1, const P2& pred2)
+            : pred1{ pred1 }
+            , pred2{ pred2 }
+        { }
+
+        template <typename I>
+        constexpr bool operator()(I& ins) const
+        {
+            return this->pred1(ins) || this->pred2(ins);
+        }
+
+        P1 pred1;
+        P2 pred2;
+
+    };
+
+    namespace test
+    {
+
+        using bound_predicate_conjunction_dummy_t =
+            bound_predicate_conjunction<bound_predicate_dummy, bound_predicate_dummy>;
+
+        using bound_predicate_disjunction_dummy_t =
+            bound_predicate_disjunction<bound_predicate_dummy, bound_predicate_dummy>;
+
+        static_assert(is_bound_predicate_v<bound_is_predicate<char>>);
+        static_assert(is_bound_predicate_v<bound_is_predicate<wchar_t>>);
+        static_assert(is_bound_predicate_v<bound_is_predicate<char16_t>>);
+        static_assert(is_bound_predicate_v<bound_is_predicate<char32_t>>);
+        static_assert(is_bound_predicate_v<bound_predicate_conjunction_dummy_t>);
+        static_assert(is_bound_predicate_v<bound_predicate_disjunction_dummy_t>);
+
+    }
+
+    template <typename P>
+    struct bound_predicate_negation
+    {
+
+        static_assert(is_bound_predicate_v<P>);
+
+
+        explicit constexpr bound_predicate_negation(const P& pred)
+            : pred{ pred }
+        { }
+
+        template <typename T2>
+        constexpr auto operator()(T2& ins) const
+        {
+            return !this->pred(ins);
+        }
+
+        P pred;
 
     };
 
@@ -346,37 +460,6 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // bound predicate type traits
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    template<typename, typename, typename = void>
-    struct is_bound_predicate_impl : std::false_type {};
-
-
-    template <typename T1, typename T2>
-    struct is_bound_predicate_impl<
-        T1,
-        T2,
-        requires_type_t<decltype(std::declval<T1>()(std::declval<std::basic_istream<T2>>())), bool>
-    >
-        : std::true_type
-    {};
-
-    template <typename T>
-    struct is_bound_predicate
-        : std::conjunction<
-            is_bound_predicate_impl<T, char>,
-            is_bound_predicate_impl<T, wchar_t>,
-            is_bound_predicate_impl<T, char16_t>,
-            is_bound_predicate_impl<T, char32_t>
-        >
-    {};
-
-    template <typename T>
-    constexpr auto is_bound_predicate_v = is_bound_predicate<T>::value;
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // universal logical bound predicate predicate operations
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -422,7 +505,7 @@ namespace LL1
     template <typename C, typename = requires_t<is_character_type<C>>>
     constexpr auto operator!(const bound_is_not_predicate<C>& p)
     {
-        return bound_is_predicate<T>{ p.cmp };
+        return bound_is_predicate<C>{ p.cmp };
     }
 
     template <typename... Cs, typename = requires_t<are_character_types<Cs...>>>
@@ -430,7 +513,7 @@ namespace LL1
     {
         return std::apply(
             [](const auto&... cmps) {
-                return bound_is_none_of_predicate<Ts...>{ cmps... };
+                return bound_is_none_of_predicate<Cs...>{ cmps... };
             },
             p.cmps
         );
@@ -441,7 +524,7 @@ namespace LL1
     {
         return std::apply(
             [](const auto&... cmps) {
-                return bound_is_one_of_predicate<Ts...>{ cmps... };
+                return bound_is_one_of_predicate<Cs...>{ cmps... };
             },
             p.cmps
         );
@@ -509,7 +592,7 @@ namespace LL1
     {
         return std::apply(
             [&rhs](const auto&... cmps) {
-                return bound_is_one_of_predicate<Ts..., T>{ cmps..., rhs.cmp };
+                return bound_is_one_of_predicate<Cs..., C>{ cmps..., rhs.cmp };
             },
             lhs.cmps
         );
@@ -801,7 +884,7 @@ namespace LL1
         if (pred(ins))
             return next(ins, trans);
         else
-            return std::nullopt_t;
+            return std::nullopt;
     }
 
     template <
@@ -1020,12 +1103,11 @@ namespace LL1
 
         template <typename I>
         constexpr auto operator()(I& ins, code_position& pos) const
-            -> std::optional<decltype(next(ins, pos, this->trans))>
         {
             if (this->pred(ins))
                 return next(ins, pos, this->trans);
             else
-                return std::nullopt;
+                return std::optional<decltype(next(ins, pos, this->trans))>{};
         }
 
         template <typename A>

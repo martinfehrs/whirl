@@ -52,7 +52,7 @@ namespace LL1
 
         static constexpr void ignore(input_stream_dummy<T>& ins) noexcept
         {
-            ins.ignore()
+            ins.ignore();
         }
 
         static constexpr bool is_end(input_stream_dummy<T>& ins) noexcept
@@ -309,5 +309,3 @@ TEST_CASE("testing sequential example", "[sequential]")
         REQUIRE(result.empty());
     }
 }
-
-
