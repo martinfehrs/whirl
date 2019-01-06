@@ -19,7 +19,7 @@ addons:
       - COMPILER="CC=gcc-7 && CXX=g++-7"
 
 before_install:
-    - eval "${COMPILER}"
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 500
 
 before_script:
   - mkdir build
