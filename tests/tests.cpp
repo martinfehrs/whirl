@@ -131,6 +131,10 @@ namespace LL1
     static_assert(is_bound_predicate_v<bound_predicate_conjunction_dummy_t>);
     static_assert(is_bound_predicate_v<bound_predicate_disjunction_dummy_t>);
 
+    static_assert(is_bound_predicate_v<bound_is_predicate<char>>);
+    static_assert(is_bound_predicate_v<bound_is_predicate<wchar_t>>);
+    static_assert(is_bound_predicate_v<bound_is_predicate<char16_t>>);
+    static_assert(is_bound_predicate_v<bound_is_predicate<char32_t>>);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // run-time checks
