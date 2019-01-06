@@ -18,7 +18,7 @@ addons:
       - COMPILER="CC=gcc-7 && CXX=g++-7"
 
 before_install:
-    - eval ${COMPILER}
+    - eval "${COMPILER}"
 
 before_script:
   - mkdir build
