@@ -5,8 +5,20 @@ dist: xenial
 language: cpp
 
 compiler:
-  - gcc
+  - g++-7
   - clang
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
+    env:
+      - COMPILER="CC=gcc-7 && CXX=g++-7"
+
+before_install:
+    - eval ${COMPILER}
 
 before_script:
   - mkdir build
