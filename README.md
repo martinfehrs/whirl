@@ -1,5 +1,5 @@
 ![whirl++](assets/images/logo.svg)<br/>
-_a header only library for implementing LL(1) parsers_. 
+_a header only library for implementing LL(1) parsers_.
 
 Its purpose is to simplify parser implementations providing a set of higher level functions on top
 of the stl's streaming capabilities or compatible APIs. It can be used as a more verbose but better readable alternative to regular expressions.
@@ -14,7 +14,7 @@ the BMP are recognized correctly. Supports all single byte encodings.
 - functional composition of primitives.
 - implicit transformators for reading functions
 - further small examples
-- unit tests for all components 
+- unit tests for all components
 
 ## Long term goals
 - a rich set of predefined lookahead and reading functions for recurring token sequences
@@ -46,8 +46,8 @@ data                   = { whitespace }, data-entry ;
 constexpr auto is_separator        = LL1::is_space;
 constexpr auto is_sign             = LL1::is('-');
 constexpr auto is_number           = LL1::is_digit || is_sign;
-constexpr auto is_non_zero_number  = is_number && !LL1::is_zero; 
-                                       
+constexpr auto is_non_zero_number  = is_number && !LL1::is_zero;
+
 constexpr auto read_sign           = LL1::next_if(is_sign, LL1::as(-1)) || 1;
 constexpr auto read_digit          = LL1::next(LL1::as_digit);
 constexpr auto read_digit_sequence = LL1::next_while(LL1::is_digit, LL1::as_digits);
@@ -55,10 +55,10 @@ constexpr auto read_digit_sequence = LL1::next_while(LL1::is_digit, LL1::as_digi
 constexpr auto ignore_whitespace   = LL1::next_while(LL1::is_space);
 
 auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
-{    
+{
     if (LL1::is_zero(ins))
         return read_digit(ins, pos);
-    else if (is_non_zero_number(ins))
+    else
         return read_digit_sequence(ins, pos, read_sign(ins, pos) * read_digit(ins, pos));
 }
 
@@ -69,18 +69,18 @@ std::vector<int> read_data_entry(std::istream& ins, LL1::code_position& pos)
     if (is_number(ins))
     {
         temperatures.push_back(read_decimal_whole_number(ins, pos));
-        
+
         if (is_separator(ins))
         {
             LL1::next(ins, pos);
             ignore_whitespace(ins, pos);
             const auto further_temperatures = read_data_entry(ins, pos);
-                
+
             temperatures.insert(
                 std::end(temperatures),
                 std::begin(further_temperatures), std::end(further_temperatures)
             );
-                
+
             return temperatures;
         }
         else if(LL1::is_end(ins))
@@ -109,4 +109,3 @@ auto read_data(std::istream& ins, LL1::code_position& pos)
     return read_data_entry(ins, pos);
 }
 ```
-
