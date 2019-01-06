@@ -88,73 +88,12 @@ namespace LL1
     constexpr auto is_compatible_character_type_v = is_compatible_character_type<T1, T2>::value;
 
 
-    namespace test
-    {
-
-        static_assert(is_character_type<char>::value);
-        static_assert(is_character_type<wchar_t>::value);
-        static_assert(is_character_type<char16_t>::value);
-        static_assert(is_character_type<char32_t>::value);
-
-        static_assert(are_character_types<char, wchar_t, char16_t, char32_t>::value);
-
-        static_assert(equality_comparable<int, int>::value);
-
-        static_assert(is_compatible_character_type<char, char>::value);
-        static_assert(is_compatible_character_type<wchar_t, wchar_t>::value);
-        static_assert(is_compatible_character_type<char16_t, char16_t>::value);
-        static_assert(is_compatible_character_type<char32_t, char32_t>::value);
-
-        static_assert(is_character_type_v<char>);
-        static_assert(is_character_type_v<wchar_t>);
-        static_assert(is_character_type_v<char16_t>);
-        static_assert(is_character_type_v<char32_t>);
-
-        static_assert(are_character_types_v<char, wchar_t, char16_t, char32_t>);
-
-        static_assert(is_compatible_character_type_v<char, char>);
-        static_assert(is_compatible_character_type_v<wchar_t, wchar_t>);
-        static_assert(is_compatible_character_type_v<char16_t, char16_t>);
-        static_assert(is_compatible_character_type_v<char32_t, char32_t>);
-
-    }
-
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // input source type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename T, typename = void>
     struct input_source_traits;
-
-    template <template <typename...> typename TT, typename T, typename... Ts>
-    struct input_source_traits<
-        TT<T, Ts...>, requires_t<std::is_base_of<std::basic_istream<T, Ts...>, TT<T, Ts...>>>
-    >
-    {
-        using char_type = T;
-        using stream_type = TT<T, Ts...>;
-
-        static char_type look_ahead(std::basic_istream<T, Ts...>& ins)
-        {
-            return ins.peek();
-        }
-
-        static char_type read(std::basic_istream<T, Ts...>& ins)
-        {
-            return ins.get();
-        }
-
-        static void ignore(std::basic_istream<T, Ts...>& ins)
-        {
-            return ins.ignore();
-        }
-
-        static auto is_end(std::basic_istream<T, Ts...>& ins)
-        {
-            return ins.peek() == std::char_traits<T>::eof();
-        }
-    };
 
     template <typename T, typename T2, typename = void>
     struct is_input_source_trait_class_type_impl : std::false_type { };
@@ -199,13 +138,42 @@ namespace LL1
         is_compatible_input_source_type<T1, T2>::value;
 
 
+    template <template <typename...> typename TT, typename T, typename... Ts>
+    struct input_source_traits<
+        TT<T, Ts...>, requires_t<std::is_base_of<std::basic_istream<T, Ts...>, TT<T, Ts...>>>
+    >
+    {
+        using char_type = T;
+        using stream_type = TT<T, Ts...>;
+
+        static char_type look_ahead(std::basic_istream<T, Ts...>& ins)
+        {
+            return ins.peek();
+        }
+
+        static char_type read(std::basic_istream<T, Ts...>& ins)
+        {
+            return ins.get();
+        }
+
+        static void ignore(std::basic_istream<T, Ts...>& ins)
+        {
+            return ins.ignore();
+        }
+
+        static auto is_end(std::basic_istream<T, Ts...>& ins)
+        {
+            return ins.peek() == std::char_traits<T>::eof();
+        }
+    };
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // bound predicate type traits
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     namespace detail
     {
-
         template <typename T1, typename T2>
         using return_type_t = decltype(std::declval<T1>()(std::declval<std::basic_istream<T2>&>()));
 
@@ -236,19 +204,6 @@ namespace LL1
 
     template <typename T>
     constexpr auto is_bound_predicate_v = is_bound_predicate<T>::value;
-
-
-    namespace test
-    {
-        struct bound_predicate_dummy
-        {
-            bool operator()(const std::istream&);
-        };
-
-        static_assert(detail::is_bound_predicate_impl<bound_predicate_dummy, char>::value);
-        static_assert(is_bound_predicate<bound_predicate_dummy>::value);
-        static_assert(is_bound_predicate_v<bound_predicate_dummy>);
-    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -323,24 +278,6 @@ namespace LL1
         P2 pred2;
 
     };
-
-    namespace test
-    {
-
-        using bound_predicate_conjunction_dummy_t =
-            bound_predicate_conjunction<bound_predicate_dummy, bound_predicate_dummy>;
-
-        using bound_predicate_disjunction_dummy_t =
-            bound_predicate_disjunction<bound_predicate_dummy, bound_predicate_dummy>;
-
-        static_assert(is_bound_predicate_v<bound_is_predicate<char>>);
-        static_assert(is_bound_predicate_v<bound_is_predicate<wchar_t>>);
-        static_assert(is_bound_predicate_v<bound_is_predicate<char16_t>>);
-        static_assert(is_bound_predicate_v<bound_is_predicate<char32_t>>);
-        static_assert(is_bound_predicate_v<bound_predicate_conjunction_dummy_t>);
-        static_assert(is_bound_predicate_v<bound_predicate_disjunction_dummy_t>);
-
-    }
 
     template <typename P>
     struct bound_predicate_negation
