@@ -14,6 +14,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-7
+      - g++-7-multilib
     env:
       - COMPILER="CC=gcc-7 && CXX=g++-7"
 
