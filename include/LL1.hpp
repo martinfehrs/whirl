@@ -207,7 +207,7 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // bound predicates
+    // basic bound predicates
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename C>
@@ -231,75 +231,6 @@ namespace LL1
 
     };
 
-    template <typename P1, typename P2>
-    struct bound_predicate_conjunction
-    {
-
-        static_assert(is_bound_predicate_v<P1>);
-        static_assert(is_bound_predicate_v<P2>);
-
-
-        explicit constexpr bound_predicate_conjunction(P1 p1, P2 p2)
-            : p1{ p1 }
-            , p2{ p2 }
-        { }
-
-        template <typename T>
-        constexpr bool operator()(T& ins) const
-        {
-            return this->p1(ins) && this->p2(ins);
-        }
-
-        P1 p1;
-        P2 p2;
-
-    };
-
-    template <typename P1, typename P2>
-    struct bound_predicate_disjunction
-    {
-
-        static_assert(is_bound_predicate_v<P1>);
-        static_assert(is_bound_predicate_v<P2>);
-
-
-        explicit constexpr bound_predicate_disjunction(const P1& pred1, const P2& pred2)
-            : pred1{ pred1 }
-            , pred2{ pred2 }
-        { }
-
-        template <typename I>
-        constexpr bool operator()(I& ins) const
-        {
-            return this->pred1(ins) || this->pred2(ins);
-        }
-
-        P1 pred1;
-        P2 pred2;
-
-    };
-
-    template <typename P>
-    struct bound_predicate_negation
-    {
-
-        static_assert(is_bound_predicate_v<P>);
-
-
-        explicit constexpr bound_predicate_negation(const P& pred)
-            : pred{ pred }
-        { }
-
-        template <typename T2>
-        constexpr auto operator()(T2& ins) const
-        {
-            return !this->pred(ins);
-        }
-
-        P pred;
-
-    };
-
     template <typename C>
     struct bound_is_not_predicate
     {
@@ -312,7 +243,7 @@ namespace LL1
         { }
 
         template <typename I, typename = requires_t<is_compatible_input_source_type<I, C>>>
-        constexpr auto operator()(I& ins) const
+        constexpr bool operator()(I& ins) const
         {
             return input_source_traits<I>::look_ahead(ins) != this->cmp;
         }
@@ -333,7 +264,7 @@ namespace LL1
         { }
 
         template <typename I, typename = requires_t<is_compatible_input_source_type<I, Cs>...>>
-        constexpr auto operator()(I& ins) const
+        constexpr bool operator()(I& ins) const
         {
             return std::apply(
                 [&ins](const auto&... cmps) {
@@ -359,7 +290,7 @@ namespace LL1
         { }
 
         template <typename I, typename = requires_t<is_compatible_input_source_type<I, Cs>...>>
-        constexpr auto operator()(I& ins) const
+        constexpr bool operator()(I& ins) const
         {
             return std::apply(
                 [&ins](const auto&... cmps) {
@@ -377,7 +308,7 @@ namespace LL1
     {
 
         template <typename I, typename = requires_t<is_input_source_type<I>>>
-        constexpr auto operator()(I& ins) const
+        constexpr bool operator()(I& ins) const
         {
             return input_source_traits<I>::is_end(ins);
         }
@@ -388,7 +319,7 @@ namespace LL1
     {
 
         template <typename I, typename = requires_t<is_input_source_type<I>>>
-        constexpr auto operator()(I& ins) const
+        constexpr bool operator()(I& ins) const
         {
             return !input_source_traits<I>::is_end(ins);
         }
@@ -397,7 +328,81 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // universal logical bound predicate predicate operations
+    // composed bound predicates
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <typename P1, typename P2>
+    struct bound_predicate_conjunction
+    {
+
+	static_assert(is_bound_predicate_v<P1>);
+	static_assert(is_bound_predicate_v<P2>);
+
+
+	explicit constexpr bound_predicate_conjunction(P1 p1, P2 p2)
+	    : p1{ p1 }
+	    , p2{ p2 }
+	{ }
+
+	template <typename T>
+	constexpr bool operator()(T& ins) const
+	{
+	    return this->p1(ins) && this->p2(ins);
+	}
+
+	P1 p1;
+	P2 p2;
+
+    };
+
+    template <typename P1, typename P2>
+    struct bound_predicate_disjunction
+    {
+
+	static_assert(is_bound_predicate_v<P1>);
+	static_assert(is_bound_predicate_v<P2>);
+
+
+	explicit constexpr bound_predicate_disjunction(const P1& pred1, const P2& pred2)
+	    : pred1{ pred1 }
+	    , pred2{ pred2 }
+	{ }
+
+	template <typename I>
+	constexpr bool operator()(I& ins) const
+	{
+	    return this->pred1(ins) || this->pred2(ins);
+	}
+
+	P1 pred1;
+	P2 pred2;
+
+    };
+
+    template <typename P>
+    struct bound_predicate_negation
+    {
+
+	static_assert(is_bound_predicate_v<P>);
+
+
+	explicit constexpr bound_predicate_negation(const P& pred)
+	    : pred{ pred }
+	{ }
+
+	template <typename I>
+	constexpr bool operator()(I& ins) const
+	{
+	    return !this->pred(ins);
+	}
+
+	P pred;
+
+    };
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // universal logical bound predicate operations
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     template <typename P, typename = requires_t<is_bound_predicate<P>>>
