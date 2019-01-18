@@ -1,8 +1,5 @@
 os:
-  - linux
   - windows
-
-dist: xenial
 
 language: cpp
 
@@ -34,6 +31,7 @@ script: make && make test
 matrix:
   include:
   - os: linux
+    dist: xenial
     addons:
       apt:
         sources:
