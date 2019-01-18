@@ -18,7 +18,6 @@ matrix:
   - os: linux
     language: cpp
     compiler: clang
-   dist: xenial
   - os: windows
     language: cpp
     compiler: clang
