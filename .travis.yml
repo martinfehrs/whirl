@@ -6,7 +6,7 @@ dist: xenial
 language: cpp
 
 compiler:
-  - g++-7
+  - g++
   - clang
 
 addons:
