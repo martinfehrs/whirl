@@ -2,9 +2,23 @@ matrix:
   include:
   - os: linux
     language: cpp
-    compiler:
-      - gcc
-      - clang
+    compiler: gcc
+    dist: xenial
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-7
+    before_install:
+      - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 500
+    before_script:
+      - mkdir build
+      - cd build
+      - cmake ..
+  - os: linux
+    language: cpp
+    compiler: clang
     dist: xenial
     addons:
       apt:
