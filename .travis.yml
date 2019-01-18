@@ -18,6 +18,7 @@ matrix:
   - os: linux
     language: cpp
     compiler: clang
+    dist: xenial
   - os: windows
     language: cpp
     compiler: clang
@@ -30,4 +31,6 @@ before_script:
   - cd build
   - cmake ..
 
-script: make && make test
+script:
+  - make
+  - make test
