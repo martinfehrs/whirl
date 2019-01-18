@@ -23,11 +23,8 @@ matrix:
     before_script:
       - mkdir build
       - cd build
-      - cmake -G NMake Makefiles" ..
-  - os: osx
-    language: cpp
-    compiler: clang
+      - cmake -G "NMake Makefiles" ..
 
 script:
   - cmake --build .
-  - cmake --build . -target test
+  - cmake --build . --target test
