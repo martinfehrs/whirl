@@ -73,6 +73,8 @@ namespace LL1
     using bound_predicate_disjunction_dummy_t =
         bound_predicate_disjunction<bound_predicate_dummy, bound_predicate_dummy>;
 
+    using bound_predicate_negation_dummy_t = bound_predicate_negation<bound_predicate_dummy>;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // compile-time checks
@@ -128,12 +130,46 @@ namespace LL1
     static_assert(is_bound_predicate_v<bound_is_predicate<wchar_t>>);
     static_assert(is_bound_predicate_v<bound_is_predicate<char16_t>>);
     static_assert(is_bound_predicate_v<bound_is_predicate<char32_t>>);
-    static_assert(is_bound_predicate_v<bound_predicate_conjunction_dummy_t>);
-    static_assert(is_bound_predicate_v<bound_predicate_disjunction_dummy_t>);
+
     static_assert(is_bound_predicate_v<bound_is_not_predicate<char>>);
     static_assert(is_bound_predicate_v<bound_is_not_predicate<wchar_t>>);
     static_assert(is_bound_predicate_v<bound_is_not_predicate<char16_t>>);
     static_assert(is_bound_predicate_v<bound_is_not_predicate<char32_t>>);
+
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<char>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<char, char>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<char, char, char>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<wchar_t>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<wchar_t, wchar_t>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<wchar_t, wchar_t, wchar_t>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<char16_t>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<char16_t, char16_t>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<char16_t, char16_t, char16_t>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<char32_t>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<char32_t, char32_t>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<char32_t, char32_t, char32_t>>);
+    static_assert(is_bound_predicate_v<bound_is_one_of_predicate<char, wchar_t, char16_t>>);
+
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<char>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<char, char>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<char, char, char>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<wchar_t>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<wchar_t, wchar_t>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<wchar_t, wchar_t, wchar_t>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<char16_t>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<char16_t, char16_t>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<char16_t, char16_t, char16_t>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<char32_t>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<char32_t, char32_t>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<char32_t, char32_t, char32_t>>);
+    static_assert(is_bound_predicate_v<bound_is_none_of_predicate<char, wchar_t, char16_t>>);
+
+    static_assert(is_bound_predicate_v<bound_is_end_predicate>);
+    static_assert(is_bound_predicate_v<bound_is_character_predicate>);
+
+    static_assert(is_bound_predicate_v<bound_predicate_conjunction_dummy_t>);
+    static_assert(is_bound_predicate_v<bound_predicate_disjunction_dummy_t>);
+    static_assert(is_bound_predicate_v<bound_predicate_negation_dummy_t>);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
