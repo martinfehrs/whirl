@@ -38,7 +38,7 @@ matrix:
     before_script:
       - mkdir build
       - cd build
-      - cmake -G "Unix Makefiles" ..
+      - cmake -G "NMake Makefiles" ..
 
 script:
   - cmake --build .
