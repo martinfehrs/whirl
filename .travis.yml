@@ -1,8 +1,10 @@
 matrix:
   include:
-  - os: linux
+  - os:blinux
     language: cpp
-    compiler: gcc
+    compiler:
+      - gcc
+      - clang
     dist: xenial
     addons:
       apt:
@@ -10,31 +12,22 @@ matrix:
           - ubuntu-toolchain-r-test
         packages:
           - g++-7
-      env:
-        - COMPILER="CC=gcc-7 && CXX=g++-7"
     before_install:
       - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 500
-  - os: linux
-    language: cpp
-    compiler: clang
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-        packages:
-          - g++-7
+    before_script:
+      - mkdir build
+      - cd build
+      - cmake ..
   - os: windows
     language: cpp
-    compiler: clang
+    before_script:
+      - mkdir build
+      - cd build
+      - cmake -G NMake Makefiles" ..
   - os: osx
     language: cpp
     compiler: clang
 
-before_script:
-  - mkdir build
-  - cd build
-  - cmake ..
-
 script:
   - cmake --build .
-  - ctest
+  - cmake --build . -target test
