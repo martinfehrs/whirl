@@ -36,5 +36,4 @@ before_script:
   - cmake ..
 
 script:
-  - make
-  - make test
+  - cmake --build . --target test
