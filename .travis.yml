@@ -32,8 +32,8 @@ script: make && make test
 
 
 matrix:
-  exclude:
-  - os: windows
+  include:
+  - os: linux
     addons:
       apt:
         sources:
