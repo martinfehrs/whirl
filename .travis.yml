@@ -18,7 +18,12 @@ matrix:
   - os: linux
     language: cpp
     compiler: clang
-    dist: xenial
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-7-multilib
   - os: windows
     language: cpp
     compiler: clang
@@ -32,5 +37,4 @@ before_script:
   - cmake ..
 
 script:
-  - make
-  - make test
+  - make && make test
