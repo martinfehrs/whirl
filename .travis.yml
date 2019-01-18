@@ -1,20 +1,8 @@
-language: cpp
-
-compiler:
-  - gcc
-  - clang
-
-before_script:
-  - mkdir build
-  - cd build
-  - cmake ..
-
-script: make && make test
-
-
 matrix:
   include:
   - os: linux
+    language: cpp
+    compiler: gcc
     dist: xenial
     addons:
       apt:
@@ -27,5 +15,20 @@ matrix:
         - COMPILER="CC=gcc-7 && CXX=g++-7"
     before_install:
       - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 500
+  - os: linux
+    language: cpp
+    compiler: clang
+   dist: xenial
   - os: windows
+    language: cpp
+    compiler: clang
   - os: osx
+    language: cpp
+    compiler: clang
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script: make && make test
