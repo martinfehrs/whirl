@@ -1,12 +1,11 @@
-os:
-  -linux
+os: linux
 
 dist: xenial
 
 language: cpp
 
 compiler:
-  - g++
+  - gcc
   - clang
 
 addons:
@@ -16,8 +15,8 @@ addons:
     packages:
       - g++-7
       - g++-7-multilib
-    env:
-      - COMPILER="CC=gcc-7 && CXX=g++-7"
+  env:
+    - COMPILER="CC=gcc-7 && CXX=g++-7"
 
 before_install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 500
