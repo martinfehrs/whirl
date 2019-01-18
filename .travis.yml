@@ -34,10 +34,11 @@ matrix:
       - cmake ..
   - os: windows
     language: cpp
+    compiler: gcc
     before_script:
       - mkdir build
       - cd build
-      - cmake -G "NMake Makefiles" ..
+      - cmake ..
 
 script:
   - cmake --build .
