@@ -1,24 +1,8 @@
-os:
-  - windows
-
 language: cpp
 
 compiler:
   - gcc
   - clang
-
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-7
-      - g++-7-multilib
-  env:
-    - COMPILER="CC=gcc-7 && CXX=g++-7"
-
-before_install:
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 500
 
 before_script:
   - mkdir build
@@ -43,3 +27,5 @@ matrix:
         - COMPILER="CC=gcc-7 && CXX=g++-7"
     before_install:
       - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 500
+  - os: windows
+  - os: osx
