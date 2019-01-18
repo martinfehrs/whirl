@@ -111,13 +111,9 @@ namespace LL1
 
     static_assert(is_input_source_type_v<std::basic_istream<char>>);
     static_assert(is_input_source_type_v<std::basic_istream<wchar_t>>);
-    static_assert(is_input_source_type_v<std::basic_istream<char16_t>>);
-    static_assert(is_input_source_type_v<std::basic_istream<char32_t>>);
 
     static_assert(is_compatible_input_source_type<std::basic_istream<char>, char>::value);
     static_assert(is_compatible_input_source_type<std::basic_istream<wchar_t>, wchar_t>::value);
-    static_assert(is_compatible_input_source_type<std::basic_istream<char16_t>, char16_t>::value);
-    static_assert(is_compatible_input_source_type<std::basic_istream<char32_t>, char32_t>::value);
 
     static_assert(is_compatible_input_source_type_v<std::istream, char>);
     static_assert(is_compatible_input_source_type_v<std::wistream, wchar_t>);
