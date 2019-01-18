@@ -1,6 +1,5 @@
 os:
   -linux
-  -windows
 
 dist: xenial
 
