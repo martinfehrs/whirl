@@ -10,7 +10,6 @@ matrix:
           - ubuntu-toolchain-r-test
         packages:
           - g++-7
-          - g++-7-multilib
       env:
         - COMPILER="CC=gcc-7 && CXX=g++-7"
     before_install:
@@ -23,7 +22,7 @@ matrix:
         sources:
           - ubuntu-toolchain-r-test
         packages:
-          - g++-7-multilib
+          - g++-7
   - os: windows
     language: cpp
     compiler: clang
@@ -37,4 +36,5 @@ before_script:
   - cmake ..
 
 script:
-  - make && make test
+  - make
+  - make test
