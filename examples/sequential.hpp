@@ -56,6 +56,7 @@ namespace sequential
             {
                 LL1::next(ins, pos);
                 ignore_whitespace(ins, pos);
+
                 const auto further_temperatures = read_data_entry(ins, pos);
 
                 temperatures.insert(
@@ -68,14 +69,12 @@ namespace sequential
             else
             {
                 LL1::next(ins, pos, LL1::is_end);
-
                 return temperatures;
             }
         }
         else
         {
             LL1::next(ins, pos, LL1::is_end);
-
             return temperatures;
         }
     }
@@ -83,7 +82,6 @@ namespace sequential
     auto read_data(std::istream& ins, LL1::code_position& pos)
     {
         ignore_whitespace(ins, pos);
-
         return read_data_entry(ins, pos);
     }
 }

@@ -65,9 +65,11 @@ auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
 std::vector<int> read_data_entry(std::istream& ins, LL1::code_position& pos)
 {
     std::vector<int> temperatures;
+
     if (is_number(ins))
     {
         temperatures.push_back(read_decimal_whole_number(ins, pos));
+
         if (is_separator(ins))
         {
             LL1::next(ins, pos);
