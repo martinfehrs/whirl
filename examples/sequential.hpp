@@ -65,22 +65,18 @@ namespace sequential
 
                 return temperatures;
             }
-            else if(LL1::is_end(ins))
-            {
-                return temperatures;
-            }
             else
             {
-                throw LL1::unexpected_input{};
+                LL1::next(ins, pos, LL1::is_end);
+
+                return temperatures;
             }
-        }
-        else if (LL1::is_end(ins))
-        {
-            return temperatures;
         }
         else
         {
-            throw LL1::unexpected_input{};
+            LL1::next(ins, pos, LL1::is_end);
+
+            return temperatures;
         }
     }
 

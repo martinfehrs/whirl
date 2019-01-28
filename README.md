@@ -65,15 +65,14 @@ auto read_decimal_whole_number(std::istream& ins, LL1::code_position& pos)
 std::vector<int> read_data_entry(std::istream& ins, LL1::code_position& pos)
 {
     std::vector<int> temperatures;
-
     if (is_number(ins))
     {
         temperatures.push_back(read_decimal_whole_number(ins, pos));
-
         if (is_separator(ins))
         {
             LL1::next(ins, pos);
             ignore_whitespace(ins, pos);
+
             const auto further_temperatures = read_data_entry(ins, pos);
 
             temperatures.insert(
@@ -83,29 +82,22 @@ std::vector<int> read_data_entry(std::istream& ins, LL1::code_position& pos)
 
             return temperatures;
         }
-        else if(LL1::is_end(ins))
-        {
-            return temperatures;
-        }
         else
         {
-            throw LL1::unexpected_input{};
+            LL1::next(ins, pos, LL1::is_end);
+            return temperatures;
         }
-    }
-    else if (LL1::is_end(ins))
-    {
-        return temperatures;
     }
     else
     {
-        throw LL1::unexpected_input{};
+        LL1::next(ins, pos, LL1::is_end);
+        return temperatures;
     }
 }
 
 auto read_data(std::istream& ins, LL1::code_position& pos)
 {
     ignore_whitespace(ins, pos);
-
     return read_data_entry(ins, pos);
 }
 ```

@@ -76,6 +76,12 @@ namespace LL1
     using bound_predicate_negation_dummy_t = bound_predicate_negation<bound_predicate_dummy>;
 
 
+    struct not_a_character {};
+
+    template <typename I, typename R>
+    R dummy_transformator(I);
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // compile-time checks
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +124,6 @@ namespace LL1
     static_assert(is_compatible_input_source_type_v<std::istream, char>);
     static_assert(is_compatible_input_source_type_v<std::wistream, wchar_t>);
 
-    static_assert(detail::is_bound_predicate_impl<bound_predicate_dummy, char>::value);
     static_assert(is_bound_predicate<bound_predicate_dummy>::value);
     static_assert(is_bound_predicate_v<bound_predicate_dummy>);
 
@@ -166,6 +171,24 @@ namespace LL1
     static_assert(is_bound_predicate_v<bound_predicate_conjunction_dummy_t>);
     static_assert(is_bound_predicate_v<bound_predicate_disjunction_dummy_t>);
     static_assert(is_bound_predicate_v<bound_predicate_negation_dummy_t>);
+
+    // transformator type trait tests
+
+    static_assert(is_transformator<decltype(dummy_transformator<char, int>)>::value);
+    static_assert(is_transformator<decltype(dummy_transformator<wchar_t, int>)>::value);
+    static_assert(is_transformator<decltype(dummy_transformator<char16_t, int>)>::value);
+    static_assert(is_transformator<decltype(dummy_transformator<char32_t, int>)>::value);
+
+    static_assert(!is_transformator<decltype(dummy_transformator<not_a_character, int>)>::value);
+    static_assert(!is_transformator<decltype(dummy_transformator<int, void>)>::value);
+
+    static_assert(is_transformator_v<decltype(dummy_transformator<char, int>)>);
+    static_assert(is_transformator_v<decltype(dummy_transformator<wchar_t, int>)>);
+    static_assert(is_transformator_v<decltype(dummy_transformator<char16_t, int>)>);
+    static_assert(is_transformator_v<decltype(dummy_transformator<char32_t, int>)>);
+
+    static_assert(!is_transformator_v<decltype(dummy_transformator<not_a_character, int>)>);
+    static_assert(!is_transformator_v<decltype(dummy_transformator<int, void>)>);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -207,6 +207,65 @@ namespace LL1
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    // transformator type traits
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    namespace detail
+    {
+        template <typename T, typename I, typename = void>
+        struct is_transformator_impl : std::false_type
+        {};
+
+        template <typename T, typename I>
+        struct is_transformator_impl<
+            T, I, std::void_t<decltype(std::declval<T>()(std::declval<I>()))>
+        > : std::negation<std::is_same<decltype(std::declval<T>()(std::declval<I>())), void>>
+        {};
+
+        template <typename T, typename I, typename = void>
+        struct is_sequence_transformator_impl : std::false_type
+        { };
+
+        template <typename T, typename I>
+        struct is_sequence_transformator_impl<
+            T, I, std::void_t<decltype(std::declval<T>()(std::declval<I>(), std::declval<I>()))>
+        > : std::negation<
+                std::is_same<
+                    decltype(std::declval<T>()(std::declval<I>(), std::declval<I>())),
+                    void
+                >
+            >
+        {};
+
+    }
+
+    template <typename T>
+    struct is_transformator
+        : std::disjunction<
+            detail::is_transformator_impl<T, char>,
+            detail::is_transformator_impl<T, wchar_t>,
+            detail::is_transformator_impl<T, char16_t>,
+            detail::is_transformator_impl<T, char32_t>
+        >
+    {};
+
+    template <typename T>
+    struct is_sequence_transformator
+        : std::disjunction<
+            detail::is_sequence_transformator_impl<T, char>,
+            detail::is_sequence_transformator_impl<T, wchar_t>,
+            detail::is_sequence_transformator_impl<T, char16_t>,
+            detail::is_sequence_transformator_impl<T, char32_t>
+        >
+    {};
+
+    template <typename T>
+    constexpr auto is_transformator_v = is_transformator<T>::value;
+
+    template <typename T>
+    constexpr auto is_sequence_transformator_v = is_sequence_transformator<T>::value;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // basic bound predicates
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -335,23 +394,23 @@ namespace LL1
     struct bound_predicate_conjunction
     {
 
-	static_assert(is_bound_predicate_v<P1>);
-	static_assert(is_bound_predicate_v<P2>);
+        static_assert(is_bound_predicate_v<P1>);
+        static_assert(is_bound_predicate_v<P2>);
 
 
-	explicit constexpr bound_predicate_conjunction(P1 p1, P2 p2)
-	    : p1{ p1 }
-	    , p2{ p2 }
-	{ }
+        explicit constexpr bound_predicate_conjunction(P1 p1, P2 p2)
+            : p1{ p1 }
+            , p2{ p2 }
+        { }
 
-	template <typename T>
-	constexpr bool operator()(T& ins) const
-	{
-	    return this->p1(ins) && this->p2(ins);
-	}
+        template <typename T>
+        constexpr bool operator()(T& ins) const
+        {
+            return this->p1(ins) && this->p2(ins);
+        }
 
-	P1 p1;
-	P2 p2;
+        P1 p1;
+        P2 p2;
 
     };
 
@@ -359,23 +418,23 @@ namespace LL1
     struct bound_predicate_disjunction
     {
 
-	static_assert(is_bound_predicate_v<P1>);
-	static_assert(is_bound_predicate_v<P2>);
+        static_assert(is_bound_predicate_v<P1>);
+        static_assert(is_bound_predicate_v<P2>);
 
 
-	explicit constexpr bound_predicate_disjunction(const P1& pred1, const P2& pred2)
-	    : pred1{ pred1 }
-	    , pred2{ pred2 }
-	{ }
+        explicit constexpr bound_predicate_disjunction(const P1& pred1, const P2& pred2)
+            : pred1{ pred1 }
+            , pred2{ pred2 }
+        { }
 
-	template <typename I>
-	constexpr bool operator()(I& ins) const
-	{
-	    return this->pred1(ins) || this->pred2(ins);
-	}
+        template <typename I>
+        constexpr bool operator()(I& ins) const
+        {
+            return this->pred1(ins) || this->pred2(ins);
+        }
 
-	P1 pred1;
-	P2 pred2;
+        P1 pred1;
+        P2 pred2;
 
     };
 
@@ -383,20 +442,20 @@ namespace LL1
     struct bound_predicate_negation
     {
 
-	static_assert(is_bound_predicate_v<P>);
+        static_assert(is_bound_predicate_v<P>);
 
 
-	explicit constexpr bound_predicate_negation(const P& pred)
-	    : pred{ pred }
-	{ }
+        explicit constexpr bound_predicate_negation(const P& pred)
+            : pred{ pred }
+        { }
 
-	template <typename I>
-	constexpr bool operator()(I& ins) const
-	{
-	    return !this->pred(ins);
-	}
+        template <typename I>
+        constexpr bool operator()(I& ins) const
+        {
+            return !this->pred(ins);
+        }
 
-	P pred;
+        P pred;
 
     };
 
@@ -611,26 +670,26 @@ namespace LL1
     // transformators
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename T>
+    template <typename R>
     struct as_transform
     {
-        constexpr explicit as_transform(const T& obj)
-            noexcept(std::is_nothrow_copy_constructible_v<T>)
-            : obj{ obj }
+        constexpr explicit as_transform(const R& res)
+            noexcept(std::is_nothrow_copy_constructible_v<R>)
+            : res{ res }
         { }
 
-        constexpr explicit as_transform(T&& obj)
-            noexcept(std::is_nothrow_move_constructible_v<T>)
-            : obj{ std::move(obj) }
+        constexpr explicit as_transform(R&& res)
+            noexcept(std::is_nothrow_move_constructible_v<R>)
+            : res{ std::move(res) }
         { }
 
         template <typename C, typename = requires_t<is_character_type<C>>>
         constexpr auto operator()(const C&) const
         {
-            return obj;
+            return res;
         }
 
-        T obj;
+        R res;
     };
 
     struct as_is_transform
@@ -669,10 +728,10 @@ namespace LL1
     constexpr auto as_digit  = as_digit_transform{};
     constexpr auto as_digits = as_digits_transform{};
 
-    template <typename T>
-    constexpr auto as(T&& obj)
+    template <typename R>
+    constexpr auto as(R&& res)
     {
-        return as_transform{ std::forward<T>(obj) };
+        return as_transform{ std::forward<R>(res) };
     }
 
 
@@ -689,7 +748,12 @@ namespace LL1
         input_source_traits<I>::ignore(ins);
     }
 
-    template <typename I, typename T, typename = requires_t<is_input_source_type<I>>>
+    template <
+        typename I,
+        typename T,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_transformator<T>>
+    >
     constexpr auto next(I& ins, const T& trans)
     {
         if (input_source_traits<I>::is_end(ins))
@@ -714,7 +778,12 @@ namespace LL1
         }
     }
 
-    template <typename I, typename T, typename = requires_t<is_input_source_type<I>>>
+    template <
+        typename I,
+        typename T,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_transformator<T>>
+    >
     constexpr auto next(I& ins, code_position& pos, const T& trans)
     {
         const auto tok = next(ins, trans);
@@ -734,8 +803,8 @@ namespace LL1
 
     template <
         typename I,
-	typename P,
-	typename = requires_t<is_input_source_type<I>>,
+        typename P,
+        typename = requires_t<is_input_source_type<I>>,
         typename = requires_t<is_bound_predicate<P>>
     >
     constexpr void next(I& ins, const P& pred)
@@ -751,7 +820,8 @@ namespace LL1
         typename P,
         typename T,
         typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<is_bound_predicate<P>>
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_transformator<T>>
     >
     constexpr auto next(I& ins, const T& trans, const P& pred)
     {
@@ -783,7 +853,8 @@ namespace LL1
         typename I,
         typename T,
         typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_input_source_type<I>>
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_transformator<T>>
     >
     constexpr auto next(I& ins, code_position& pos, const P& pred, const T& trans)
     {
@@ -818,7 +889,8 @@ namespace LL1
         typename P,
         typename T,
         typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<is_bound_predicate<P>>
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_transformator<T>>
     >
     constexpr auto next_if(I& ins, const P& pred, const T& trans)
         -> std::optional<decltype(next(ins, trans))>
@@ -846,7 +918,8 @@ namespace LL1
         typename P,
         typename T,
         typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<is_bound_predicate<P>>
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_transformator<T>>
     >
     constexpr std::optional<typename I::char_type> next_if(
         I& ins, code_position& pos, const P& pred, const T& trans)
@@ -879,7 +952,8 @@ namespace LL1
         typename P,
         typename T,
         typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<is_bound_predicate<P>>
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_transformator<T>>
     >
     constexpr auto next_while(I& ins, const P& pred, const T& trans)
     {
@@ -906,15 +980,16 @@ namespace LL1
     template <
         typename I,
         typename P,
-        typename V,
+        typename S,
         typename T,
         typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<is_bound_predicate<P>>
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_sequence_transformator<T>>
     >
     constexpr auto next_while(
-        I& ins, code_position& pos, const P& pred, const V& init, const T& trans)
+        I& ins, code_position& pos, const P& pred, const S& start, const T& trans)
     {
-        V result = init;
+        S result = start;
 
         while (pred(ins))
             result = trans(result, next(ins, pos, as_is));
@@ -930,6 +1005,9 @@ namespace LL1
     template <typename T>
     struct bound_transforming_read
     {
+
+        static_assert(is_transformator_v<T>);
+
 
         explicit constexpr bound_transforming_read(const T& trans)
             : trans{ trans }
@@ -989,6 +1067,7 @@ namespace LL1
     {
 
         static_assert(is_bound_predicate_v<P>);
+        static_assert(is_transformator_v<T>);
 
 
         constexpr bound_ord_conditional_transforming_read(
@@ -1027,6 +1106,7 @@ namespace LL1
     {
 
         static_assert(is_bound_predicate_v<P>);
+        static_assert(is_transformator_v<T>);
 
 
         explicit constexpr bound_transforming_conditional_read(const P& pred, const T& trans)
@@ -1095,23 +1175,23 @@ namespace LL1
     {
 
         static_assert(is_bound_predicate_v<P>);
-
+        static_assert(is_sequence_transformator_v<T>);
 
         explicit constexpr bound_transforming_conditional_multi_read(const P& pred, const T& trans)
             : pred{ pred }
             , trans{ trans }
         { }
 
-        template <typename V, typename I>
-        auto operator()(I& ins, const V& init) const
+        template <typename S, typename I>
+        auto operator()(I& ins, const S& start) const
         {
-            return next_while(ins, this->pred, init, trans);
+            return next_while(ins, this->pred, start, trans);
         }
 
-        template <typename V, typename I>
-        auto operator()(I& ins, code_position& pos, const V& init) const
+        template <typename S, typename I>
+        auto operator()(I& ins, code_position& pos, const S& start) const
         {
-            return next_while(ins, pos, this->pred, init, trans);
+            return next_while(ins, pos, this->pred, start, trans);
         }
 
         P pred;
@@ -1124,7 +1204,7 @@ namespace LL1
     // bound consumer factories
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename T>
+    template <typename T, typename = requires_t<is_transformator<T>>>
     constexpr auto next(const T& trans)
     {
         return bound_transforming_read{ trans };
@@ -1136,7 +1216,12 @@ namespace LL1
         return bound_conditional_read{ pred };
     }
 
-    template <typename P, typename T, typename = requires_t<is_bound_predicate<P>>>
+    template <
+        typename P,
+        typename T,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_transformator<T>>
+    >
     constexpr auto next_if(const P& pred, const T& trans)
     {
         return bound_transforming_conditional_read{ pred, trans };
@@ -1148,7 +1233,12 @@ namespace LL1
         return bound_conditional_multi_read{ pred };
     }
 
-    template <typename P, typename T, typename = requires_t<is_bound_predicate<P>>>
+    template <
+        typename P,
+        typename T,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_sequence_transformator<T>>
+    >
     constexpr auto next_while(const P& pred, const T& trans)
     {
         return bound_transforming_conditional_multi_read{ pred, trans };
