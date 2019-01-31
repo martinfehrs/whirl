@@ -1,5 +1,5 @@
-#ifndef __LL1_HPP__
-#define __LL1_HPP__
+#ifndef __WHIRL_HPP__
+#define __WHIRL_HPP__
 
 
 #include <istream>
@@ -1247,4 +1247,4 @@ namespace LL1
 }
 
 
-#endif /*__LL1_HPP__*/
+#endif /*__WHIRL_HPP__*/

@@ -17,5 +17,4 @@ enable_testing(true)
 add_subdirectory(examples)
 add_subdirectory(tests)
 
-install(FILES Inc/LL1.hpp DESTINATION include)
-
+install(FILES Inc/whirl.hpp DESTINATION include)
