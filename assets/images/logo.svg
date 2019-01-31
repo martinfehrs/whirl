@@ -41,7 +41,9 @@
      inkscape:window-y="27"
      inkscape:window-maximized="1"
      showguides="true"
-     inkscape:guide-bbox="true">
+     inkscape:guide-bbox="true"
+     inkscape:showpageshadow="false"
+     showborder="false">
     <sodipodi:guide
        position="-3.8270089,24.09598"
        orientation="-0.70710678,0.70710678"
@@ -56,7 +58,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -67,18 +69,18 @@
      transform="translate(-26.299882,-29.764981)">
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:'Baekmuk Headline';-inkscape-font-specification:'Baekmuk Headline, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="43.369007"
-       y="37.330914"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555556px;line-height:1.25;font-family:Purisa;-inkscape-font-specification:'Purisa, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr;text-anchor:start;fill:#232323;fill-opacity:1;stroke:none;stroke-width:0.26458332;"
+       x="43.652493"
+       y="37.567146"
        id="text4527"><tspan
          sodipodi:role="line"
          id="tspan4525"
-         x="43.369007"
-         y="37.330914"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:'Baekmuk Headline';-inkscape-font-specification:'Baekmuk Headline, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332">hirl</tspan></text>
+         x="43.652493"
+         y="37.567146"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555556px;font-family:Purisa;-inkscape-font-specification:'Purisa, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr;text-anchor:start;stroke-width:0.26458332;fill:#232323;fill-opacity:1;">hirl</tspan></text>
     <g
        id="g4597"
-       transform="translate(7.1343005,0.56696429)">
+       transform="matrix(1.0709764,0,0,1.152682,4.9684484,-4.6724922)">
       <path
          transform="matrix(-0.13334389,-0.99106983,-0.99106983,0.13334389,62.0312,-2.4908702)"
          d="m -32.185946,34.484333 c -0.109925,-0.477191 0.463143,-0.755458 0.855041,-0.70549 0.764457,0.09747 1.129925,0.951141 0.956314,1.637174 -0.263792,1.04239 -1.446722,1.515537 -2.419307,1.207138 -1.321034,-0.418888 -1.905269,-1.944661 -1.457962,-3.20144 0.569634,-1.600477 2.443613,-2.297005 3.983573,-1.708786 0.446626,0.170598 0.854304,0.437935 1.191883,0.776194"
@@ -106,10 +108,9 @@
          sodipodi:type="spiral" />
     </g>
     <path
-       style="fill:#008080;stroke:#0079d2;stroke-width:0.25799432px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 37.651662,38.538949 15.768012,-0.04725"
-       id="path4599"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cc" />
+       style="fill:#43eed0;fill-opacity:1;stroke:#23afff;stroke-width:1.15799999;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path4639"
+       d="m 38.321868,40.037457 c 0.158075,-0.02968 0.315612,-0.06238 0.474226,-0.08904 2.09686,-0.352391 4.216119,-0.574143 6.335392,-0.736545 0.764789,-0.05861 1.530891,-0.09859 2.296336,-0.14788 1.814828,-0.04046 2.465591,-0.07722 4.236546,-0.03505 0.555098,0.01321 1.109466,0.04813 1.664197,0.07221 0,0 -0.360864,0.203553 -0.360864,0.203553 v 0 c -0.537084,-0.03352 -1.073534,-0.07967 -1.611262,-0.100469 -1.799976,-0.06958 -2.326166,-0.02981 -4.183607,0.0076 -0.768643,0.05149 -1.538218,0.09055 -2.305926,0.154459 -1.490058,0.124048 -2.754656,0.272545 -4.224822,0.48614 -0.632183,0.09185 -1.697291,0.271921 -2.374817,0.413082 -0.177498,0.03698 -0.352478,0.08516 -0.528717,0.127743 0,0 0.583319,-0.355791 0.583319,-0.355791 z"
+       inkscape:connector-curvature="0" />
   </g>
 </svg>
