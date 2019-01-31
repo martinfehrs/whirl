@@ -40,7 +40,14 @@
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1"
-     showguides="false" />
+     showguides="true"
+     inkscape:guide-bbox="true">
+    <sodipodi:guide
+       position="-3.8270089,24.09598"
+       orientation="-0.70710678,0.70710678"
+       id="guide4601"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -61,17 +68,17 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:'Baekmuk Headline';-inkscape-font-specification:'Baekmuk Headline, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="45.684113"
+       x="43.369007"
        y="37.330914"
        id="text4527"><tspan
          sodipodi:role="line"
          id="tspan4525"
-         x="45.684113"
+         x="43.369007"
          y="37.330914"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:'Baekmuk Headline';-inkscape-font-specification:'Baekmuk Headline, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332">hirl</tspan></text>
     <g
        id="g4597"
-       transform="translate(9.4494047,0.56696429)">
+       transform="translate(7.1343005,0.56696429)">
       <path
          transform="matrix(-0.13334389,-0.99106983,-0.99106983,0.13334389,62.0312,-2.4908702)"
          d="m -32.185946,34.484333 c -0.109925,-0.477191 0.463143,-0.755458 0.855041,-0.70549 0.764457,0.09747 1.129925,0.951141 0.956314,1.637174 -0.263792,1.04239 -1.446722,1.515537 -2.419307,1.207138 -1.321034,-0.418888 -1.905269,-1.944661 -1.457962,-3.20144 0.569634,-1.600477 2.443613,-2.297005 3.983573,-1.708786 0.446626,0.170598 0.854304,0.437935 1.191883,0.776194"
@@ -99,8 +106,8 @@
          sodipodi:type="spiral" />
     </g>
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 39.245566,38.160973 16.583706,-0.04725"
+       style="fill:#008080;stroke:#0079d2;stroke-width:0.25799432px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 37.651662,38.538949 15.768012,-0.04725"
        id="path4599"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
