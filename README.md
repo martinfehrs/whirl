@@ -9,21 +9,18 @@ There is no unicode support, yet. Only utf-32 is fully supported. For utf-16 onl
 the BMP are recognized correctly. Supports all single byte encodings.
 
 ## Goals for Version 1
-- arbitrary lookaheads
 - full unicode support for utf-8 and utf-16
 - functional composition of primitives.
-- implicit transformators for reading functions
-- further small examples
+- transformators for reading functions
+- some simple examples
 - unit tests for all components
 
 ## Long term goals
 - a rich set of predefined lookahead and reading functions for recurring token sequences
-- some more complex examples
+- some complex examples
 - a doxypress generated api documentation
-- an intoducing tutorial
+- an introducing tutorial
 - a constexpr implementation of regular expressions on top of this library
-- allow regular expressions as arguments
-
 
 ## Simple Example
 Reading sequential measurement data from an input stream provided by an input device. The full
