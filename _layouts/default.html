@@ -15,7 +15,7 @@
     <![endif]-->
   </head>
   <body>
-    <div class="wrapper">
+    <div class="wrapper" style="width:800px">
       <header {% unless site.description or site.github.project_tagline %} class="without-description" {% endunless %}>
         <h1>{{ site.title | default: site.github.repository_name }}</h1>
         {% if site.description or site.github.project_tagline %}
@@ -36,7 +36,7 @@
 
       </section>
     </div>
-    <footer>
+    <footer style="width:800px">
     {% if site.github.is_project_page %}
       <p>Project maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
     {% endif %}
