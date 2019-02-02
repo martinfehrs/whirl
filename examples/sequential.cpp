@@ -6,7 +6,7 @@ int main(int argc, char** argv)
     if (argc != 3)
     {
         if(argc < 2)
-            std::cerr << "missing input file\n"; 
+            std::cerr << "missing input file\n";
 
         if(argc < 3)
             std::cerr << "missing output file\n";
@@ -34,7 +34,7 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    LL1::code_position pos{ 1, 1 };
+    whirl::code_position pos{ 1, 1 };
 
     try
     {
@@ -45,12 +45,12 @@ int main(int argc, char** argv)
 
         return EXIT_SUCCESS;
     }
-    catch(LL1::unexpected_input)
+    catch(whirl::unexpected_input)
     {
-        if (LL1::is_character(ifs))
+        if (whirl::is_character(ifs))
         {
             std::cerr << "unexpeced token "
-                << static_cast<char>(LL1::next(ifs, [](const char& c){ return c; }))
+                << static_cast<char>(whirl::next(ifs, [](const char& c){ return c; }))
                 << " at ("
                 << pos.row
                 << ", "

@@ -4,7 +4,7 @@
 #include "sequential.hpp"
 
 
-namespace LL1
+namespace whirl
 {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -410,7 +410,7 @@ namespace LL1
                 -3, -3, -2, -1, 0, -1, 0, 1, 1, 2, 2, 2, 4, 5, 8
             };
 
-            LL1::code_position pos{ 1, 1 };
+            whirl::code_position pos{ 1, 1 };
 
             std::ifstream ifs("sequential.inp");
 
@@ -423,7 +423,7 @@ namespace LL1
 
         SECTION("invalid input")
         {
-            LL1::code_position pos{ 1, 1 };
+            whirl::code_position pos{ 1, 1 };
 
             std::ifstream ifs("sequential_invalid.inp");
 
@@ -432,7 +432,7 @@ namespace LL1
 
         SECTION("empty input")
         {
-            LL1::code_position pos{ 1, 1 };
+            whirl::code_position pos{ 1, 1 };
 
             std::istringstream iss;
 
