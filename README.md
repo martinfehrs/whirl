@@ -1,4 +1,4 @@
-<div class="heading">
+<div class="heading" style="padding-bottom:10px">
     <div><img src="assets/images/logo.svg" alt="whirl"/></div>
     <div><i>header only library for implementing LL(1) parsers.</i></div>
 </div>
