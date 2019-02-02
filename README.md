@@ -1,5 +1,7 @@
-![whirl](assets/images/logo.svg)<br/>
-_a header only library for implementing LL(1) parsers_.
+<div class="heading">
+    <img src="assets/images/logo.svg">whirl</img>
+    <i>header only library for implementing LL(1) parsers.</i>
+</div>
 
 Its purpose is to simplify parser implementations providing a set of higher level functions on top
 of the stl's streaming capabilities or compatible APIs. It can be used as a more verbose but better readable alternative to regular expressions.
