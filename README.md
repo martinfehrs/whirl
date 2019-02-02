@@ -1,6 +1,7 @@
-<div class="heading" style="margin-bottom:10px">
+<div class="heading">
     <div><img src="assets/images/logo.svg" alt="whirl"/></div>
     <div><i>header only library for implementing LL(1) parsers.</i></div>
+    <br />
 </div>
 
 Its purpose is to simplify parser implementations providing a set of higher level functions on top
