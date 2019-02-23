@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     }
     catch(whirl::unexpected_input)
     {
-        if (whirl::is_character(ifs))
+        if (whirl::is(ifs, character))
         {
             std::cerr << "unexpeced token "
                 << static_cast<char>(whirl::next(ifs, [](const char& c){ return c; }))

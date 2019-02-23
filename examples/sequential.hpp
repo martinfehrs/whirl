@@ -15,29 +15,33 @@
 // =================================================================================================
 
 
-#include "whirl.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <deque>
 
+#include "whirl.hpp"
+
+
+using namespace whirl::predicates;
+
 
 namespace sequential
 {
-    constexpr auto is_separator        = whirl::is_space;
-    constexpr auto is_sign             = whirl::is('-');
-    constexpr auto is_number           = whirl::is_digit || is_sign;
-    constexpr auto is_non_zero_number  = is_number && !whirl::is_zero;
+    constexpr auto separator           = whirl::is(space);
+    constexpr auto sign                = whirl::is('-');
+    constexpr auto number              = whirl::is(digit) || whirl::is(sign);
+    constexpr auto non_zero_number     = whirl::is(number) && !whirl::is(zero);
 
-    constexpr auto read_sign           = whirl::next_if(is_sign, whirl::as(-1)) || 1;
+    constexpr auto read_sign           = whirl::next_if(sign, whirl::as(-1)) || 1;
     constexpr auto read_digit          = whirl::next(whirl::as_digit);
-    constexpr auto read_digit_sequence = whirl::next_while(whirl::is_digit, whirl::as_digits);
+    constexpr auto read_digit_sequence = whirl::next_while(digit, whirl::as_digits);
 
-    constexpr auto ignore_whitespace   = whirl::next_while(whirl::is_space);
+    constexpr auto ignore_whitespace   = whirl::next_while(space);
 
     auto read_decimal_whole_number(std::istream& ins, whirl::code_position& pos)
     {
-        if (whirl::is_zero(ins))
+        if (whirl::is(ins, zero))
             return read_digit(ins, pos);
         else
             return read_digit_sequence(ins, pos, read_sign(ins, pos) * read_digit(ins, pos));
@@ -48,11 +52,11 @@ namespace sequential
     {
         std::vector<int> temperatures;
 
-        if (is_number(ins))
+        if (whirl::is(ins, number))
         {
             temperatures.push_back(read_decimal_whole_number(ins, pos));
 
-            if (is_separator(ins))
+            if (whirl::is(ins, separator))
             {
                 whirl::next(ins, pos);
                 ignore_whitespace(ins, pos);
@@ -68,13 +72,13 @@ namespace sequential
             }
             else
             {
-                whirl::next(ins, pos, whirl::is_end);
+                whirl::next_is(ins, pos, end);
                 return temperatures;
             }
         }
         else
         {
-            whirl::next(ins, pos, whirl::is_end);
+            whirl::next_is(ins, pos, end);
             return temperatures;
         }
     }

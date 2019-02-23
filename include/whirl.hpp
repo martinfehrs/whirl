@@ -389,10 +389,46 @@ namespace whirl
     // bound predicate factories
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template <typename C, typename = requires_t<is_character_type<C>>>
+    template <
+        typename C,
+        typename = requires_t<is_character_type<C>>
+    >
     constexpr auto is(const C& cmp)
     {
         return bound_is_predicate{ cmp };
+    }
+
+    template <
+        typename P,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = void
+    >
+    constexpr auto is(const P& cmp)
+    {
+        return cmp;
+    }
+
+    template <
+        typename I,
+        typename C,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_character_type<C>>
+    >
+    constexpr auto is(I& ins, const C& cmp)
+    {
+        return input_source_traits<I>::look_ahead(ins) != cmp;
+    }
+
+    template <
+        typename I,
+        typename P,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = void
+    >
+    constexpr auto is(I& ins, const P& cmp)
+    {
+        return cmp(ins);
     }
 
     template <typename C, typename = requires_t<is_character_type<C>>>
@@ -418,14 +454,16 @@ namespace whirl
     // predefined bound predicates
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    constexpr auto is_end            = bound_is_end_predicate{};
-    constexpr auto is_character      = bound_is_character_predicate{};
-    constexpr auto is_blank          = is_one_of(' ', '\t');
-    constexpr auto is_space          = is_one_of(' ', '\t', '\n');
-    constexpr auto is_zero           = is('0');
-    constexpr auto is_non_zero_digit = is_one_of('1', '2', '3', '4', '5', '6', '7', '8', '9');
-    constexpr auto is_digit          = is_zero || is_non_zero_digit;
-
+    namespace predicates
+    {
+        constexpr auto end            = bound_is_end_predicate{};
+        constexpr auto character      = bound_is_character_predicate{};
+        constexpr auto blank          = is_one_of(' ', '\t');
+        constexpr auto space          = is_one_of(' ', '\t', '\n');
+        constexpr auto zero           = is('0');
+        constexpr auto non_zero_digit = is_one_of('1', '2', '3', '4', '5', '6', '7', '8', '9');
+        constexpr auto digit          = is(zero) || is(non_zero_digit);
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // transformators
@@ -568,7 +606,7 @@ namespace whirl
         typename = requires_t<is_input_source_type<I>>,
         typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr void next(I& ins, const P& pred)
+    constexpr void next_is(I& ins, const P& pred)
     {
         if(!pred(ins))
             throw unexpected_input{};
@@ -584,7 +622,7 @@ namespace whirl
         typename = requires_t<is_bound_predicate<P>>,
         typename = requires_t<is_transformator<T>>
     >
-    constexpr auto next(I& ins, const T& trans, const P& pred)
+    constexpr auto next_is(I& ins, const P& pred, const T& trans)
     {
         if(!pred(ins))
             throw unexpected_input{};
@@ -598,7 +636,7 @@ namespace whirl
         typename = requires_t<is_input_source_type<I>>,
         typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr void next(I& ins, code_position& pos, const P& pred)
+    constexpr void next_is(I& ins, code_position& pos, const P& pred)
     {
         if(!pred(ins))
             throw unexpected_input{};
@@ -617,7 +655,7 @@ namespace whirl
         typename = requires_t<is_input_source_type<I>>,
         typename = requires_t<is_transformator<T>>
     >
-    constexpr auto next(I& ins, code_position& pos, const P& pred, const T& trans)
+    constexpr auto next_is(I& ins, code_position& pos, const P& pred, const T& trans)
     {
         if(!pred(ins))
             throw unexpected_input{};
@@ -988,11 +1026,28 @@ namespace whirl
         return bound_transforming_conditional_read{ pred, trans };
     }
 
+    //template <typename P, typename = requires_t<is_bound_predicate<P>>>
+    //constexpr auto next_while(const P& pred)
+    //{
+    //    return bound_conditional_multi_read{ pred };
+    //}
+
     template <typename P, typename = requires_t<is_bound_predicate<P>>>
     constexpr auto next_while(const P& pred)
     {
         return bound_conditional_multi_read{ pred };
     }
+
+    //template <
+    //    typename P,
+    //    typename T,
+    //    typename = requires_t<is_bound_predicate<P>>,
+    //    typename = requires_t<is_sequence_transformator<T>>
+    //>
+    //constexpr auto next_while(const P& pred, const T& trans)
+    //{
+    //    return bound_transforming_conditional_multi_read{ pred, trans };
+    //}
 
     template <
         typename P,
