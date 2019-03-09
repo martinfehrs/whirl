@@ -26,10 +26,9 @@ endif(BUILD_TESTING)
 target_link_libraries(tests sequential_lib)
 add_dependencies(tests valid_sequential_input invalid_sequential_input)
 
-target_link_libraries(tests LLk catch2)
+target_link_libraries(tests whirl catch2)
 add_test(NAME is         COMMAND tests [is]        )
 add_test(NAME is-not     COMMAND tests [is-not]    )
 add_test(NAME is-one-of  COMMAND tests [is-one-of] )
 add_test(NAME is-none-of COMMAND tests [is-none-of])
 add_test(NAME sequential COMMAND tests [sequential])
-
