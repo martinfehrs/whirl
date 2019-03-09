@@ -23,7 +23,7 @@ else(BUILD_TESTING)
     add_executable(tests EXCLUDE_FROM_ALL tests.cpp)
 endif(BUILD_TESTING)
 
-target_link_libraries(tests PRIVATE whirl sequential_lib cath2)
+target_link_libraries(tests PRIVATE whirl sequential_lib catch2)
 add_dependencies(tests valid_sequential_input invalid_sequential_input)
 
 add_test(NAME is         COMMAND tests [is]        )
