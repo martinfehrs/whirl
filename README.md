@@ -63,7 +63,7 @@ auto read_decimal_whole_number(std::istream& ins, whirl::code_position& pos)
 
 }
 
-std::vector<int> read_data_entry(std::istream& ins, whirl::code_position& pos)
+std::vector<int> read_data_entries(std::istream& ins, whirl::code_position& pos)
 {
     std::vector<int> temperatures;
 
@@ -76,7 +76,7 @@ std::vector<int> read_data_entry(std::istream& ins, whirl::code_position& pos)
             whirl::next(ins, pos);
             ignore_whitespace(ins, pos);
 
-            const auto further_temperatures = read_data_entry(ins, pos);
+            const auto further_temperatures = read_data_entries(ins, pos);
 
             temperatures.insert(
                 std::end(temperatures),
@@ -95,6 +95,6 @@ std::vector<int> read_data_entry(std::istream& ins, whirl::code_position& pos)
 auto read_data(std::istream& ins, whirl::code_position& pos)
 {
     ignore_whitespace(ins, pos);
-    return read_data_entry(ins, pos);
+    return read_data_entries(ins, pos);
 }
 ```
