@@ -82,20 +82,14 @@ std::vector<int> read_data_entry(std::istream& ins, whirl::code_position& pos)
                 std::end(temperatures),
                 std::begin(further_temperatures), std::end(further_temperatures)
             );
-
-            return temperatures;
         }
         else
-        {
             whirl::next_is(ins, pos, end);
-            return temperatures;
-        }
     }
     else
-    {
         whirl::next_is(ins, pos, end);
-        return temperatures;
-    }
+
+    return temperatures;
 }
 
 auto read_data(std::istream& ins, whirl::code_position& pos)
