@@ -54,14 +54,6 @@ constexpr auto read_digit_sequence = whirl::next_while(digit, whirl::as_digits);
 
 constexpr auto ignore_whitespace   = whirl::next_while(space);
 
-auto read_decimal_whole_number(std::istream& ins, whirl::code_position& pos)
-{
-    if (whirl::is(ins, zero))
-        return read_digit(ins, pos);
-    else
-        return read_digit_sequence(ins, pos, read_sign(ins, pos) * read_digit(ins, pos));
-}
-
 auto read_data_entries(std::istream& ins, whirl::code_position& pos)
 {
     std::vector<int> temperatures;
@@ -70,7 +62,11 @@ auto read_data_entries(std::istream& ins, whirl::code_position& pos)
 
     while(whirl::is(ins, number))
     {
-        temperatures.push_back(read_decimal_whole_number(ins, pos));
+        const auto number = whirl::is(ins, zero) ?
+            read_digit(ins, pos) :
+            read_digit_sequence(ins, pos, read_sign(ins, pos) * read_digit(ins, pos));
+
+        temperatures.push_back(number);
         ignore_whitespace(ins, pos);
     }
 
