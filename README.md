@@ -43,10 +43,8 @@ data                   = { whitespace }, data-entry ;
 ```
 
 ```C++
-constexpr auto separator           = whirl::is(space);
 constexpr auto sign                = whirl::is('-');
 constexpr auto number              = whirl::is(digit) || whirl::is(sign);
-constexpr auto non_zero_number     = whirl::is(number) && !whirl::is(zero);
 
 constexpr auto read_sign           = whirl::next_if(sign, whirl::as(-1)) || 1;
 constexpr auto read_digit          = whirl::next(whirl::as_digit);
