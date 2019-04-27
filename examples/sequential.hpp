@@ -45,42 +45,23 @@ namespace sequential
             return read_digit(ins, pos);
         else
             return read_digit_sequence(ins, pos, read_sign(ins, pos) * read_digit(ins, pos));
-
     }
 
-    std::vector<int> read_data_entries(std::istream& ins, whirl::code_position& pos)
+    auto read_data_entries(std::istream& ins, whirl::code_position& pos)
     {
         std::vector<int> temperatures;
 
-        if (whirl::is(ins, number))
+        ignore_whitespace(ins, pos);
+
+        while(whirl::is(ins, number))
         {
             temperatures.push_back(read_decimal_whole_number(ins, pos));
-
-            if (whirl::is(ins, separator))
-            {
-                whirl::next(ins, pos);
-                ignore_whitespace(ins, pos);
-
-                const auto further_temperatures = read_data_entries(ins, pos);
-
-                temperatures.insert(
-                    std::end(temperatures),
-                    std::begin(further_temperatures), std::end(further_temperatures)
-                );
-            }
-            else
-                whirl::next_is(ins, pos, end);
+            ignore_whitespace(ins, pos);
         }
-        else
-            whirl::next_is(ins, pos, end);
+
+        whirl::next_is(ins, pos, end);
 
         return temperatures;
-    }
-
-    auto read_data(std::istream& ins, whirl::code_position& pos)
-    {
-        ignore_whitespace(ins, pos);
-        return read_data_entries(ins, pos);
     }
 }
 

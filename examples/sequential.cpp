@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 
     try
     {
-        for(auto temperature : sequential::read_data(ifs, pos))
+        for(auto temperature : sequential::read_data_entries(ifs, pos))
             ofs << temperature << " ";
 
         ofs.close();

@@ -416,7 +416,7 @@ namespace whirl
 
             REQUIRE(ifs.is_open());
 
-            const auto result = sequential::read_data(ifs, pos);
+            const auto result = sequential::read_data_entries(ifs, pos);
 
             REQUIRE(std::equal(std::begin(result), std::end(result), std::begin(expected_result)));
         }
@@ -427,7 +427,7 @@ namespace whirl
 
             std::ifstream ifs("sequential_invalid.inp");
 
-            REQUIRE_THROWS(sequential::read_data(ifs, pos));
+            REQUIRE_THROWS(sequential::read_data_entries(ifs, pos));
         }
 
         SECTION("empty input")
@@ -436,7 +436,7 @@ namespace whirl
 
             std::istringstream iss;
 
-            const auto result = sequential::read_data(iss, pos);
+            const auto result = sequential::read_data_entries(iss, pos);
 
             REQUIRE(result.empty());
         }
