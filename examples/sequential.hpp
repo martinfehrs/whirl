@@ -35,13 +35,11 @@ namespace sequential
     constexpr auto read_digit          = whirl::next(whirl::as_digit);
     constexpr auto read_digit_sequence = whirl::next_while(digit, whirl::as_digits);
 
-    constexpr auto ignore_whitespace   = whirl::next_while(space);
-
     auto read_data_entries(std::istream& ins, whirl::code_position& pos)
     {
         std::vector<int> temperatures;
 
-        ignore_whitespace(ins, pos);
+        whirl::next_while(ins, pos, space);
 
         while(whirl::is(ins, number))
         {
@@ -50,7 +48,7 @@ namespace sequential
                 read_digit_sequence(ins, pos, read_sign(ins, pos) * read_digit(ins, pos));
 
             temperatures.push_back(number);
-            ignore_whitespace(ins, pos);
+            whirl::next_while(ins, pos, space);
         }
 
         whirl::next_is(ins, pos, end);
