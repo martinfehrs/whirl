@@ -841,21 +841,15 @@ namespace whirl
         { }
 
         template <typename I>
-        constexpr std::optional<typename I::char_type> operator()(I& ins) const
+        constexpr auto operator()(I& ins) const
         {
-            if (this->pred(ins))
-                return next(ins);
-            else
-                return std::nullopt;
+            return next_is(ins, this->pred);
         }
 
         template <typename I>
-        constexpr std::optional<typename I::char_type> operator()(I& ins, code_position& pos) const
+        constexpr auto operator()(I& ins, code_position& pos) const
         {
-            if (this->pred(ins))
-                return next(ins, pos);
-            else
-                return std::nullopt;
+            return next_is(ins, this->pred, pos);
         }
 
         P pred;
@@ -880,19 +874,19 @@ namespace whirl
         template <typename I>
         constexpr auto operator()(I& ins) const
         {
-            if (this->pred(ins))
+            if(is(ins, this->pred))
                 return next(ins, this->trans);
             else
-                return alt;
+                return this->alt;
         }
 
         template <typename I>
         constexpr auto operator()(I& ins, code_position& pos) const
         {
-            if (this->pred(ins))
+            if(is(ins, this->pred))
                 return next(ins, pos, this->trans);
             else
-                return alt;
+                return this->alt;
         }
 
         P pred;
@@ -917,19 +911,13 @@ namespace whirl
         template <typename I>
         constexpr std::optional<typename I::char_type> operator()(I& ins) const
         {
-            if (this->pred(ins))
-                return next(ins, this->trans);
-            else
-                return std::nullopt;
+            return next_is(ins, this->pred, this->trans);
         }
 
         template <typename I>
         constexpr auto operator()(I& ins, code_position& pos) const
         {
-            if (this->pred(ins))
-                return next(ins, pos, this->trans);
-            else
-                return std::optional<decltype(next(ins, pos, this->trans))>{};
+            return next_is(ins, pos, this->pred, this->trans);
         }
 
         template <typename A>
@@ -1011,7 +999,7 @@ namespace whirl
     }
 
     template <typename P, typename = requires_t<is_bound_predicate<P>>>
-    constexpr auto next_if(const P& pred)
+    constexpr auto next_is(const P& pred)
     {
         return bound_conditional_read{ pred };
     }
@@ -1022,7 +1010,7 @@ namespace whirl
         typename = requires_t<is_bound_predicate<P>>,
         typename = requires_t<is_transformator<T>>
     >
-    constexpr auto next_if(const P& pred, const T& trans)
+    constexpr auto next_is(const P& pred, const T& trans)
     {
         return bound_transforming_conditional_read{ pred, trans };
     }

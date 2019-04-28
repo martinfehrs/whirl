@@ -27,7 +27,7 @@ namespace sequential
 {
     constexpr auto number              = whirl::is(whirl::digit) || whirl::is(whirl::negative_sign);
 
-    constexpr auto read_sign           = whirl::next_if(whirl::negative_sign, whirl::as(-1)) || 1;
+    constexpr auto read_sign           = whirl::next_is(whirl::negative_sign, whirl::as(-1)) || 1;
     constexpr auto read_digit          = whirl::next(whirl::as_digit);
     constexpr auto read_digit_sequence = whirl::next_while(whirl::digit, whirl::as_digits);
 
