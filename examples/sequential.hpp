@@ -28,7 +28,6 @@ using namespace whirl::predicates;
 
 namespace sequential
 {
-
     constexpr auto number              = whirl::is(digit) || whirl::is(negative_sign);
 
     constexpr auto read_sign           = whirl::next_if(negative_sign, whirl::as(-1)) || 1;
