@@ -1027,28 +1027,11 @@ namespace whirl
         return bound_transforming_conditional_read{ pred, trans };
     }
 
-    //template <typename P, typename = requires_t<is_bound_predicate<P>>>
-    //constexpr auto next_while(const P& pred)
-    //{
-    //    return bound_conditional_multi_read{ pred };
-    //}
-
     template <typename P, typename = requires_t<is_bound_predicate<P>>>
     constexpr auto next_while(const P& pred)
     {
         return bound_conditional_multi_read{ pred };
     }
-
-    //template <
-    //    typename P,
-    //    typename T,
-    //    typename = requires_t<is_bound_predicate<P>>,
-    //    typename = requires_t<is_sequence_transformator<T>>
-    //>
-    //constexpr auto next_while(const P& pred, const T& trans)
-    //{
-    //    return bound_transforming_conditional_multi_read{ pred, trans };
-    //}
 
     template <
         typename P,
