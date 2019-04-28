@@ -23,34 +23,31 @@
 #include "whirl.hpp"
 
 
-using namespace whirl::predicates;
-
-
 namespace sequential
 {
-    constexpr auto number              = whirl::is(digit) || whirl::is(negative_sign);
+    constexpr auto number              = whirl::is(whirl::digit) || whirl::is(whirl::negative_sign);
 
-    constexpr auto read_sign           = whirl::next_if(negative_sign, whirl::as(-1)) || 1;
+    constexpr auto read_sign           = whirl::next_if(whirl::negative_sign, whirl::as(-1)) || 1;
     constexpr auto read_digit          = whirl::next(whirl::as_digit);
-    constexpr auto read_digit_sequence = whirl::next_while(digit, whirl::as_digits);
+    constexpr auto read_digit_sequence = whirl::next_while(whirl::digit, whirl::as_digits);
 
     auto read_data_entries(std::istream& ins, whirl::code_position& pos)
     {
         std::vector<int> temperatures;
 
-        whirl::next_while(ins, pos, space);
+        whirl::next_while(ins, pos, whirl::space);
 
         while(whirl::is(ins, number))
         {
-            const auto number = whirl::is(ins, zero) ?
+            const auto number = whirl::is(ins, whirl::zero) ?
                 read_digit(ins, pos) :
                 read_digit_sequence(ins, pos, read_sign(ins, pos) * read_digit(ins, pos));
 
             temperatures.push_back(number);
-            whirl::next_while(ins, pos, space);
+            whirl::next_while(ins, pos, whirl::space);
         }
 
-        whirl::next_is(ins, pos, end);
+        whirl::next_is(ins, pos, whirl::end);
 
         return temperatures;
     }
