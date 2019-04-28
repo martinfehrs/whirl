@@ -28,10 +28,10 @@ using namespace whirl::predicates;
 
 namespace sequential
 {
-    constexpr auto sign                = whirl::is('-');
-    constexpr auto number              = whirl::is(digit) || whirl::is(sign);
 
-    constexpr auto read_sign           = whirl::next_if(sign, whirl::as(-1)) || 1;
+    constexpr auto number              = whirl::is(digit) || whirl::is(negative_sign);
+
+    constexpr auto read_sign           = whirl::next_if(negative_sign, whirl::as(-1)) || 1;
     constexpr auto read_digit          = whirl::next(whirl::as_digit);
     constexpr auto read_digit_sequence = whirl::next_while(digit, whirl::as_digits);
 

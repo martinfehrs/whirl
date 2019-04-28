@@ -463,6 +463,9 @@ namespace whirl
         constexpr auto zero           = is('0');
         constexpr auto non_zero_digit = is_one_of('1', '2', '3', '4', '5', '6', '7', '8', '9');
         constexpr auto digit          = is(zero) || is(non_zero_digit);
+        constexpr auto positive_sign  = is('+');
+        constexpr auto negative_sign  = is('-');
+        constexpr auto sign           = is(positive_sign) || is(negative_sign);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
