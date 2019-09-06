@@ -511,7 +511,7 @@ namespace whirl
         }
     };
 
-    template <typename N>
+    template <typename N, typename = std::enable_if_t<std::is_arithmetic_v<N>>>
     struct as_digits_transform
     {
         template <typename C, typename = requires_t<is_character_type<C>>>
