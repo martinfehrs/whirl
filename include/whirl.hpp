@@ -532,7 +532,7 @@ namespace whirl
     // transformator factories
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    constexpr auto as_is     = as_is_transform{};
+    constexpr auto as_is = as_is_transform{};
 
     template <typename N>
     constexpr auto as_digit = as_digit_transform<N>{};
