@@ -501,10 +501,11 @@ namespace whirl
         }
     };
 
+    template <typename N, typename = std::enable_if_t<std::is_arithmetic_v<N>>>
     struct as_digit_transform
     {
         template <typename C, typename = requires_t<is_character_type<C>>>
-        constexpr auto operator()(const C& chr) const
+        constexpr N operator()(const C& chr) const
         {
             return chr - '0';
         }
@@ -532,7 +533,9 @@ namespace whirl
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     constexpr auto as_is     = as_is_transform{};
-    constexpr auto as_digit  = as_digit_transform{};
+
+    template <typename N>
+    constexpr auto as_digit = as_digit_transform<N>{};
 
     template <typename N, size_t base = 10>
     constexpr auto as_digits = as_digits_transform<N, base>{};
