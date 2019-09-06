@@ -21,6 +21,20 @@ namespace whirl
     {
         unsigned row;
         unsigned col;
+
+        template <typename C, typename = requires_t<is_character_type<C>>>
+        constexpr void update(C chr) noexcept
+        {
+            if (chr == '\n')
+            {
+                this->row++;
+                this->col = 0;
+            }
+            else
+            {
+                this->col++;
+            }
+        }
     };
 
     struct unexpected_input { };
@@ -577,7 +591,7 @@ namespace whirl
     template <typename I, typename = requires_t<is_input_source_type<I>>>
     constexpr void next(I& ins, code_position& pos)
     {
-        if (next(ins, as_is) == '\n')
+        if(next(ins, as_is) == '\n')
         {
             pos.row++;
             pos.col = 0;
