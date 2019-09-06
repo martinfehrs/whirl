@@ -577,9 +577,7 @@ namespace whirl
     template <typename I, typename = requires_t<is_input_source_type<I>>>
     constexpr void next(I& ins, code_position& pos)
     {
-        const auto tok = next(ins, as_is);
-
-        if (tok == '\n')
+        if (next(ins, as_is) == '\n')
         {
             pos.row++;
             pos.col = 0;
@@ -598,9 +596,9 @@ namespace whirl
     >
     constexpr auto next(I& ins, code_position& pos, const T& trans)
     {
-        const auto tok = next(ins, trans);
+        const auto chr = next(ins, as_is);
 
-        if (tok == '\n')
+        if (chr == '\n')
         {
             pos.row++;
             pos.col = 0;
@@ -610,7 +608,7 @@ namespace whirl
             pos.col++;
         }
 
-        return tok;
+        return trans(chr);
     }
 
 
