@@ -529,12 +529,6 @@ namespace whirl
     struct as_digits_transform
     {
         template <typename C, typename = requires_t<is_character_type<C>>>
-        constexpr N operator()(const C& chr) const
-        {
-            return chr - '0';
-        }
-
-        template <typename C, typename = requires_t<is_character_type<C>>>
         constexpr N operator()(const N& num, const C& chr) const
         {
             return num * 10 + chr - '0';
