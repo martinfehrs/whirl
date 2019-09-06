@@ -570,6 +570,22 @@ namespace whirl
 
     template <
         typename I,
+        typename V,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<std::negation<is_transformator<V>>>
+    >
+    constexpr V next(I& ins, V val)
+    {
+        if (input_source_traits<I>::is_end(ins))
+            throw unexpected_input{};
+
+        input_source_traits<I>::ignore(ins);
+
+        return val;
+    }
+
+    template <
+        typename I,
         typename T,
         typename = requires_t<is_input_source_type<I>>,
         typename = requires_t<is_transformator<T>>
@@ -582,10 +598,38 @@ namespace whirl
         return trans(input_source_traits<I>::read(ins));
     }
 
+    template <
+        typename I,
+        typename T,
+        typename V,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_sequence_transformator<T>>
+    >
+    constexpr auto next(I& ins, const T& trans, V val)
+    {
+        if (input_source_traits<I>::is_end(ins))
+            throw unexpected_input{};
+
+        return trans(val, input_source_traits<I>::read(ins));
+    }
+
     template <typename I, typename = requires_t<is_input_source_type<I>>>
     constexpr void next(I& ins, code_position& pos)
     {
         pos.update(next(ins, as_is));
+    }
+
+    template <
+        typename I,
+        typename V,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<std::negation<is_transformator<V>>>
+    >
+    constexpr auto next(I& ins, code_position& pos, V val)
+    {
+        pos.update(next(ins, as_is));
+
+        return val;
     }
 
     template <
@@ -601,6 +645,22 @@ namespace whirl
         pos.update(chr);
 
         return trans(chr);
+    }
+
+    template <
+        typename I,
+        typename T,
+        typename V,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_sequence_transformator<T>>
+    >
+    constexpr auto next(I& ins, code_position& pos, const T& trans, V val)
+    {
+        const auto chr = next(ins, as_is);
+
+        pos.update(chr);
+
+        return trans(val, chr);
     }
 
 
