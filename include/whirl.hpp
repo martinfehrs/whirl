@@ -510,12 +510,19 @@ namespace whirl
         }
     };
 
+    template <typename N, unsigned base = 10>
     struct as_digits_transform
     {
-        template <typename N, typename C, typename = requires_t<is_character_type<C>>>
-        constexpr auto operator()(const N& num, const C& chr) const
+        template <typename C, typename = requires_t<is_character_type<C>>>
+        constexpr N operator()(const C& chr) const
         {
-            return num * 10 + chr - '0';
+            return chr - '0';
+        }
+
+        template <typename C, typename = requires_t<is_character_type<C>>>
+        constexpr N operator()(const N& num, const C& chr) const
+        {
+            return num * base + chr - '0';
         }
     };
 
@@ -526,7 +533,9 @@ namespace whirl
 
     constexpr auto as_is     = as_is_transform{};
     constexpr auto as_digit  = as_digit_transform{};
-    constexpr auto as_digits = as_digits_transform{};
+
+    template <typename N, size_t base = 10>
+    constexpr auto as_digits = as_digits_transform<N, base>{};
 
     template <typename R>
     constexpr auto as(R&& res)
