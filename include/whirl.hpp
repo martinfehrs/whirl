@@ -591,15 +591,7 @@ namespace whirl
     template <typename I, typename = requires_t<is_input_source_type<I>>>
     constexpr void next(I& ins, code_position& pos)
     {
-        if(next(ins, as_is) == '\n')
-        {
-            pos.row++;
-            pos.col = 0;
-        }
-        else
-        {
-            pos.col++;
-        }
+        pos.update(next(ins, as_is));
     }
 
     template <
@@ -612,15 +604,7 @@ namespace whirl
     {
         const auto chr = next(ins, as_is);
 
-        if (chr == '\n')
-        {
-            pos.row++;
-            pos.col = 0;
-        }
-        else
-        {
-            pos.col++;
-        }
+        pos.update(chr);
 
         return trans(chr);
     }
