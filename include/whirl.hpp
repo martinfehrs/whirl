@@ -9,6 +9,7 @@
 #include <tuple>
 
 #include "type_traits.hpp"
+#include "values.hpp"
 
 
 namespace whirl
@@ -519,19 +520,9 @@ namespace whirl
     struct as_digit_transform
     {
         template <typename C, typename = requires_t<is_character_type<C>>>
-        constexpr N operator()(const C& chr) const
+        constexpr auto operator()(const C& chr) const
         {
-            return chr - '0';
-        }
-    };
-
-    template <typename N, typename = std::enable_if_t<std::is_arithmetic_v<N>>>
-    struct as_digits_transform
-    {
-        template <typename C, typename = requires_t<is_character_type<C>>>
-        constexpr N operator()(const N& num, const C& chr) const
-        {
-            return num * 10 + chr - '0';
+            return Digit{ chr - '0' };
         }
     };
 
@@ -544,9 +535,6 @@ namespace whirl
 
     template <typename N>
     constexpr auto as_digit = as_digit_transform<N>{};
-
-    template <typename N>
-    constexpr auto as_digits = as_digits_transform<N>{};
 
     template <typename R>
     constexpr auto as(R&& res)
@@ -824,12 +812,12 @@ namespace whirl
     >
     constexpr auto next_while(I& ins, const P& pred, const T& trans)
     {
-        std::basic_string<typename I::char_type> tokseq;
+        decltype(concat(next(ins, trans), next(ins, trans))) result;
 
         while (pred(ins))
-            tokseq.push_back(next(ins, trans));
+            result = concat(result, next(ins, trans));
 
-        return tokseq;
+        return result;
     }
 
     template <
@@ -838,7 +826,7 @@ namespace whirl
         typename = requires_t<is_input_source_type<I>>,
         typename = requires_t<is_bound_predicate<P>>
     >
-    constexpr auto next_while(I& ins, code_position& pos, const P& pred)
+    constexpr void next_while(I& ins, code_position& pos, const P& pred)
     {
         while (pred(ins))
             next(ins, pos);
@@ -851,7 +839,7 @@ namespace whirl
         typename T,
         typename = requires_t<is_input_source_type<I>>,
         typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_sequence_transformator<T>>
+        typename = requires_t<is_transformator<T>>
     >
     constexpr auto next_while(
         I& ins, code_position& pos, const P& pred, const S& start, const T& trans)
@@ -859,7 +847,7 @@ namespace whirl
         S result = start;
 
         while (pred(ins))
-            result = trans(result, next(ins, pos, as_is));
+            result = concat(result, next(ins, pos, trans));
 
         return result;
     }
@@ -1030,7 +1018,7 @@ namespace whirl
     {
 
         static_assert(is_bound_predicate_v<P>);
-        static_assert(is_sequence_transformator_v<T>);
+        static_assert(is_transformator_v<T>);
 
         explicit constexpr bound_transforming_conditional_multi_read(const P& pred, const T& trans)
             : pred{ pred }
@@ -1092,7 +1080,7 @@ namespace whirl
         typename P,
         typename T,
         typename = requires_t<is_bound_predicate<P>>,
-        typename = requires_t<is_sequence_transformator<T>>
+        typename = requires_t<is_transformator<T>>
     >
     constexpr auto next_while(const P& pred, const T& trans)
     {

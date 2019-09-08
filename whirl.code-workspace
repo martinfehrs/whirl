@@ -10,6 +10,9 @@
         "files.trimTrailingWhitespace": true,
         "editor.rulers": [100],
         "editor.insertSpaces": true,
-        "editor.detectIndentation": false
+        "editor.detectIndentation": false,
+        "files.associations": {
+            "ratio": "cpp"
+        }
     }
 }
