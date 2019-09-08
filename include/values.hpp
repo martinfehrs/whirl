@@ -2,6 +2,9 @@
 #define __VALUES_HPP__
 
 
+#include <ostream>
+
+
 namespace whirl
 {
 
