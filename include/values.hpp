@@ -67,6 +67,15 @@ namespace whirl
     };
 
     template <typename D>
+    std::ostream& operator<<(std::ostream& os, UnsignedNumber<D> unum)
+    {
+        os << unum.data();
+
+        return os;
+    }
+
+
+    template <typename D>
     class SignedNumber
     {
 
