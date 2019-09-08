@@ -204,22 +204,6 @@ namespace whirl
             T, I, std::void_t<decltype(std::declval<T>()(std::declval<I>()))>
         > : std::negation<std::is_same<decltype(std::declval<T>()(std::declval<I>())), void>>
         {};
-
-        template <typename T, typename I, typename = void>
-        struct is_sequence_transformator_impl : std::false_type
-        { };
-
-        template <typename T, typename I>
-        struct is_sequence_transformator_impl<
-            T, I, std::void_t<decltype(std::declval<T>()(std::declval<I>(), std::declval<I>()))>
-        > : std::negation<
-                std::is_same<
-                    decltype(std::declval<T>()(std::declval<I>(), std::declval<I>())),
-                    void
-                >
-            >
-        {};
-
     }
 
     template <typename T>
@@ -233,20 +217,8 @@ namespace whirl
     {};
 
     template <typename T>
-    struct is_sequence_transformator
-        : std::disjunction<
-            detail::is_sequence_transformator_impl<T, char>,
-            detail::is_sequence_transformator_impl<T, wchar_t>,
-            detail::is_sequence_transformator_impl<T, char16_t>,
-            detail::is_sequence_transformator_impl<T, char32_t>
-        >
-    {};
-
-    template <typename T>
     constexpr auto is_transformator_v = is_transformator<T>::value;
 
-    template <typename T>
-    constexpr auto is_sequence_transformator_v = is_sequence_transformator<T>::value;
 }
 
 #endif /*__TYPE_TRAITS_HPP__*/

@@ -14,6 +14,7 @@
 
 namespace whirl
 {
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // parsing error handling
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -586,21 +587,6 @@ namespace whirl
         return trans(input_source_traits<I>::read(ins));
     }
 
-    template <
-        typename I,
-        typename T,
-        typename V,
-        typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<is_sequence_transformator<T>>
-    >
-    constexpr auto next(I& ins, const T& trans, V val)
-    {
-        if (input_source_traits<I>::is_end(ins))
-            throw unexpected_input{};
-
-        return trans(val, input_source_traits<I>::read(ins));
-    }
-
     template <typename I, typename = requires_t<is_input_source_type<I>>>
     constexpr void next(I& ins, code_position& pos)
     {
@@ -633,22 +619,6 @@ namespace whirl
         pos.update(chr);
 
         return trans(chr);
-    }
-
-    template <
-        typename I,
-        typename T,
-        typename V,
-        typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<is_sequence_transformator<T>>
-    >
-    constexpr auto next(I& ins, code_position& pos, const T& trans, V val)
-    {
-        const auto chr = next(ins, as_is);
-
-        pos.update(chr);
-
-        return trans(val, chr);
     }
 
 
