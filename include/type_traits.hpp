@@ -158,7 +158,8 @@ namespace whirl
     namespace detail
     {
         template <typename T1, typename T2>
-        using return_type_t = decltype(std::declval<T1>()(std::declval<std::basic_istream<T2>&>()));
+        using return_type_t =
+            decltype(std::declval<T1>().is(std::declval<std::basic_istream<T2>&>()));
 
         template<typename, typename, typename = void>
         struct is_bound_predicate_impl : std::false_type {};

@@ -58,7 +58,7 @@ namespace whirl
         { }
 
         template <typename I, typename = requires_t<is_compatible_input_source_type<I, C>>>
-        constexpr bool operator()(I& ins) const
+        constexpr bool is(I& ins) const
         {
             return input_source_traits<I>::look_ahead(ins) == this->cmp;
         }
@@ -79,7 +79,7 @@ namespace whirl
         { }
 
         template <typename I, typename = requires_t<is_compatible_input_source_type<I, C>>>
-        constexpr bool operator()(I& ins) const
+        constexpr bool is(I& ins) const
         {
             return input_source_traits<I>::look_ahead(ins) != this->cmp;
         }
@@ -100,7 +100,7 @@ namespace whirl
         { }
 
         template <typename I, typename = requires_t<is_compatible_input_source_type<I, Cs>...>>
-        constexpr bool operator()(I& ins) const
+        constexpr bool is(I& ins) const
         {
             return std::apply(
                 [&ins](const auto&... cmps) {
@@ -126,7 +126,7 @@ namespace whirl
         { }
 
         template <typename I, typename = requires_t<is_compatible_input_source_type<I, Cs>...>>
-        constexpr bool operator()(I& ins) const
+        constexpr bool is(I& ins) const
         {
             return std::apply(
                 [&ins](const auto&... cmps) {
@@ -144,7 +144,7 @@ namespace whirl
     {
 
         template <typename I, typename = requires_t<is_input_source_type<I>>>
-        constexpr bool operator()(I& ins) const
+        constexpr bool is(I& ins) const
         {
             return input_source_traits<I>::is_end(ins);
         }
@@ -155,7 +155,7 @@ namespace whirl
     {
 
         template <typename I, typename = requires_t<is_input_source_type<I>>>
-        constexpr bool operator()(I& ins) const
+        constexpr bool is(I& ins) const
         {
             return !input_source_traits<I>::is_end(ins);
         }
@@ -181,7 +181,7 @@ namespace whirl
         { }
 
         template <typename T>
-        constexpr bool operator()(T& ins) const
+        constexpr bool is(T& ins) const
         {
             return this->p1(ins) && this->p2(ins);
         }
@@ -205,7 +205,7 @@ namespace whirl
         { }
 
         template <typename I>
-        constexpr bool operator()(I& ins) const
+        constexpr bool is(I& ins) const
         {
             return this->pred1(ins) || this->pred2(ins);
         }
@@ -227,7 +227,7 @@ namespace whirl
         { }
 
         template <typename I>
-        constexpr bool operator()(I& ins) const
+        constexpr bool is(I& ins) const
         {
             return !this->pred(ins);
         }
@@ -419,9 +419,9 @@ namespace whirl
         typename = requires_t<is_bound_predicate<P>>,
         typename = void
     >
-    constexpr auto is(const P& cmp)
+    constexpr auto is(const P& pred)
     {
-        return cmp;
+        return pred;
     }
 
     template <
@@ -442,9 +442,9 @@ namespace whirl
         typename = requires_t<is_bound_predicate<P>>,
         typename = void
     >
-    constexpr auto is(I& ins, const P& cmp)
+    constexpr auto is(I& ins, const P& pred)
     {
-        return cmp(ins);
+        return pred.is(ins);
     }
 
     template <typename C, typename = requires_t<is_character_type<C>>>
@@ -684,7 +684,7 @@ namespace whirl
     >
     constexpr void next_is(I& ins, code_position& pos, const P& pred)
     {
-        if(!pred(ins))
+        if(!pred.is(ins))
             throw unexpected_input{};
 
         if constexpr(std::is_same_v<P, bound_is_end_predicate>)
@@ -855,7 +855,7 @@ namespace whirl
     >
     constexpr void next_while(I& ins, code_position& pos, const P& pred)
     {
-        while (pred(ins))
+        while (pred.is(ins))
             next(ins, pos);
     }
 
@@ -871,7 +871,7 @@ namespace whirl
     {
         decltype(concat(next(ins, trans), next(ins, trans))) result;
 
-        while (pred(ins))
+        while (pred.is(ins))
             result = concat(result, next(ins, pos, trans));
 
         return result;
@@ -888,7 +888,7 @@ namespace whirl
     >
     constexpr auto next_while(V init, I& ins, code_position& pos, P pred, T trans)
     {
-        while (pred(ins))
+        while (pred.is(ins))
             init = concat(std::move(init), next(ins, pos, std::move(trans)));
 
         return init;

@@ -13,7 +13,7 @@ namespace whirl
 
     struct bound_predicate_dummy
     {
-        bool operator()(const std::istream&);
+        bool is(const std::istream&);
     };
 
     template <typename T>
@@ -202,9 +202,9 @@ namespace whirl
             input_stream_dummy<char> ins('a');
             input_stream_dummy<char> ins_eof(std::char_traits<char>::eof());
 
-            REQUIRE((is('a')(ins    )) == true );
-            REQUIRE((is('b')(ins    )) == false);
-            REQUIRE((is('a')(ins_eof)) == false);
+            REQUIRE((is('a').is(ins    )) == true );
+            REQUIRE((is('b').is(ins    )) == false);
+            REQUIRE((is('a').is(ins_eof)) == false);
         }
 
         SECTION("wchar_t tests")
@@ -212,9 +212,9 @@ namespace whirl
             input_stream_dummy<wchar_t> ins(L'a');
             input_stream_dummy<wchar_t> ins_eof(std::char_traits<wchar_t>::eof());
 
-            REQUIRE((is(L'a')(ins    )) == true );
-            REQUIRE((is(L'b')(ins    )) == false);
-            REQUIRE((is(L'a')(ins_eof)) == false);
+            REQUIRE((is(L'a').is(ins    )) == true );
+            REQUIRE((is(L'b').is(ins    )) == false);
+            REQUIRE((is(L'a').is(ins_eof)) == false);
         }
 
         SECTION("char16_t tests")
@@ -222,9 +222,9 @@ namespace whirl
             input_stream_dummy<char16_t> ins(u'a');
             input_stream_dummy<char16_t> ins_eof(std::char_traits<char16_t>::eof());
 
-            REQUIRE((is(u'a')(ins    )) == true );
-            REQUIRE((is(u'b')(ins    )) == false);
-            REQUIRE((is(u'a')(ins_eof)) == false);
+            REQUIRE((is(u'a').is(ins    )) == true );
+            REQUIRE((is(u'b').is(ins    )) == false);
+            REQUIRE((is(u'a').is(ins_eof)) == false);
         }
 
         SECTION("char32_t tests")
@@ -232,9 +232,9 @@ namespace whirl
             input_stream_dummy<char32_t> ins(U'a');
             input_stream_dummy<char32_t> ins_eof(std::char_traits<char32_t>::eof());
 
-            REQUIRE((is(U'a')(ins    )) == true );
-            REQUIRE((is(U'b')(ins    )) == false);
-            REQUIRE((is(U'a')(ins_eof)) == false);
+            REQUIRE((is(U'a').is(ins    )) == true );
+            REQUIRE((is(U'b').is(ins    )) == false);
+            REQUIRE((is(U'a').is(ins_eof)) == false);
         }
     }
 
@@ -245,9 +245,9 @@ namespace whirl
             input_stream_dummy<char> ins('a');
             input_stream_dummy<char> ins_eof(std::char_traits<char>::eof());
 
-            REQUIRE((is_not('a')(ins    )) == false);
-            REQUIRE((is_not('b')(ins    )) == true );
-            REQUIRE((is_not('a')(ins_eof)) == true );
+            REQUIRE((is_not('a').is(ins    )) == false);
+            REQUIRE((is_not('b').is(ins    )) == true );
+            REQUIRE((is_not('a').is(ins_eof)) == true );
         }
 
         SECTION("wchar_t tests")
@@ -255,9 +255,9 @@ namespace whirl
             input_stream_dummy<wchar_t> ins(L'a');
             input_stream_dummy<wchar_t> ins_eof(std::char_traits<wchar_t>::eof());
 
-            REQUIRE((is_not(L'a')(ins    )) == false);
-            REQUIRE((is_not(L'b')(ins    )) == true );
-            REQUIRE((is_not(L'a')(ins_eof)) == true );
+            REQUIRE((is_not(L'a').is(ins    )) == false);
+            REQUIRE((is_not(L'b').is(ins    )) == true );
+            REQUIRE((is_not(L'a').is(ins_eof)) == true );
         }
 
         SECTION("char16_t tests")
@@ -265,9 +265,9 @@ namespace whirl
             input_stream_dummy<char16_t> ins(u'a');
             input_stream_dummy<char16_t> ins_eof(std::char_traits<char16_t>::eof());
 
-            REQUIRE((is_not(u'a')(ins    )) == false);
-            REQUIRE((is_not(u'b')(ins    )) == true );
-            REQUIRE((is_not(u'a')(ins_eof)) == true );
+            REQUIRE((is_not(u'a').is(ins    )) == false);
+            REQUIRE((is_not(u'b').is(ins    )) == true );
+            REQUIRE((is_not(u'a').is(ins_eof)) == true );
         }
 
         SECTION("char32_t tests")
@@ -275,9 +275,9 @@ namespace whirl
             input_stream_dummy<char32_t> ins(U'a');
             input_stream_dummy<char32_t> ins_eof(std::char_traits<char32_t>::eof());
 
-            REQUIRE((is_not(U'a')(ins    )) == false);
-            REQUIRE((is_not(U'b')(ins    )) == true );
-            REQUIRE((is_not(U'a')(ins_eof)) == true );
+            REQUIRE((is_not(U'a').is(ins    )) == false);
+            REQUIRE((is_not(U'b').is(ins    )) == true );
+            REQUIRE((is_not(U'a').is(ins_eof)) == true );
         }
     }
 
@@ -289,13 +289,13 @@ namespace whirl
             input_stream_dummy<char> ins('a');
             input_stream_dummy<char> ins_eof(std::char_traits<char>::eof());
 
-            REQUIRE((is_one_of('a'     )(ins    )) == true );
-            REQUIRE((is_one_of('b'     )(ins    )) == false);
-            REQUIRE((is_one_of('a', 'b')(ins    )) == true );
-            REQUIRE((is_one_of('b', 'a')(ins    )) == true );
-            REQUIRE((is_one_of('b', 'c')(ins    )) == false);
-            REQUIRE((is_one_of('a'     )(ins_eof)) == false);
-            REQUIRE((is_one_of('a', 'b')(ins_eof)) == false);
+            REQUIRE((is_one_of('a'     ).is(ins    )) == true );
+            REQUIRE((is_one_of('b'     ).is(ins    )) == false);
+            REQUIRE((is_one_of('a', 'b').is(ins    )) == true );
+            REQUIRE((is_one_of('b', 'a').is(ins    )) == true );
+            REQUIRE((is_one_of('b', 'c').is(ins    )) == false);
+            REQUIRE((is_one_of('a'     ).is(ins_eof)) == false);
+            REQUIRE((is_one_of('a', 'b').is(ins_eof)) == false);
 
 
         }
@@ -305,13 +305,13 @@ namespace whirl
             input_stream_dummy<wchar_t> ins(L'a');
             input_stream_dummy<wchar_t> ins_eof(std::char_traits<wchar_t>::eof());
 
-            REQUIRE((is_one_of(L'a'      )(ins    )) == true );
-            REQUIRE((is_one_of(L'b'      )(ins    )) == false);
-            REQUIRE((is_one_of(L'a', L'b')(ins    )) == true );
-            REQUIRE((is_one_of(L'b', L'a')(ins    )) == true );
-            REQUIRE((is_one_of(L'b', L'c')(ins    )) == false);
-            REQUIRE((is_one_of(L'a'      )(ins_eof)) == false);
-            REQUIRE((is_one_of(L'a', L'b')(ins_eof)) == false);
+            REQUIRE((is_one_of(L'a'      ).is(ins    )) == true );
+            REQUIRE((is_one_of(L'b'      ).is(ins    )) == false);
+            REQUIRE((is_one_of(L'a', L'b').is(ins    )) == true );
+            REQUIRE((is_one_of(L'b', L'a').is(ins    )) == true );
+            REQUIRE((is_one_of(L'b', L'c').is(ins    )) == false);
+            REQUIRE((is_one_of(L'a'      ).is(ins_eof)) == false);
+            REQUIRE((is_one_of(L'a', L'b').is(ins_eof)) == false);
         }
 
         SECTION("char16_t tests")
@@ -319,13 +319,13 @@ namespace whirl
             input_stream_dummy<char16_t> ins(u'a');
             input_stream_dummy<char16_t> ins_eof(std::char_traits<char16_t>::eof());
 
-            REQUIRE((is_one_of(u'a'      )(ins    )) == true );
-            REQUIRE((is_one_of(u'b'      )(ins    )) == false);
-            REQUIRE((is_one_of(u'a', u'b')(ins    )) == true );
-            REQUIRE((is_one_of(u'b', u'a')(ins    )) == true );
-            REQUIRE((is_one_of(u'b', u'c')(ins    )) == false);
-            REQUIRE((is_one_of(u'a'      )(ins_eof)) == false);
-            REQUIRE((is_one_of(u'a', u'b')(ins_eof)) == false);
+            REQUIRE((is_one_of(u'a'      ).is(ins    )) == true );
+            REQUIRE((is_one_of(u'b'      ).is(ins    )) == false);
+            REQUIRE((is_one_of(u'a', u'b').is(ins    )) == true );
+            REQUIRE((is_one_of(u'b', u'a').is(ins    )) == true );
+            REQUIRE((is_one_of(u'b', u'c').is(ins    )) == false);
+            REQUIRE((is_one_of(u'a'      ).is(ins_eof)) == false);
+            REQUIRE((is_one_of(u'a', u'b').is(ins_eof)) == false);
         }
 
         SECTION("char32_t tests")
@@ -333,13 +333,13 @@ namespace whirl
             input_stream_dummy<char32_t> ins(U'a');
             input_stream_dummy<char32_t> ins_eof(std::char_traits<char32_t>::eof());
 
-            REQUIRE((is_one_of(U'a'      )(ins    )) == true );
-            REQUIRE((is_one_of(U'b'      )(ins    )) == false);
-            REQUIRE((is_one_of(U'a', U'b')(ins    )) == true );
-            REQUIRE((is_one_of(U'b', U'a')(ins    )) == true );
-            REQUIRE((is_one_of(U'b', U'c')(ins    )) == false);
-            REQUIRE((is_one_of(U'a'      )(ins_eof)) == false);
-            REQUIRE((is_one_of(U'a', U'b')(ins_eof)) == false);
+            REQUIRE((is_one_of(U'a'      ).is(ins    )) == true );
+            REQUIRE((is_one_of(U'b'      ).is(ins    )) == false);
+            REQUIRE((is_one_of(U'a', U'b').is(ins    )) == true );
+            REQUIRE((is_one_of(U'b', U'a').is(ins    )) == true );
+            REQUIRE((is_one_of(U'b', U'c').is(ins    )) == false);
+            REQUIRE((is_one_of(U'a'      ).is(ins_eof)) == false);
+            REQUIRE((is_one_of(U'a', U'b').is(ins_eof)) == false);
         }
     }
 
@@ -350,13 +350,13 @@ namespace whirl
             input_stream_dummy<char> ins('a');
             input_stream_dummy<char> ins_eof(std::char_traits<char>::eof());
 
-            REQUIRE((is_none_of('a'     )(ins    ))  == false);
-            REQUIRE((is_none_of('b'     )(ins    ))  == true );
-            REQUIRE((is_none_of('a', 'b')(ins    ))  == false);
-            REQUIRE((is_none_of('b', 'a')(ins    ))  == false);
-            REQUIRE((is_none_of('b', 'c')(ins    ))  == true );
-            REQUIRE((is_none_of('a'     )(ins_eof))  == true );
-            REQUIRE((is_none_of('a', 'b')(ins_eof))  == true );
+            REQUIRE((is_none_of('a'     ).is(ins    ))  == false);
+            REQUIRE((is_none_of('b'     ).is(ins    ))  == true );
+            REQUIRE((is_none_of('a', 'b').is(ins    ))  == false);
+            REQUIRE((is_none_of('b', 'a').is(ins    ))  == false);
+            REQUIRE((is_none_of('b', 'c').is(ins    ))  == true );
+            REQUIRE((is_none_of('a'     ).is(ins_eof))  == true );
+            REQUIRE((is_none_of('a', 'b').is(ins_eof))  == true );
         }
 
         SECTION("wchar_t tests")
@@ -364,13 +364,13 @@ namespace whirl
             input_stream_dummy<wchar_t> ins(L'a');
             input_stream_dummy<wchar_t> ins_eof(std::char_traits<wchar_t>::eof());
 
-            REQUIRE((is_none_of(L'a'      )(ins    ))  == false);
-            REQUIRE((is_none_of(L'b'      )(ins    ))  == true );
-            REQUIRE((is_none_of(L'a', L'b')(ins    ))  == false);
-            REQUIRE((is_none_of(L'b', L'a')(ins    ))  == false);
-            REQUIRE((is_none_of(L'b', L'c')(ins    ))  == true );
-            REQUIRE((is_none_of(L'a'      )(ins_eof))  == true );
-            REQUIRE((is_none_of(L'a', L'b')(ins_eof))  == true );
+            REQUIRE((is_none_of(L'a'      ).is(ins    ))  == false);
+            REQUIRE((is_none_of(L'b'      ).is(ins    ))  == true );
+            REQUIRE((is_none_of(L'a', L'b').is(ins    ))  == false);
+            REQUIRE((is_none_of(L'b', L'a').is(ins    ))  == false);
+            REQUIRE((is_none_of(L'b', L'c').is(ins    ))  == true );
+            REQUIRE((is_none_of(L'a'      ).is(ins_eof))  == true );
+            REQUIRE((is_none_of(L'a', L'b').is(ins_eof))  == true );
         }
 
         SECTION("char16_t tests")
@@ -378,13 +378,13 @@ namespace whirl
             input_stream_dummy<char16_t> ins(u'a');
             input_stream_dummy<char16_t> ins_eof(std::char_traits<char16_t>::eof());
 
-            REQUIRE((is_none_of(u'a'      )(ins    ))  == false);
-            REQUIRE((is_none_of(u'b'      )(ins    ))  == true );
-            REQUIRE((is_none_of(u'a', u'b')(ins    ))  == false);
-            REQUIRE((is_none_of(u'b', u'a')(ins    ))  == false);
-            REQUIRE((is_none_of(u'b', u'c')(ins    ))  == true );
-            REQUIRE((is_none_of(u'a'      )(ins_eof))  == true );
-            REQUIRE((is_none_of(u'a', u'b')(ins_eof))  == true );
+            REQUIRE((is_none_of(u'a'      ).is(ins    ))  == false);
+            REQUIRE((is_none_of(u'b'      ).is(ins    ))  == true );
+            REQUIRE((is_none_of(u'a', u'b').is(ins    ))  == false);
+            REQUIRE((is_none_of(u'b', u'a').is(ins    ))  == false);
+            REQUIRE((is_none_of(u'b', u'c').is(ins    ))  == true );
+            REQUIRE((is_none_of(u'a'      ).is(ins_eof))  == true );
+            REQUIRE((is_none_of(u'a', u'b').is(ins_eof))  == true );
         }
 
         SECTION("char32_t tests")
@@ -392,13 +392,13 @@ namespace whirl
             input_stream_dummy<char32_t> ins(U'a');
             input_stream_dummy<char32_t> ins_eof(std::char_traits<char32_t>::eof());
 
-            REQUIRE((is_none_of(U'a'      )(ins    ))  == false);
-            REQUIRE((is_none_of(U'b'      )(ins    ))  == true );
-            REQUIRE((is_none_of(U'a', U'b')(ins    ))  == false);
-            REQUIRE((is_none_of(U'b', U'a')(ins    ))  == false);
-            REQUIRE((is_none_of(U'b', U'c')(ins    ))  == true );
-            REQUIRE((is_none_of(U'a'      )(ins_eof))  == true );
-            REQUIRE((is_none_of(U'a', U'b')(ins_eof))  == true );
+            REQUIRE((is_none_of(U'a'      ).is(ins    ))  == false);
+            REQUIRE((is_none_of(U'b'      ).is(ins    ))  == true );
+            REQUIRE((is_none_of(U'a', U'b').is(ins    ))  == false);
+            REQUIRE((is_none_of(U'b', U'a').is(ins    ))  == false);
+            REQUIRE((is_none_of(U'b', U'c').is(ins    ))  == true );
+            REQUIRE((is_none_of(U'a'      ).is(ins_eof))  == true );
+            REQUIRE((is_none_of(U'a', U'b').is(ins_eof))  == true );
         }
     }
 
