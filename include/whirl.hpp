@@ -9,7 +9,7 @@
 #include <tuple>
 
 #include "type_traits.hpp"
-#include "values.hpp"
+#include "tokens.hpp"
 
 
 namespace whirl
@@ -523,7 +523,7 @@ namespace whirl
         template <typename C, typename = requires_t<is_character_type<C>>>
         constexpr auto operator()(const C& chr) const
         {
-            return Digit{ chr - '0' };
+            return DigitSequence{ chr - '0' };
         }
     };
 
@@ -559,27 +559,11 @@ namespace whirl
 
     template <
         typename I,
-        typename V,
-        typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<std::negation<is_transformator<V>>>
-    >
-    constexpr V next(I& ins, V val)
-    {
-        if (input_source_traits<I>::is_end(ins))
-            throw unexpected_input{};
-
-        input_source_traits<I>::ignore(ins);
-
-        return val;
-    }
-
-    template <
-        typename I,
         typename T,
         typename = requires_t<is_input_source_type<I>>,
         typename = requires_t<is_transformator<T>>
     >
-    constexpr auto next(I& ins, const T& trans)
+    constexpr auto next(I& ins, T trans)
     {
         if (input_source_traits<I>::is_end(ins))
             throw unexpected_input{};
@@ -587,23 +571,26 @@ namespace whirl
         return trans(input_source_traits<I>::read(ins));
     }
 
+    template <
+        typename V,
+        typename I,
+        typename T,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_transformator<T>>
+    >
+    constexpr auto next(V init, I& ins, T trans)
+    {
+        if (input_source_traits<I>::is_end(ins))
+            throw unexpected_input{};
+
+        return concat(init, trans(input_source_traits<I>::read(ins)));
+    }
+
+
     template <typename I, typename = requires_t<is_input_source_type<I>>>
     constexpr void next(I& ins, code_position& pos)
     {
         pos.update(next(ins, as_is));
-    }
-
-    template <
-        typename I,
-        typename V,
-        typename = requires_t<is_input_source_type<I>>,
-        typename = requires_t<std::negation<is_transformator<V>>>
-    >
-    constexpr auto next(I& ins, code_position& pos, V val)
-    {
-        pos.update(next(ins, as_is));
-
-        return val;
     }
 
     template <
@@ -619,6 +606,22 @@ namespace whirl
         pos.update(chr);
 
         return trans(chr);
+    }
+
+    template <
+        typename V,
+        typename I,
+        typename T,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_transformator<T>>
+    >
+    constexpr auto next(V init, I& ins, code_position& pos, const T& trans)
+    {
+        const auto chr = next(ins, as_is);
+
+        pos.update(chr);
+
+        return concat(init, trans(chr));
     }
 
 
@@ -657,6 +660,23 @@ namespace whirl
     }
 
     template <
+        typename V,
+        typename I,
+        typename P,
+        typename T,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_transformator<T>>
+    >
+    constexpr auto next_is(V init, I& ins, const P& pred, const T& trans)
+    {
+        if(!pred(ins))
+            throw unexpected_input{};
+
+        return concat(init, next(ins, trans));
+    }
+
+    template <
         typename I,
         typename P,
         typename = requires_t<is_input_source_type<I>>,
@@ -690,6 +710,26 @@ namespace whirl
             return;
 
         return next(ins, pos, trans);
+    }
+
+    template <
+        typename V,
+        typename P,
+        typename I,
+        typename T,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_transformator<T>>
+    >
+    constexpr auto next_is(V init, I& ins, code_position& pos, const P& pred, const T& trans)
+    {
+        if(!pred(ins))
+            throw unexpected_input{};
+
+        if constexpr(std::is_same_v<P, bound_is_end_predicate>)
+            return;
+
+        return concat(init, next(ins, pos, trans));
     }
 
 
@@ -791,6 +831,23 @@ namespace whirl
     }
 
     template <
+        typename V,
+        typename I,
+        typename P,
+        typename T,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_transformator<T>>
+    >
+    constexpr auto next_while(V init, I& ins, const P& pred, const T& trans)
+    {
+        while (pred(ins))
+            init = concat(init, next(ins, trans));
+
+        return init;
+    }
+
+    template <
         typename I,
         typename P,
         typename = requires_t<is_input_source_type<I>>,
@@ -805,21 +862,36 @@ namespace whirl
     template <
         typename I,
         typename P,
-        typename S,
         typename T,
         typename = requires_t<is_input_source_type<I>>,
         typename = requires_t<is_bound_predicate<P>>,
         typename = requires_t<is_transformator<T>>
     >
-    constexpr auto next_while(
-        I& ins, code_position& pos, const P& pred, const S& start, const T& trans)
+    constexpr auto next_while(I& ins, code_position& pos, const P& pred, const T& trans)
     {
-        S result = start;
+        decltype(concat(next(ins, trans), next(ins, trans))) result;
 
         while (pred(ins))
             result = concat(result, next(ins, pos, trans));
 
         return result;
+    }
+
+    template <
+        typename V,
+        typename I,
+        typename P,
+        typename T,
+        typename = requires_t<is_input_source_type<I>>,
+        typename = requires_t<is_bound_predicate<P>>,
+        typename = requires_t<is_transformator<T>>
+    >
+    constexpr auto next_while(V init, I& ins, code_position& pos, P pred, T trans)
+    {
+        while (pred(ins))
+            init = concat(std::move(init), next(ins, pos, std::move(trans)));
+
+        return init;
     }
 
 
@@ -844,10 +916,22 @@ namespace whirl
             return next(ins, this->trans);
         }
 
+        template <typename V, typename I>
+        constexpr auto operator()(V init, I& ins) const
+        {
+            return next(init, ins, this->trans);
+        }
+
         template <typename I>
         constexpr auto operator()(I& ins, code_position& pos) const
         {
             return next(ins, pos, this->trans);
+        }
+
+        template <typename V, typename I>
+        constexpr auto operator()(V init, I& ins, code_position& pos) const
+        {
+            return next(init, ins, pos, this->trans);
         }
 
         T trans;
@@ -866,15 +950,15 @@ namespace whirl
         { }
 
         template <typename I>
-        constexpr auto operator()(I& ins) const
+        constexpr void operator()(I& ins) const
         {
-            return next_is(ins, this->pred);
+            next_is(ins, this->pred);
         }
 
         template <typename I>
-        constexpr auto operator()(I& ins, code_position& pos) const
+        constexpr void operator()(I& ins, code_position& pos) const
         {
-            return next_is(ins, this->pred, pos);
+            next_is(ins, this->pred, pos);
         }
 
         P pred;
@@ -905,6 +989,15 @@ namespace whirl
                 return this->alt;
         }
 
+        template <typename V, typename I>
+        constexpr auto operator()(V init, I& ins) const
+        {
+            if(is(ins, this->pred))
+                return concat(init, next(ins, this->trans));
+            else
+                return concat(init, this->alt);
+        }
+
         template <typename I>
         constexpr auto operator()(I& ins, code_position& pos) const
         {
@@ -912,6 +1005,15 @@ namespace whirl
                 return next(ins, pos, this->trans);
             else
                 return this->alt;
+        }
+
+        template <typename V, typename I>
+        constexpr auto operator()(V init, I& ins, code_position& pos) const
+        {
+            if(is(ins, this->pred))
+                return concat(init, next(ins, pos, this->trans));
+            else
+                return concat(init, this->alt);
         }
 
         P pred;
@@ -934,15 +1036,27 @@ namespace whirl
         { }
 
         template <typename I>
-        constexpr std::optional<typename I::char_type> operator()(I& ins) const
+        constexpr auto operator()(I& ins) const
         {
             return next_is(ins, this->pred, this->trans);
+        }
+
+        template <typename V, typename I>
+        constexpr auto operator()(V init, I& ins) const
+        {
+            return next_is(init, ins, this->pred, this->trans);
         }
 
         template <typename I>
         constexpr auto operator()(I& ins, code_position& pos) const
         {
             return next_is(ins, pos, this->pred, this->trans);
+        }
+
+        template <typename V, typename I>
+        constexpr auto operator()(V init, I& ins, code_position& pos) const
+        {
+            return next_is(init, ins, pos, this->pred, this->trans);
         }
 
         template <typename A>
@@ -995,16 +1109,28 @@ namespace whirl
             , trans{ trans }
         { }
 
-        template <typename S, typename I>
-        auto operator()(I& ins, const S& start) const
+        template <typename I>
+        auto operator()(I& ins) const
         {
-            return next_while(ins, this->pred, start, trans);
+            return next_while(ins, this->pred, this->trans);
         }
 
-        template <typename S, typename I>
-        auto operator()(I& ins, code_position& pos, const S& start) const
+        template <typename V, typename I>
+        auto operator()(V init, I& ins) const
         {
-            return next_while(ins, pos, this->pred, start, trans);
+            return next_while(init, ins, this->pred, this->trans);
+        }
+
+        template <typename I>
+        auto operator()(I& ins, code_position& pos) const
+        {
+            return next_while(ins, pos, this->pred, this->trans);
+        }
+
+        template <typename V, typename I>
+        auto operator()(V init, I& ins, code_position& pos) const
+        {
+            return next_while(init, ins, pos, this->pred, this->trans);
         }
 
         P pred;

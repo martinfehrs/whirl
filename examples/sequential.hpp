@@ -25,33 +25,28 @@
 
 namespace sequential
 {
-    constexpr auto number              = whirl::is(whirl::digit) || whirl::is(whirl::negative_sign);
+    constexpr auto number = whirl::is(whirl::digit) || whirl::is(whirl::negative_sign);
 
-    constexpr auto read_sign           = whirl::next_is(whirl::negative_sign, whirl::as(whirl::Sign::negative)) || whirl::Sign::positive;
-    constexpr auto read_digit          = whirl::next(whirl::as_digit<int>);
+    constexpr auto read_sign = whirl::next_is(
+        whirl::negative_sign, whirl::as(whirl::Sign::negative)) || whirl::Sign::positive;
+
+    constexpr auto read_digit = whirl::next(whirl::as_digit<int>);
     constexpr auto read_digit_sequence = whirl::next_while(whirl::digit, whirl::as_digit<int>);
 
     auto read_data_entries(std::istream& ins, whirl::code_position& pos)
     {
-        std::vector<whirl::SignedNumber<int>> temperatures;
+        std::vector<int> temperatures;
 
         whirl::next_while(ins, pos, whirl::space);
 
         while(whirl::is(ins, number))
         {
-            whirl::SignedNumber<int> num;
+            const auto numtok = whirl::is(ins, whirl::zero) ?
+                read_digit(ins, pos).as_signed() :
+                read_digit_sequence(read_digit(read_sign(ins, pos), ins, pos), ins, pos);
 
-            if(whirl::is(ins, whirl::zero))
-            {
-                num = concat(num, read_digit(ins, pos));
-            }
-            else
-            {
-                const auto sign = read_sign(ins, pos);
-                num = read_digit_sequence(ins, pos, whirl::concat(sign, read_digit(ins, pos)));
-            }
+            temperatures.push_back(numtok.value());
 
-            temperatures.push_back(num);
             whirl::next_while(ins, pos, whirl::space);
         }
 
